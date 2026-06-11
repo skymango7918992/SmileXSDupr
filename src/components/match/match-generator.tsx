@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +14,7 @@ type Props = {
   onManualAdd: () => void;
   onClearDay: () => Promise<void>;
   loading?: boolean;
+  cardClassName?: string;
 };
 
 export function MatchGenerator({
@@ -21,15 +24,22 @@ export function MatchGenerator({
   onManualAdd,
   onClearDay,
   loading,
+  cardClassName,
 }: Props) {
   const [courtCount, setCourtCount] = useState(defaultCourtCount);
 
   return (
-    <Card className="h-full">
-      <CardTitle className="mb-4">產生對戰</CardTitle>
+    <Card className={cn("h-full", cardClassName)}>
+      <CardTitle className="mb-1">產生對戰</CardTitle>
+      <p className="mb-4 flex items-center gap-1.5 text-xs text-emerald-700">
+        <Sparkles className="h-3.5 w-3.5" />
+        智慧排程 · 優先配對較少同隊的組合
+      </p>
 
       <div className="mb-4">
-        <label className="mb-1 block text-xs text-gray-500">場數</label>
+        <label className="mb-1 block text-xs font-medium text-slate-500">
+          場數
+        </label>
         <Input
           type="number"
           min={1}
@@ -43,6 +53,7 @@ export function MatchGenerator({
         <Button
           disabled={loading || selectedCount < 4}
           onClick={() => onGenerate(courtCount)}
+          className="shadow-md shadow-emerald-900/15"
         >
           自動排場
         </Button>
@@ -62,8 +73,8 @@ export function MatchGenerator({
         </Button>
       </div>
 
-      <p className="mt-4 text-xs leading-relaxed text-gray-500">
-        自動排場會依今日到場球員隨機配對，新場次會接在既有場次之後繼續編號。
+      <p className="mt-4 text-xs leading-relaxed text-slate-500">
+        系統會參考歷史搭檔紀錄，盡量讓每位球員與不同隊友搭配。新場次會接在既有場次之後繼續編號。
       </p>
     </Card>
   );

@@ -40,7 +40,6 @@ yarn-error.log*
 
 # 可提交的範例檔
 !.env.example
-!.env.local.example
 
 # vercel
 .vercel

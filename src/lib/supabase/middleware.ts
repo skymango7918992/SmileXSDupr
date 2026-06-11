@@ -1,0 +1,80 @@
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+
+export async function updateSession(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options),
+          );
+        },
+      },
+    },
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+  const isAuthRoute = pathname.startsWith("/login");
+
+  if (!user) {
+    if (!isAuthRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  const { data: factors } = await supabase.auth.mfa.listFactors();
+  const hasTotp = (factors?.totp?.length ?? 0) > 0;
+  const isSetupRoute = pathname.startsWith("/login/setup");
+
+  if (!hasTotp) {
+    if (!isSetupRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login/setup";
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  const { data: aal } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+  const needsMfa =
+    aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2";
+
+  if (needsMfa) {
+    if (!isAuthRoute || isSetupRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("step", "verify");
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  if (isAuthRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
+
+  return supabaseResponse;
+}

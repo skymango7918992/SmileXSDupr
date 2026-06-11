@@ -2,8 +2,22 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { buildTeammateHistory } from "@/lib/pair-history";
 import { generateMatchPairings } from "@/lib/scheduler";
 import type { MatchDay, MatchWithPlayers } from "@/types/database";
+
+async function getTeammateHistoryForPlayers(playerIds: string[]) {
+  if (playerIds.length === 0) return new Map<string, number>();
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("match_players")
+    .select("match_id, player_id, team")
+    .in("player_id", playerIds);
+
+  if (error) throw new Error(error.message);
+  return buildTeammateHistory(data ?? []);
+}
 
 async function getOrCreateMatchDay(matchDate: string): Promise<MatchDay> {
   const supabase = await createClient();
@@ -114,7 +128,13 @@ export async function generateMatches(
       ? existingMatches[0].round_number + 1
       : 1;
 
-  const pairings = generateMatchPairings(playerIds, courtCount, startRound);
+  const teammateHistory = await getTeammateHistoryForPlayers(playerIds);
+  const pairings = generateMatchPairings(
+    playerIds,
+    courtCount,
+    startRound,
+    teammateHistory,
+  );
 
   for (const pairing of pairings) {
     const { data: match, error: matchError } = await supabase

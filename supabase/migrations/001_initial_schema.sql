@@ -46,13 +46,13 @@ create table if not exists match_players (
 -- 應用設定（單筆）
 create table if not exists app_settings (
   id                   uuid primary key default gen_random_uuid(),
-  team_name            text not null default '匹克球隊',
+  team_name            text not null default '星鑽 XS 匹克球',
   default_court_count  int  not null default 4,
   updated_at           timestamptz not null default now()
 );
 
 insert into app_settings (team_name, default_court_count)
-select '匹克球隊', 4
+select '星鑽 XS 匹克球', 4
 where not exists (select 1 from app_settings);
 
 -- 索引

@@ -12,7 +12,7 @@
 
 ```bash
 npm install
-cp .env.local.example .env.local
+cp .env.example .env
 # 填入 NEXT_PUBLIC_SUPABASE_URL 與 NEXT_PUBLIC_SUPABASE_ANON_KEY
 npm run dev
 ```

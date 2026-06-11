@@ -2,14 +2,12 @@ import { MatchCenter } from "@/components/match/match-center";
 import { SetupGuide } from "@/components/setup/setup-guide";
 import { getMatchDay, getMatchesForDate } from "@/lib/actions/matches";
 import { getPlayers } from "@/lib/actions/players";
+import { hasSupabaseEnv } from "@/lib/env";
 import { getSettings } from "@/lib/actions/settings";
 import { toISODate } from "@/lib/utils";
 
 export default async function HomePage() {
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
+  if (!hasSupabaseEnv()) {
     return <SetupGuide />;
   }
 

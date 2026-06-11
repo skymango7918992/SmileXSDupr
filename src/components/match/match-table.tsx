@@ -88,10 +88,12 @@ function ScoreRow({
   const team1 = getTeamPlayers(match, 1);
   const team2 = getTeamPlayers(match, 2);
 
+  const isCompleted = match.status === "completed";
+
   return (
-    <tr className="border-t border-gray-100">
+    <tr className="border-t border-slate-100 transition hover:bg-emerald-50/40">
       <td className="px-3 py-4">
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-800 to-emerald-600 text-sm font-bold text-white shadow-md shadow-emerald-900/20">
           {match.round_number}
         </span>
       </td>
@@ -126,7 +128,16 @@ function ScoreRow({
         </div>
       </td>
       <td className="px-3 py-4">
-        <div className="flex gap-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={
+              isCompleted
+                ? "rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800"
+                : "rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800"
+            }
+          >
+            {isCompleted ? "已完成" : "待進行"}
+          </span>
           {editing ? (
             <Button
               size="sm"
@@ -176,7 +187,7 @@ export function MatchTable({
     <Card>
       <div className="mb-4 flex items-center gap-2">
         <CardTitle>今日對戰表</CardTitle>
-        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
           {matches.length} 場
         </span>
       </div>

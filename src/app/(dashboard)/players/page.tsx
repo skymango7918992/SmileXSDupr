@@ -1,12 +1,10 @@
 import { PlayerManagement } from "@/components/players/player-management";
 import { SetupGuide } from "@/components/setup/setup-guide";
+import { hasSupabaseEnv } from "@/lib/env";
 import { getPlayers } from "@/lib/actions/players";
 
 export default async function PlayersPage() {
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
+  if (!hasSupabaseEnv()) {
     return <SetupGuide />;
   }
 

@@ -1,12 +1,10 @@
 import { SettingsForm } from "@/components/settings/settings-form";
 import { SetupGuide } from "@/components/setup/setup-guide";
+import { hasSupabaseEnv } from "@/lib/env";
 import { getSettings } from "@/lib/actions/settings";
 
 export default async function SettingsPage() {
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
+  if (!hasSupabaseEnv()) {
     return <SetupGuide />;
   }
 

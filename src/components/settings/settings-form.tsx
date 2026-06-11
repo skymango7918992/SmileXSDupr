@@ -13,7 +13,7 @@ type Props = {
 
 export function SettingsForm({ initialSettings }: Props) {
   const [teamName, setTeamName] = useState(
-    initialSettings?.team_name ?? "匹克球隊",
+    initialSettings?.team_name ?? "星鑽 XS 匹克球",
   );
   const [courtCount, setCourtCount] = useState(
     initialSettings?.default_court_count ?? 4,
