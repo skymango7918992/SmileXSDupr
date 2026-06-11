@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "星鑽 XS 匹克球 · DUPR 賽事管理",
-  description: "星鑽 XS 專業匹克球 DUPR 賽事排程 · 即時計分 · Excel 匯出",
+  description: "星鑽 XS 專業匹克球 DUPR 賽事排程 · 即時計分 · CSV 匯出",
 };
 
 export default function RootLayout({

@@ -16,9 +16,35 @@ export type MatchDay = {
   updated_at: string;
 };
 
+export type ScheduleSession = {
+  id: string;
+  match_day_id: string;
+  name: string;
+  sort_order: number;
+  status: "draft" | "active" | "closed";
+  created_at: string;
+  updated_at: string;
+};
+
+export type SessionPlayer = {
+  id: string;
+  schedule_session_id: string;
+  player_id: string;
+  joined_after_round: number;
+  joined_at: string;
+  player?: Player;
+};
+
+export type ScheduleSessionWithStats = ScheduleSession & {
+  player_count: number;
+  match_count: number;
+  completed_count: number;
+};
+
 export type Match = {
   id: string;
   match_day_id: string;
+  schedule_session_id: string | null;
   round_number: number;
   team1_score: number | null;
   team2_score: number | null;

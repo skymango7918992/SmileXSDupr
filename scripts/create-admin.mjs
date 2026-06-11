@@ -4,7 +4,7 @@
  * 使用方式：
  *   node scripts/create-admin.mjs
  *
- * 需在 .env 設定：
+ * 從專案根目錄 .env 讀取（非 .env.local）：
  *   NEXT_PUBLIC_SUPABASE_URL
  *   SUPABASE_SERVICE_ROLE_KEY
  *   ADMIN_EMAIL=smile@xingzuan-xs.local

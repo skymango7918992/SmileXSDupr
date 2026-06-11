@@ -64,17 +64,17 @@ export function MatchGenerator({
           variant="danger"
           disabled={loading}
           onClick={() => {
-            if (confirm("確定要清空當日所有對戰嗎？")) {
+            if (confirm("確定要清空本組所有「未打」的場次嗎？已完成場次不受影響。")) {
               void onClearDay();
             }
           }}
         >
-          清空當日
+          清空未打
         </Button>
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-slate-500">
-        系統會參考歷史搭檔紀錄，盡量讓每位球員與不同隊友搭配。新場次會接在既有場次之後繼續編號。
+        系統會參考本組已完成場次與歷史紀錄，盡量避免重複搭檔。新場次接續編號。
       </p>
     </Card>
   );

@@ -1,6 +1,14 @@
+import { LeaderboardTop3 } from "@/components/leaderboard/leaderboard-top3";
 import { MatchCenter } from "@/components/match/match-center";
 import { SetupGuide } from "@/components/setup/setup-guide";
-import { getMatchDay, getMatchesForDate } from "@/lib/actions/matches";
+import { getLeaderboardTop3 } from "@/lib/actions/leaderboard";
+import type { LeaderboardEntry } from "@/types/leaderboard";
+import {
+  getMatchDay,
+  getMatchesForSession,
+  getSessionPlayers,
+  getSessionsForDate,
+} from "@/lib/actions/sessions";
 import { getPlayers } from "@/lib/actions/players";
 import { hasSupabaseEnv } from "@/lib/env";
 import { getSettings } from "@/lib/actions/settings";
@@ -14,21 +22,50 @@ export default async function HomePage() {
   const today = toISODate(new Date());
 
   try {
-    const [players, matchDay, matches, settings] = await Promise.all([
+    const [players, settings, sessions] = await Promise.all([
       getPlayers(true),
-      getMatchDay(today),
-      getMatchesForDate(today),
       getSettings(),
+      getSessionsForDate(today),
     ]);
 
+    let top3: LeaderboardEntry[] = [];
+    let leaderboardError: string | null = null;
+    try {
+      top3 = await getLeaderboardTop3();
+    } catch (e) {
+      leaderboardError =
+        e instanceof Error ? e.message : "獲勝榜資料讀取失敗";
+    }
+
+    const activeSessionId = sessions[0]?.id ?? null;
+
+    let matches: Awaited<ReturnType<typeof getMatchesForSession>> = [];
+    let selectedIds: string[] = [];
+
+    if (activeSessionId) {
+      const [matchList, roster] = await Promise.all([
+        getMatchesForSession(activeSessionId),
+        getSessionPlayers(activeSessionId),
+      ]);
+      matches = matchList;
+      selectedIds = roster.map((r) => r.player_id);
+    }
+
+    await getMatchDay(today);
+
     return (
-      <MatchCenter
-        players={players}
-        initialMatchDate={today}
-        initialMatchDay={matchDay}
-        initialMatches={matches}
-        settings={settings}
-      />
+      <div className="space-y-6">
+        <LeaderboardTop3 entries={top3} error={leaderboardError} />
+        <MatchCenter
+          players={players}
+          initialMatchDate={today}
+          initialSessions={sessions}
+          initialSessionId={activeSessionId}
+          initialMatches={matches}
+          initialSelectedIds={selectedIds}
+          settings={settings}
+        />
+      </div>
     );
   } catch (error) {
     return (

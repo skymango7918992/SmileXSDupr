@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 
 type Props = {
   matches: MatchWithPlayers[];
+  sessionName?: string;
   onSaveScore: (
     matchId: string,
     team1Score: number,
@@ -163,7 +164,10 @@ function ScoreRow({
             variant="danger"
             disabled={disabled || saving}
             onClick={() => {
-              if (confirm(`確定刪除第 ${match.round_number} 場？`)) {
+              const message = isCompleted
+                ? `第 ${match.round_number} 場已完成並已計分。\n\n刪除後獲勝榜與匯出紀錄也會一併移除，確定要刪除嗎？`
+                : `確定刪除第 ${match.round_number} 場？`;
+              if (confirm(message)) {
                 void onDelete(match.id);
               }
             }}
@@ -179,14 +183,15 @@ function ScoreRow({
 
 export function MatchTable({
   matches,
+  sessionName,
   onSaveScore,
   onDelete,
   loading,
 }: Props) {
   return (
     <Card>
-      <div className="mb-4 flex items-center gap-2">
-        <CardTitle>今日對戰表</CardTitle>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <CardTitle>{sessionName ? `${sessionName} 對戰表` : "今日對戰表"}</CardTitle>
         <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
           {matches.length} 場
         </span>

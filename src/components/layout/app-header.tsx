@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { href: "/", label: "對戰中心" },
+  { href: "/", label: "對戰中心", exact: true },
+  { href: "/leaderboard", label: "獲勝榜" },
   { href: "/players", label: "球員管理" },
 ];
 
@@ -35,7 +36,7 @@ export function AppHeader() {
               星鑽 XS 匹克球
             </h1>
             <p className="text-xs text-slate-500">
-              DUPR 專業賽事管理 · 即時計分 · Excel 匯出
+              DUPR 專業賽事管理 · 即時計分 · CSV 匯出
             </p>
           </div>
         </div>
@@ -60,7 +61,10 @@ export function AppHeader() {
 
       <nav className="mx-auto flex max-w-7xl gap-2 px-4 pb-4">
         {navItems.map((item) => {
-          const active = pathname === item.href;
+          const active =
+            "exact" in item && item.exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link
               key={item.href}

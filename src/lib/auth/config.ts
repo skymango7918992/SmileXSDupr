@@ -1,9 +1,11 @@
+import { getAdminEnv } from "@/lib/env";
+
 export function getAdminUsername(): string {
-  return process.env.ADMIN_USERNAME ?? "Smile";
+  return getAdminEnv().username;
 }
 
 export function getAdminEmail(): string {
-  return process.env.ADMIN_EMAIL ?? "smile@xingzuan-xs.local";
+  return getAdminEnv().email;
 }
 
 export function isValidAdminUsername(username: string): boolean {
