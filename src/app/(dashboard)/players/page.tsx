@@ -1,6 +1,6 @@
 import { PlayerManagement } from "@/components/players/player-management";
 import { SetupGuide } from "@/components/setup/setup-guide";
-import { hasSupabaseEnv } from "@/lib/env";
+import { getDuprConfigMode, hasSupabaseEnv } from "@/lib/env";
 import { getPlayers } from "@/lib/actions/players";
 
 export default async function PlayersPage() {
@@ -10,7 +10,12 @@ export default async function PlayersPage() {
 
   try {
     const players = await getPlayers();
-    return <PlayerManagement initialPlayers={players} />;
+    return (
+      <PlayerManagement
+        initialPlayers={players}
+        duprConfigMode={getDuprConfigMode()}
+      />
+    );
   } catch (error) {
     return (
       <SetupGuide

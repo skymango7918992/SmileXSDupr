@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import type { ScheduleSessionWithStats } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ type Props = {
   activeId: string | null;
   onSelect: (id: string) => void;
   onCreate: () => void;
+  onDelete?: (sessionId: string, sessionName: string) => void;
   loading?: boolean;
 };
 
@@ -18,21 +19,45 @@ export function SessionTabs({
   activeId,
   onSelect,
   onCreate,
+  onDelete,
   loading,
 }: Props) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-slate-700">今日賽程組</p>
-        <Button
-          size="sm"
-          variant="secondary"
-          disabled={loading}
-          onClick={onCreate}
-        >
-          <Plus className="h-4 w-4" />
-          新增賽程
-        </Button>
+        <div className="flex gap-2">
+          {activeId && onDelete && (
+            <Button
+              size="sm"
+              variant="danger"
+              disabled={loading}
+              onClick={() => {
+                const session = sessions.find((s) => s.id === activeId);
+                if (!session) return;
+                if (
+                  confirm(
+                    `確定刪除「${session.name}」？\n此賽程所有場次與名單將一併刪除。`,
+                  )
+                ) {
+                  onDelete(session.id, session.name);
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+              刪除
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={loading}
+            onClick={onCreate}
+          >
+            <Plus className="h-4 w-4" />
+            新增
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1">

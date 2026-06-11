@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Pencil, Save, Trash2 } from "lucide-react";
+import { playerDisplayName } from "@/lib/player-display";
 import type { MatchWithPlayers, Player } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -35,7 +36,9 @@ function TeamCell({ players }: { players: (Player | undefined)[] }) {
       {players.map((player, idx) =>
         player ? (
           <div key={player.id} className="text-sm">
-            <span className="font-medium text-gray-900">{player.name}</span>
+            <span className="font-medium text-gray-900">
+              {playerDisplayName(player)}
+            </span>
             <span className="ml-2 text-xs text-gray-400">{player.dupr_id}</span>
           </div>
         ) : (

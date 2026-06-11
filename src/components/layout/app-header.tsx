@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/", label: "對戰中心", exact: true },
+  { href: "/checkin", label: "報到收款" },
   { href: "/leaderboard", label: "獲勝榜" },
   { href: "/players", label: "球員管理" },
 ];
@@ -59,7 +60,7 @@ export function AppHeader() {
         </div>
       </div>
 
-      <nav className="mx-auto flex max-w-7xl gap-2 px-4 pb-4">
+      <nav className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-4">
         {navItems.map((item) => {
           const active =
             "exact" in item && item.exact

@@ -15,6 +15,7 @@ import {
   createManualMatch,
   createSession,
   deleteMatch,
+  deleteSession,
   generateMatchesForSession,
   getMatchDates,
   getMatchesForSession,
@@ -148,6 +149,18 @@ export function MatchCenter({
         await loadDateData(matchDate, session.id);
       } catch (e) {
         setError(e instanceof Error ? e.message : "建立賽程失敗");
+      }
+    });
+  };
+
+  const handleDeleteSession = (sessionId: string) => {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await deleteSession(sessionId);
+        await loadDateData(matchDate);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "刪除賽程失敗");
       }
     });
   };
@@ -345,6 +358,7 @@ export function MatchCenter({
             activeId={activeSessionId}
             onSelect={handleSessionSelect}
             onCreate={handleCreateSession}
+            onDelete={handleDeleteSession}
             loading={isPending}
           />
         </div>

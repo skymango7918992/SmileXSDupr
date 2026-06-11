@@ -25,6 +25,9 @@ export function SetupGuide({ error }: { error?: string }) {
             <li>supabase/migrations/002_auth_rls.sql</li>
             <li>supabase/migrations/003_schedule_sessions.sql</li>
             <li>supabase/migrations/004_match_round_per_session.sql</li>
+            <li>supabase/migrations/005_check_in.sql</li>
+            <li>supabase/migrations/006_player_source_dupr.sql</li>
+            <li>supabase/migrations/007_player_display_name.sql</li>
           </ul>
         </li>
         <li>

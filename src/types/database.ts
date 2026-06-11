@@ -1,9 +1,16 @@
+export type PlayerSource = "manual" | "club";
+
 export type Player = {
   id: string;
+  /** DUPR 官方名稱（Club 同步寫入） */
   name: string;
+  /** 介面顯示用名稱，可自訂中文 */
+  display_name: string;
+  display_name_customized: boolean;
   dupr_id: string;
   active: boolean;
   dupr_rating: number | null;
+  source: PlayerSource;
   created_at: string;
   updated_at: string;
 };

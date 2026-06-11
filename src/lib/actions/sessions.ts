@@ -280,6 +280,16 @@ export async function createSession(
   return data;
 }
 
+export async function deleteSession(sessionId: string): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("schedule_sessions")
+    .delete()
+    .eq("id", sessionId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+}
+
 export async function getSessionPlayers(
   sessionId: string,
 ): Promise<SessionPlayer[]> {

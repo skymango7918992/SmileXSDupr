@@ -39,6 +39,34 @@ export function getServiceRoleKey(): string | undefined {
   return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 }
 
+export type DuprConfigMode = "token" | "credentials" | "none";
+
+/** 是否已設定 DUPR 同步（Token 或帳密擇一） */
+export function getDuprConfigMode(): DuprConfigMode {
+  if (process.env.DUPR_API_TOKEN?.trim()) return "token";
+  if (
+    process.env.DUPR_EMAIL?.trim() &&
+    process.env.DUPR_PASSWORD?.trim()
+  ) {
+    return "credentials";
+  }
+  return "none";
+}
+
+export function hasDuprEnv(): boolean {
+  return getDuprConfigMode() !== "none";
+}
+
+/** DUPR Club 同步設定（不含 token，token 請用 resolveDuprAccessToken） */
+export function getDuprConfig() {
+  return {
+    apiBase: process.env.DUPR_API_BASE?.trim() || "https://api.dupr.gg",
+    clubId: process.env.DUPR_CLUB_ID?.trim() || "4668804565",
+    apiVersion: process.env.DUPR_API_VERSION?.trim() || "v1.0",
+    mode: getDuprConfigMode(),
+  };
+}
+
 export function getEnvSetupHint(): string {
   return ENV_FILE_HINT;
 }

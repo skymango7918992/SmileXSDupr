@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { playerDisplayName } from "@/lib/player-display";
 import type { Player } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -72,7 +73,7 @@ export function ManualMatchDialog({
                 <option value="">選擇球員 1</option>
                 {available.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} ({p.dupr_id})
+                    {playerDisplayName(p)} ({p.dupr_id})
                   </option>
                 ))}
               </select>
@@ -84,7 +85,7 @@ export function ManualMatchDialog({
                 <option value="">選擇球員 2</option>
                 {available.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} ({p.dupr_id})
+                    {playerDisplayName(p)} ({p.dupr_id})
                   </option>
                 ))}
               </select>
@@ -102,7 +103,7 @@ export function ManualMatchDialog({
                 <option value="">選擇球員 1</option>
                 {available.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} ({p.dupr_id})
+                    {playerDisplayName(p)} ({p.dupr_id})
                   </option>
                 ))}
               </select>
@@ -114,7 +115,7 @@ export function ManualMatchDialog({
                 <option value="">選擇球員 2</option>
                 {available.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} ({p.dupr_id})
+                    {playerDisplayName(p)} ({p.dupr_id})
                   </option>
                 ))}
               </select>

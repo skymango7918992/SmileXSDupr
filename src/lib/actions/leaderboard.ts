@@ -77,12 +77,14 @@ function toEntries(stats: Map<string, PlayerStats>): LeaderboardEntry[] {
     const rateB = b.matches > 0 ? b.wins / b.matches : 0;
     if (rateB !== rateA) return rateB - rateA;
     if (b.matches !== a.matches) return b.matches - a.matches;
-    return a.player.name.localeCompare(b.player.name, "zh-Hant");
+    const nameA = a.player.display_name?.trim() || a.player.name;
+    const nameB = b.player.display_name?.trim() || b.player.name;
+    return nameA.localeCompare(nameB, "zh-Hant");
   });
 
   return sorted.map((row, index) => ({
     playerId: row.player.id,
-    name: row.player.name,
+    name: row.player.display_name?.trim() || row.player.name,
     duprId: row.player.dupr_id,
     wins: row.wins,
     losses: row.losses,

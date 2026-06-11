@@ -1,5 +1,6 @@
 "use client";
 
+import { playerDisplayName } from "@/lib/player-display";
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -63,7 +64,7 @@ export function PlayerChipGrid({
                   : "border-gray-200 bg-white text-gray-700 shadow-sm hover:border-emerald-200 hover:bg-emerald-50",
               )}
             >
-              <span className="font-semibold">{player.name}</span>
+              <span className="font-semibold">{playerDisplayName(player)}</span>
               <span className="ml-2 text-xs opacity-60">{player.dupr_id}</span>
             </button>
           );

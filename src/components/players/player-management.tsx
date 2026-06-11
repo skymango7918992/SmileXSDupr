@@ -5,6 +5,7 @@ import {
   Check,
   Pencil,
   Plus,
+  RefreshCw,
   Search,
   Trash2,
   UserCheck,
@@ -16,7 +17,10 @@ import {
   deletePlayer,
   updatePlayer,
 } from "@/lib/actions/players";
-import type { Player } from "@/types/database";
+import { syncDuprClubMembers } from "@/lib/actions/dupr-sync";
+import type { DuprConfigMode } from "@/lib/env";
+import { playerDisplayName } from "@/lib/player-display";
+import type { Player, PlayerSource } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -27,10 +31,27 @@ const PAGE_SIZE = 10;
 
 type Props = {
   initialPlayers: Player[];
+  duprConfigMode: DuprConfigMode;
 };
+
+function SourceBadge({ source }: { source: PlayerSource }) {
+  return (
+    <span
+      className={cn(
+        "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+        source === "club"
+          ? "bg-sky-100 text-sky-800"
+          : "bg-violet-100 text-violet-800",
+      )}
+    >
+      {source === "club" ? "Club" : "手動"}
+    </span>
+  );
+}
 
 type RowDraft = {
   name: string;
+  displayName: string;
   dupr_id: string;
   rating: string;
 };
@@ -154,6 +175,8 @@ function PlayerCard({
   onToggleActive,
   onDelete,
 }: PlayerRowProps) {
+  const isClub = player.source === "club";
+
   return (
     <div
       className={cn(
@@ -165,62 +188,107 @@ function PlayerCard({
         <div className="space-y-3">
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-500">
-              姓名
+              DUPR 名稱
+            </label>
+            {isClub ? (
+              <p className="min-h-11 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-base text-slate-700">
+                {rowDraft?.name}
+              </p>
+            ) : (
+              <Input
+                value={rowDraft?.name ?? ""}
+                onChange={(e) =>
+                  onDraftChange({
+                    name: e.target.value,
+                    displayName: rowDraft?.displayName ?? "",
+                    dupr_id: rowDraft?.dupr_id ?? "",
+                    rating: rowDraft?.rating ?? "",
+                  })
+                }
+                className="min-h-11 text-base"
+              />
+            )}
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-500">
+              顯示名稱
             </label>
             <Input
-              value={rowDraft?.name ?? ""}
+              value={rowDraft?.displayName ?? ""}
               onChange={(e) =>
                 onDraftChange({
-                  name: e.target.value,
+                  name: rowDraft?.name ?? "",
+                  displayName: e.target.value,
                   dupr_id: rowDraft?.dupr_id ?? "",
                   rating: rowDraft?.rating ?? "",
                 })
               }
               className="min-h-11 text-base"
+              placeholder="對戰中心顯示用，可填中文"
             />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-500">
               DUPR ID
             </label>
-            <Input
-              value={rowDraft?.dupr_id ?? ""}
-              onChange={(e) =>
-                onDraftChange({
-                  name: rowDraft?.name ?? "",
-                  dupr_id: e.target.value.toUpperCase(),
-                  rating: rowDraft?.rating ?? "",
-                })
-              }
-              className="min-h-11 font-mono text-base"
-            />
+            {isClub ? (
+              <p className="min-h-11 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 font-mono text-base text-slate-700">
+                {rowDraft?.dupr_id}
+              </p>
+            ) : (
+              <Input
+                value={rowDraft?.dupr_id ?? ""}
+                onChange={(e) =>
+                  onDraftChange({
+                    name: rowDraft?.name ?? "",
+                    displayName: rowDraft?.displayName ?? "",
+                    dupr_id: e.target.value.toUpperCase(),
+                    rating: rowDraft?.rating ?? "",
+                  })
+                }
+                className="min-h-11 font-mono text-base"
+              />
+            )}
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-500">
               DUPR 評分
             </label>
-            <Input
-              type="number"
-              step="0.01"
-              value={rowDraft?.rating ?? ""}
-              onChange={(e) =>
-                onDraftChange({
-                  name: rowDraft?.name ?? "",
-                  dupr_id: rowDraft?.dupr_id ?? "",
-                  rating: e.target.value,
-                })
-              }
-              className="min-h-11 text-base"
-              placeholder="選填"
-            />
+            {isClub ? (
+              <p className="min-h-11 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-base text-slate-700">
+                {rowDraft?.rating || "NR"}
+              </p>
+            ) : (
+              <Input
+                type="number"
+                step="0.01"
+                value={rowDraft?.rating ?? ""}
+                onChange={(e) =>
+                  onDraftChange({
+                    name: rowDraft?.name ?? "",
+                    displayName: rowDraft?.displayName ?? "",
+                    dupr_id: rowDraft?.dupr_id ?? "",
+                    rating: e.target.value,
+                  })
+                }
+                className="min-h-11 text-base"
+                placeholder="選填"
+              />
+            )}
           </div>
         </div>
       ) : (
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-base font-semibold text-slate-900">
-              {player.name}
+              {playerDisplayName(player)}
             </p>
+            {player.display_name?.trim() &&
+              player.display_name.trim() !== player.name && (
+                <p className="mt-0.5 truncate text-xs text-slate-500">
+                  DUPR：{player.name}
+                </p>
+              )}
             <p className="mt-0.5 font-mono text-sm text-slate-600">
               {player.dupr_id}
             </p>
@@ -234,6 +302,7 @@ function PlayerCard({
               >
                 {player.active ? "有效" : "停用"}
               </span>
+              <SourceBadge source={player.source ?? "manual"} />
               {player.dupr_rating != null && (
                 <span className="text-xs text-slate-500">
                   評分 {player.dupr_rating}
@@ -275,6 +344,8 @@ function PlayerTableRow({
   onToggleActive,
   onDelete,
 }: PlayerRowProps) {
+  const isClub = player.source === "club";
+
   return (
     <tr
       className={cn(
@@ -284,70 +355,113 @@ function PlayerTableRow({
     >
       <td className="px-3 py-2">
         {isEditing ? (
-          <Input
-            value={rowDraft?.name ?? ""}
-            onChange={(e) =>
-              onDraftChange({
-                name: e.target.value,
-                dupr_id: rowDraft?.dupr_id ?? "",
-                rating: rowDraft?.rating ?? "",
-              })
-            }
-            className="h-9"
-          />
+          isClub ? (
+            <span className="text-sm text-slate-600">{rowDraft?.name}</span>
+          ) : (
+            <Input
+              value={rowDraft?.name ?? ""}
+              onChange={(e) =>
+                onDraftChange({
+                  name: e.target.value,
+                  displayName: rowDraft?.displayName ?? "",
+                  dupr_id: rowDraft?.dupr_id ?? "",
+                  rating: rowDraft?.rating ?? "",
+                })
+              }
+              className="h-9"
+            />
+          )
         ) : (
-          <span className="text-sm font-medium text-slate-900">{player.name}</span>
+          <span className="text-sm text-slate-700">{player.name}</span>
         )}
       </td>
       <td className="px-3 py-2">
         {isEditing ? (
           <Input
-            value={rowDraft?.dupr_id ?? ""}
+            value={rowDraft?.displayName ?? ""}
             onChange={(e) =>
               onDraftChange({
                 name: rowDraft?.name ?? "",
-                dupr_id: e.target.value.toUpperCase(),
+                displayName: e.target.value,
+                dupr_id: rowDraft?.dupr_id ?? "",
                 rating: rowDraft?.rating ?? "",
               })
             }
-            className="h-9 font-mono text-sm"
+            className="h-9"
+            placeholder="對戰中心顯示"
           />
+        ) : (
+          <span className="text-sm font-medium text-slate-900">
+            {playerDisplayName(player)}
+          </span>
+        )}
+      </td>
+      <td className="px-3 py-2">
+        {isEditing ? (
+          isClub ? (
+            <span className="font-mono text-sm text-slate-600">
+              {rowDraft?.dupr_id}
+            </span>
+          ) : (
+            <Input
+              value={rowDraft?.dupr_id ?? ""}
+              onChange={(e) =>
+                onDraftChange({
+                  name: rowDraft?.name ?? "",
+                  displayName: rowDraft?.displayName ?? "",
+                  dupr_id: e.target.value.toUpperCase(),
+                  rating: rowDraft?.rating ?? "",
+                })
+              }
+              className="h-9 font-mono text-sm"
+            />
+          )
         ) : (
           <span className="font-mono text-sm text-slate-600">{player.dupr_id}</span>
         )}
       </td>
       <td className="px-3 py-2">
         {isEditing ? (
-          <Input
-            type="number"
-            step="0.01"
-            value={rowDraft?.rating ?? ""}
-            onChange={(e) =>
-              onDraftChange({
-                name: rowDraft?.name ?? "",
-                dupr_id: rowDraft?.dupr_id ?? "",
-                rating: e.target.value,
-              })
-            }
-            className="h-9 w-24"
-            placeholder="—"
-          />
+          isClub ? (
+            <span className="text-sm text-slate-600">
+              {rowDraft?.rating || "NR"}
+            </span>
+          ) : (
+            <Input
+              type="number"
+              step="0.01"
+              value={rowDraft?.rating ?? ""}
+              onChange={(e) =>
+                onDraftChange({
+                  name: rowDraft?.name ?? "",
+                  displayName: rowDraft?.displayName ?? "",
+                  dupr_id: rowDraft?.dupr_id ?? "",
+                  rating: e.target.value,
+                })
+              }
+              className="h-9 w-24"
+              placeholder="—"
+            />
+          )
         ) : (
           <span className="text-sm text-slate-600">
-            {player.dupr_rating ?? "—"}
+            {player.dupr_rating ?? "NR"}
           </span>
         )}
       </td>
       <td className="px-3 py-2">
-        <span
-          className={
-            player.active
-              ? "rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
-              : "rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500"
-          }
-        >
-          {player.active ? "有效" : "停用"}
-        </span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span
+            className={
+              player.active
+                ? "rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
+                : "rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500"
+            }
+          >
+            {player.active ? "有效" : "停用"}
+          </span>
+          <SourceBadge source={player.source ?? "manual"} />
+        </div>
       </td>
       <td className="px-3 py-2">
         <PlayerRowActions
@@ -366,16 +480,21 @@ function PlayerTableRow({
   );
 }
 
-export function PlayerManagement({ initialPlayers }: Props) {
+export function PlayerManagement({
+  initialPlayers,
+  duprConfigMode,
+}: Props) {
   const [players, setPlayers] = useState(initialPlayers);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [newName, setNewName] = useState("");
+  const [newDisplayName, setNewDisplayName] = useState("");
   const [newDuprId, setNewDuprId] = useState("");
   const [newRating, setNewRating] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [rowDraft, setRowDraft] = useState<RowDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const filteredPlayers = useMemo(() => {
@@ -384,6 +503,7 @@ export function PlayerManagement({ initialPlayers }: Props) {
     return players.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
+        (p.display_name ?? "").toLowerCase().includes(q) ||
         p.dupr_id.toLowerCase().includes(q),
     );
   }, [players, search]);
@@ -409,9 +529,25 @@ export function PlayerManagement({ initialPlayers }: Props) {
     setPlayers(data);
   };
 
+  const handleDuprSync = () => {
+    setError(null);
+    setSyncMessage(null);
+    startTransition(async () => {
+      try {
+        const result = await syncDuprClubMembers();
+        setSyncMessage(
+          `Club ${result.clubTotal} 人 · 新增 ${result.added} · 更新 ${result.updated} · 手動轉 Club ${result.converted}${result.merged ? ` · 合併重複 ${result.merged}` : ""} · 移除 ${result.removed}${result.deactivated ? ` · 停用 ${result.deactivated}` : ""}`,
+        );
+        await refreshFromServer();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "DUPR 同步失敗");
+      }
+    });
+  };
+
   const handleCreate = () => {
     if (!newName.trim() || !newDuprId.trim()) {
-      setError("請填寫姓名與 DUPR ID");
+      setError("請填寫 DUPR 名稱與 DUPR ID");
       return;
     }
 
@@ -420,10 +556,12 @@ export function PlayerManagement({ initialPlayers }: Props) {
       try {
         await createPlayer({
           name: newName,
+          display_name: newDisplayName.trim() || newName,
           dupr_id: newDuprId,
           dupr_rating: newRating ? Number(newRating) : null,
         });
         setNewName("");
+        setNewDisplayName("");
         setNewDuprId("");
         setNewRating("");
         await refreshFromServer();
@@ -437,6 +575,7 @@ export function PlayerManagement({ initialPlayers }: Props) {
     setEditingId(player.id);
     setRowDraft({
       name: player.name,
+      displayName: player.display_name?.trim() || player.name,
       dupr_id: player.dupr_id,
       rating: player.dupr_rating?.toString() ?? "",
     });
@@ -448,20 +587,37 @@ export function PlayerManagement({ initialPlayers }: Props) {
     setRowDraft(null);
   };
 
-  const saveRowEdit = (playerId: string) => {
+  const saveRowEdit = (player: Player) => {
     if (!rowDraft?.name.trim() || !rowDraft.dupr_id.trim()) {
-      setError("請填寫姓名與 DUPR ID");
+      setError("請填寫 DUPR 名稱與 DUPR ID");
       return;
     }
+    if (!rowDraft.displayName.trim()) {
+      setError("請填寫顯示名稱");
+      return;
+    }
+
+    const displayName = rowDraft.displayName.trim();
+    const duprName = rowDraft.name.trim();
+    const customized = displayName !== duprName;
 
     setError(null);
     startTransition(async () => {
       try {
-        await updatePlayer(playerId, {
-          name: rowDraft.name,
-          dupr_id: rowDraft.dupr_id,
-          dupr_rating: rowDraft.rating ? Number(rowDraft.rating) : null,
-        });
+        if (player.source === "club") {
+          await updatePlayer(player.id, {
+            display_name: displayName,
+            display_name_customized: customized,
+          });
+        } else {
+          await updatePlayer(player.id, {
+            name: duprName,
+            display_name: displayName,
+            display_name_customized: customized,
+            dupr_id: rowDraft.dupr_id,
+            dupr_rating: rowDraft.rating ? Number(rowDraft.rating) : null,
+          });
+        }
         cancelRowEdit();
         await refreshFromServer();
       } catch (e) {
@@ -482,11 +638,24 @@ export function PlayerManagement({ initialPlayers }: Props) {
   };
 
   const handleDelete = (player: Player) => {
-    if (!confirm(`確定刪除球員「${player.name}」？`)) return;
+    const hint =
+      player.source === "manual"
+        ? "\n\n若已有 Club 同名球員（含 O/0 打錯），將自動合併至 Club 資料。"
+        : "";
+    if (!confirm(`確定刪除球員「${playerDisplayName(player)}」？${hint}`)) return;
+    setError(null);
+    setSyncMessage(null);
     startTransition(async () => {
       try {
         if (editingId === player.id) cancelRowEdit();
-        await deletePlayer(player.id);
+        const result = await deletePlayer(player.id);
+        if (result.action === "merged") {
+          setSyncMessage("已刪除重複球員，資料已合併至 Club 官方紀錄");
+        } else if (result.action === "deactivated") {
+          setSyncMessage(
+            "此球員曾有對戰紀錄，已改為停用（無法直接刪除，避免影響歷史場次）",
+          );
+        }
         await refreshFromServer();
       } catch (e) {
         setError(e instanceof Error ? e.message : "刪除失敗");
@@ -502,21 +671,85 @@ export function PlayerManagement({ initialPlayers }: Props) {
     editingLocked: editingId !== null && editingId !== player.id,
     onDraftChange: setRowDraft,
     onStartEdit: () => startRowEdit(player),
-    onSave: () => saveRowEdit(player.id),
+    onSave: () => saveRowEdit(player),
     onCancel: cancelRowEdit,
     onToggleActive: () => toggleActive(player),
     onDelete: () => handleDelete(player),
   });
 
+  const clubCount = players.filter((p) => p.source === "club").length;
+  const manualCount = players.filter((p) => (p.source ?? "manual") === "manual").length;
+
   return (
     <div className="space-y-4 sm:space-y-5">
+      <Card className="border-sky-100 bg-gradient-to-br from-white to-sky-50/50 p-4 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-sky-900">DUPR Club 同步</CardTitle>
+            <p className="mt-1 text-sm text-slate-600">
+              Club 4668804565 · 目前 Club {clubCount} 人 · 手動 {manualCount}{" "}
+              人
+            </p>
+            {duprConfigMode === "none" ? (
+              <div className="mt-3 rounded-xl bg-amber-50 px-3 py-3 text-sm text-amber-900">
+                <p className="font-semibold">尚未設定 DUPR 連線</p>
+                <p className="mt-2 text-xs leading-relaxed text-amber-800">
+                  請在專案根目錄 <code className="rounded bg-white px-1">.env</code>{" "}
+                  加入（擇一即可）：
+                </p>
+                <pre className="mt-2 overflow-x-auto rounded-lg bg-white p-2 text-[11px] leading-relaxed text-slate-700">
+{`# 方式 A（建議）：你的 DUPR 登入帳密
+DUPR_EMAIL=你的DUPR信箱
+DUPR_PASSWORD=你的DUPR密碼
+DUPR_CLUB_ID=4668804565
+
+# 方式 B：直接貼 Bearer Token
+# DUPR_API_TOKEN=eyJ...`}
+                </pre>
+                <p className="mt-2 text-xs text-amber-800">
+                  儲存後請重新啟動 <code className="rounded bg-white px-1">npm run dev</code>
+                  ，按鈕即可使用。
+                </p>
+              </div>
+            ) : (
+              <p className="mt-1 text-xs text-slate-500">
+                已設定：
+                {duprConfigMode === "credentials"
+                  ? " DUPR 帳密登入"
+                  : " API Token"}
+                · 相同 DUPR ID（含 O/0 打錯）會合併為 Club；離開 Club 者會移除
+              </p>
+            )}
+          </div>
+          <Button
+            onClick={handleDuprSync}
+            disabled={isPending || duprConfigMode === "none"}
+            className="min-h-12 w-full shrink-0 sm:w-auto"
+          >
+            <RefreshCw className={cn("h-4 w-4", isPending && "animate-spin")} />
+            更新 Club 名單
+          </Button>
+        </div>
+        {syncMessage && (
+          <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            {syncMessage}
+          </p>
+        )}
+      </Card>
+
       <Card className="p-4 sm:p-5">
-        <CardTitle className="mb-4">新增球員</CardTitle>
+        <CardTitle className="mb-4">手動新增球員</CardTitle>
         <div className="grid gap-3">
           <Input
-            placeholder="姓名"
+            placeholder="DUPR 名稱"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
+            className="min-h-11 text-base"
+          />
+          <Input
+            placeholder="顯示名稱（選填，預設同 DUPR 名稱）"
+            value={newDisplayName}
+            onChange={(e) => setNewDisplayName(e.target.value)}
             className="min-h-11 text-base"
           />
           <Input
@@ -544,9 +777,6 @@ export function PlayerManagement({ initialPlayers }: Props) {
             新增球員
           </Button>
         </div>
-        {error && !editingId && (
-          <p className="mt-3 text-sm text-red-600">{error}</p>
-        )}
       </Card>
 
       <Card className="p-4 sm:p-5">
@@ -555,7 +785,7 @@ export function PlayerManagement({ initialPlayers }: Props) {
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
-              placeholder="搜尋姓名或 DUPR ID..."
+              placeholder="搜尋顯示名稱、DUPR 名稱或 DUPR ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="min-h-11 pl-9 text-base"
@@ -577,10 +807,11 @@ export function PlayerManagement({ initialPlayers }: Props) {
 
         {/* 桌面：表格 */}
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[720px]">
+          <table className="w-full min-w-[880px]">
             <thead>
               <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
-                <th className="px-3 py-2 font-medium">姓名</th>
+                <th className="px-3 py-2 font-medium">DUPR 名稱</th>
+                <th className="px-3 py-2 font-medium">顯示名稱</th>
                 <th className="px-3 py-2 font-medium">DUPR ID</th>
                 <th className="px-3 py-2 font-medium">評分</th>
                 <th className="px-3 py-2 font-medium">狀態</th>
@@ -613,8 +844,10 @@ export function PlayerManagement({ initialPlayers }: Props) {
           className="mt-4"
         />
 
-        {error && editingId && (
-          <p className="mt-3 text-sm text-red-600">{error}</p>
+        {error && (
+          <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
         )}
       </Card>
     </div>
