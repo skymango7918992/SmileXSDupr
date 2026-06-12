@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseEnv, hasSupabaseEnv } from "@/lib/env";
+import {
+  getTrustedDeviceCookie,
+  hasValidTrustedDevice,
+} from "@/lib/trusted-device-server";
 
 export async function updateSession(request: NextRequest) {
   // .env 未設定時不攔截，讓頁面顯示設定指引
@@ -62,6 +66,24 @@ export async function updateSession(request: NextRequest) {
 
   const needsMfa =
     aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2";
+
+  if (needsMfa && user) {
+    const deviceToken = getTrustedDeviceCookie(request.cookies.getAll());
+    const trusted = await hasValidTrustedDevice(
+      supabase,
+      user.id,
+      deviceToken,
+    );
+    if (trusted) {
+      if (isAuthRoute) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/";
+        url.searchParams.delete("step");
+        return NextResponse.redirect(url);
+      }
+      return supabaseResponse;
+    }
+  }
 
   if (needsMfa) {
     if (!isAuthRoute || isSetupRoute) {

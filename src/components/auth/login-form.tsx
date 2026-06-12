@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { KeyRound, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import { TrustDeviceCheckbox } from "@/components/auth/trust-device-checkbox";
 import { useAppUi } from "@/components/providers/app-ui-provider";
+import {
+  isCurrentDeviceTrusted,
+  registerTrustedDevice,
+} from "@/lib/actions/trusted-device";
 import { usernameToEmail } from "@/lib/auth/config";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,7 +16,11 @@ import { Input } from "@/components/ui/input";
 
 type Step = "credentials" | "verify";
 
-export function LoginForm() {
+type Props = {
+  trustedDeviceDays?: number;
+};
+
+export function LoginForm({ trustedDeviceDays = 7 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>("credentials");
@@ -23,7 +32,8 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [statusText, setStatusText] = useState<string | null>(null);
-  const { info } = useAppUi();
+  const [trustDevice, setTrustDevice] = useState(true);
+  const { info, success } = useAppUi();
 
   useEffect(() => {
     if (searchParams.get("step") === "verify") {
@@ -101,6 +111,14 @@ export function LoginForm() {
         await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
       if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+        const trusted = await isCurrentDeviceTrusted();
+        if (trusted) {
+          setStatusText("已識別信任裝置，進入系統…");
+          success(`信任裝置有效，已略過 OTP（${trustedDeviceDays} 天）`);
+          router.replace("/");
+          router.refresh();
+          return;
+        }
         setStatusText("請輸入 Google 驗證器 6 位數驗證碼");
         info("請輸入驗證器 OTP");
         await prepareMfaChallenge();
@@ -141,6 +159,11 @@ export function LoginForm() {
         await prepareMfaChallenge();
         setOtp("");
         return;
+      }
+
+      if (trustDevice) {
+        await registerTrustedDevice();
+        success(`已信任此裝置 ${trustedDeviceDays} 天`);
       }
 
       setStatusText("驗證成功，進入系統…");
@@ -228,6 +251,12 @@ export function LoginForm() {
               disabled={loading}
             />
             {error && <ErrorBox message={error} />}
+            <TrustDeviceCheckbox
+              checked={trustDevice}
+              onChange={setTrustDevice}
+              days={trustedDeviceDays}
+              disabled={loading}
+            />
             {statusText && !error && (
               <p className="text-center text-xs text-emerald-100/90">{statusText}</p>
             )}

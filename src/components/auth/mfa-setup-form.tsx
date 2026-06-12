@@ -3,11 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { QrCode, ShieldCheck } from "lucide-react";
+import { TrustDeviceCheckbox } from "@/components/auth/trust-device-checkbox";
+import { useAppUi } from "@/components/providers/app-ui-provider";
+import { registerTrustedDevice } from "@/lib/actions/trusted-device";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function MfaSetupForm() {
+type Props = {
+  trustedDeviceDays?: number;
+};
+
+export function MfaSetupForm({ trustedDeviceDays = 7 }: Props) {
   const router = useRouter();
   const [factorId, setFactorId] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -15,6 +22,8 @@ export function MfaSetupForm() {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [trustDevice, setTrustDevice] = useState(true);
+  const { success } = useAppUi();
 
   useEffect(() => {
     void startEnrollment();
@@ -63,6 +72,11 @@ export function MfaSetupForm() {
         return;
       }
 
+      if (trustDevice) {
+        await registerTrustedDevice();
+        success(`已信任此裝置 ${trustedDeviceDays} 天`);
+      }
+
       router.replace("/");
       router.refresh();
     } finally {
@@ -75,7 +89,7 @@ export function MfaSetupForm() {
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-bold text-white">綁定 OTP 驗證器</h1>
         <p className="mt-2 text-sm text-emerald-100/80">
-          首次登入需綁定 Google Authenticator，之後每次登入都要輸入驗證碼
+          首次登入需綁定 Google Authenticator；可選擇信任此裝置以略過後續 OTP
         </p>
       </div>
 
@@ -129,6 +143,13 @@ export function MfaSetupForm() {
               {error}
             </div>
           )}
+
+          <TrustDeviceCheckbox
+            checked={trustDevice}
+            onChange={setTrustDevice}
+            days={trustedDeviceDays}
+            disabled={loading}
+          />
 
           <Button
             type="submit"

@@ -77,5 +77,6 @@ export type AppSettings = {
   id: string;
   team_name: string;
   default_court_count: number;
+  trusted_device_days: number;
   updated_at: string;
 };

@@ -28,6 +28,7 @@ export function SetupGuide({ error }: { error?: string }) {
             <li>supabase/migrations/005_check_in.sql</li>
             <li>supabase/migrations/006_player_source_dupr.sql</li>
             <li>supabase/migrations/007_player_display_name.sql</li>
+            <li>supabase/migrations/008_trusted_devices.sql</li>
           </ul>
         </li>
         <li>
