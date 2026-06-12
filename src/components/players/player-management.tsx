@@ -496,8 +496,8 @@ function DuprEnvDiagnostics({ status }: { status: DuprEnvStatus | null }) {
     <p className="mt-2 text-xs text-amber-800">
       伺服器未讀到：
       {missing.length > 0 ? missing.join("、") : "DUPR 相關變數"}
-      。請確認 Vercel 變數名稱完全一致（是 DUPR 不是 DUPP），並勾選 Production
-      後重新部署。
+      。請在 Cloudflare → Workers → <strong>Variables and Secrets</strong>（執行期）
+      設定，變數名稱須完全一致（是 DUPR 不是 DUPP），儲存後重新部署。
     </p>
   );
 }
@@ -737,9 +737,9 @@ export function PlayerManagement({ initialPlayers }: Props) {
               <div className="mt-3 rounded-xl bg-amber-50 px-3 py-3 text-sm text-amber-900">
                 <p className="font-semibold">尚未設定 DUPR 連線</p>
                 <p className="mt-2 text-xs leading-relaxed text-amber-800">
-                  請在 <strong>Vercel → Settings → Environment Variables</strong>{" "}
-                  或本機 <code className="rounded bg-white px-1">.env</code>{" "}
-                  加入（擇一即可）：
+                  請在 <strong>Cloudflare → Workers → Variables and Secrets</strong>{" "}
+                  （執行期 Secrets）或本機{" "}
+                  <code className="rounded bg-white px-1">.env</code> 加入（擇一即可）：
                 </p>
                 <pre className="mt-2 overflow-x-auto rounded-lg bg-white p-2 text-[11px] leading-relaxed text-slate-700">
 {`# 方式 A（建議）：DUPR 登入帳密
@@ -751,8 +751,8 @@ DUPR_CLUB_ID=4668804565
 DUPR_API_TOKEN=eyJ...`}
                 </pre>
                 <p className="mt-2 text-xs text-amber-800">
-                  Vercel 新增或修改變數後，請到 Deployments → <strong>Redeploy</strong>{" "}
-                  才會生效。
+                  Cloudflare 新增或修改變數後，請重新部署才會生效。DUPR 密碼請用
+                  Secrets，不要加密選項。
                 </p>
                 <DuprEnvDiagnostics status={duprEnvStatus} />
               </div>

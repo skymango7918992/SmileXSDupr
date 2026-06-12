@@ -61,7 +61,7 @@ function normalizeMember(raw: RawMember): DuprClubMember | null {
 }
 
 export async function fetchAllClubMembers(): Promise<DuprClubMember[]> {
-  const { apiBase, clubId, apiVersion } = getDuprConfig();
+  const { apiBase, clubId, apiVersion } = await getDuprConfig();
   const apiToken = await resolveDuprAccessToken();
   const members: DuprClubMember[] = [];
   const limit = 25; // DUPR API 單次上限 25

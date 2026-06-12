@@ -1,3 +1,6 @@
+import { readRuntimeEnv } from "@/lib/runtime-env";
+import { ENV_SETUP_HINT } from "@/lib/env";
+
 type AuthResult = {
   accessToken?: string;
   access_token?: string;
@@ -11,17 +14,15 @@ type AuthWrapper = {
   result?: AuthResult;
 };
 
-function getApiBase(): string {
-  return process.env.DUPR_API_BASE?.trim() || "https://api.dupr.gg";
-}
-
 /** 用 DUPR 帳號密碼換取 access token（Club 管理員帳號） */
 export async function loginDuprWithCredentials(
   email: string,
   password: string,
 ): Promise<string> {
-  const version = process.env.DUPR_AUTH_VERSION?.trim() || "v2.0";
-  const res = await fetch(`${getApiBase()}/auth/${version}/login`, {
+  const apiBase =
+    (await readRuntimeEnv("DUPR_API_BASE")) || "https://api.dupr.gg";
+  const version = (await readRuntimeEnv("DUPR_AUTH_VERSION")) || "v2.0";
+  const res = await fetch(`${apiBase}/auth/${version}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -68,15 +69,15 @@ export async function loginDuprWithCredentials(
 
 /** 解析 Bearer Token：優先 DUPR_API_TOKEN，否則用 DUPR_EMAIL + DUPR_PASSWORD 登入 */
 export async function resolveDuprAccessToken(): Promise<string> {
-  const direct = process.env.DUPR_API_TOKEN?.trim();
+  const direct = await readRuntimeEnv("DUPR_API_TOKEN");
   if (direct) return direct;
 
-  const email = process.env.DUPR_EMAIL?.trim();
-  const password = process.env.DUPR_PASSWORD?.trim();
+  const email = await readRuntimeEnv("DUPR_EMAIL");
+  const password = await readRuntimeEnv("DUPR_PASSWORD");
 
   if (!email || !password) {
     throw new Error(
-      "缺少 DUPR 連線設定。請在 Vercel → Environment Variables（或本機 .env）設定 DUPR_EMAIL + DUPR_PASSWORD，或 DUPR_API_TOKEN，然後重新部署。",
+      `缺少 DUPR 連線設定。${ENV_SETUP_HINT}（DUPR_EMAIL + DUPR_PASSWORD，或 DUPR_API_TOKEN）`,
     );
   }
 

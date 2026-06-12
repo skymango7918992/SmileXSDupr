@@ -7,33 +7,43 @@
 - Next.js 16
 - Supabase (PostgreSQL)
 - Tailwind CSS
+- Cloudflare Pages / Workers（OpenNext）
 
 ## 本機開發
 
 ```bash
 npm install
 cp .env.example .env
-# 填入 NEXT_PUBLIC_SUPABASE_URL 與 NEXT_PUBLIC_SUPABASE_ANON_KEY
+# 填入環境變數
 npm run dev
 ```
 
 ## Supabase 設定
 
-在 Supabase SQL Editor 執行 `supabase/migrations/001_initial_schema.sql`。
+在 Supabase SQL Editor 依序執行 `supabase/migrations/` 內的 SQL 檔案。
 
-## 部署（Vercel）
+## 部署（Cloudflare Pages）
 
-專案可部署至 [Vercel](https://vercel.com)。在 **Settings → Environment Variables** 設定（請勾選 **Production**）：
+建議 Build 設定：
 
-**必填**
+| 欄位 | 值 |
+|------|-----|
+| Build command | `npx @opennextjs/cloudflare build` |
+| Deploy command | `npx @opennextjs/cloudflare deploy -- --keep-vars` |
+
+### 環境變數（兩處都要設）
+
+**1. Build variables and secrets**（建置時內嵌，給 `NEXT_PUBLIC_*` 與登入帳號對照）
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `ADMIN_USERNAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD`
 
-**DUPR Club 同步（球員管理，擇一）**
+**2. Variables and Secrets**（執行期，給 DUPR 同步等 Server Action）
 
 - `DUPR_EMAIL` + `DUPR_PASSWORD` + `DUPR_CLUB_ID`
 - 或 `DUPR_API_TOKEN`
 
-變數名稱須完全一致（`DUPR` 不是 `DUPP`）。**新增或修改後請 Deployments → Redeploy**，否則線上讀不到新變數。
+DUPR 密碼請用 **Secrets** 類型，變數名稱須完全一致（`DUPR` 不是 `DUPP`）。修改後請重新部署。
+
+本機預覽 Cloudflare 執行環境：`npm run preview`

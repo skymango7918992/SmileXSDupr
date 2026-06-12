@@ -46,9 +46,6 @@ yarn-error.log*
 # 可提交的範例檔
 !.env.example
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
