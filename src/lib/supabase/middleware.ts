@@ -6,11 +6,21 @@ import {
   hasValidTrustedDevice,
 } from "@/lib/trusted-device-server";
 
+function isServerActionOrRsc(request: NextRequest): boolean {
+  return (
+    request.headers.has("Next-Action") ||
+    request.headers.has("RSC") ||
+    request.headers.get("Accept")?.includes("text/x-component") === true
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   // .env 未設定時不攔截，讓頁面顯示設定指引
   if (!hasSupabaseEnv()) {
     return NextResponse.next({ request });
   }
+
+  const skipAuthRedirect = isServerActionOrRsc(request);
 
   const { supabaseUrl, supabaseAnonKey } = getSupabaseEnv();
   let supabaseResponse = NextResponse.next({ request });
@@ -40,11 +50,15 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute = pathname.startsWith("/login");
 
   if (!user) {
-    if (!isAuthRoute) {
+    if (!isAuthRoute && !skipAuthRedirect) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       return NextResponse.redirect(url);
     }
+    return supabaseResponse;
+  }
+
+  if (skipAuthRedirect) {
     return supabaseResponse;
   }
 

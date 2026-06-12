@@ -20,15 +20,19 @@ export async function getTrustedDeviceDays(): Promise<number> {
   }
 }
 
+export type RegisterTrustedDeviceResult =
+  | { ok: true }
+  | { ok: false; message: string };
+
 /** OTP 驗證成功後註冊信任裝置（依後台設定天數） */
-export async function registerTrustedDevice(): Promise<void> {
+export async function registerTrustedDevice(): Promise<RegisterTrustedDeviceResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("請先完成登入驗證");
+    return { ok: false, message: "登入狀態尚未同步，請先進入系統後再試" };
   }
 
   const days = await getTrustedDeviceDays();
@@ -52,16 +56,27 @@ export async function registerTrustedDevice(): Promise<void> {
     user_agent: userAgent,
   });
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    const hint = error.message.includes("trusted_devices")
+      ? "請在 Supabase 執行 migration 008_trusted_devices.sql"
+      : error.message;
+    return { ok: false, message: hint };
+  }
 
-  const cookieStore = await cookies();
-  cookieStore.set(TRUSTED_DEVICE_COOKIE, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: days * 24 * 60 * 60,
-  });
+  try {
+    const cookieStore = await cookies();
+    cookieStore.set(TRUSTED_DEVICE_COOKIE, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: days * 24 * 60 * 60,
+    });
+  } catch {
+    return { ok: false, message: "無法寫入信任裝置 Cookie" };
+  }
+
+  return { ok: true };
 }
 
 export async function isCurrentDeviceTrusted(): Promise<boolean> {

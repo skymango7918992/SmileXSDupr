@@ -161,14 +161,21 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
         return;
       }
 
-      if (trustDevice) {
-        await registerTrustedDevice();
-        success(`已信任此裝置 ${trustedDeviceDays} 天`);
-      }
+      await supabase.auth.getSession();
+      router.refresh();
 
       setStatusText("驗證成功，進入系統…");
       router.replace("/");
       router.refresh();
+
+      if (trustDevice) {
+        const result = await registerTrustedDevice();
+        if (result.ok) {
+          success(`已信任此裝置 ${trustedDeviceDays} 天`);
+        } else {
+          info(result.message);
+        }
+      }
     } finally {
       setLoading(false);
       setStatusText(null);

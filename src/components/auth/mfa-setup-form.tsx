@@ -23,7 +23,7 @@ export function MfaSetupForm({ trustedDeviceDays = 7 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [trustDevice, setTrustDevice] = useState(true);
-  const { success } = useAppUi();
+  const { success, info } = useAppUi();
 
   useEffect(() => {
     void startEnrollment();
@@ -72,13 +72,17 @@ export function MfaSetupForm({ trustedDeviceDays = 7 }: Props) {
         return;
       }
 
-      if (trustDevice) {
-        await registerTrustedDevice();
-        success(`已信任此裝置 ${trustedDeviceDays} 天`);
-      }
-
       router.replace("/");
       router.refresh();
+
+      if (trustDevice) {
+        const result = await registerTrustedDevice();
+        if (result.ok) {
+          success(`已信任此裝置 ${trustedDeviceDays} 天`);
+        } else {
+          info(result.message);
+        }
+      }
     } finally {
       setLoading(false);
     }
