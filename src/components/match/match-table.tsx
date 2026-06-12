@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Pencil, Save, Trash2 } from "lucide-react";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { playerDisplayName } from "@/lib/player-display";
 import type { MatchWithPlayers, Player } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -72,18 +73,40 @@ function ScoreRow({
     match.team2_score?.toString() ?? "",
   );
   const [saving, setSaving] = useState(false);
+  const { error: toastError, confirm, success } = useAppUi();
+  const isCompleted = match.status === "completed";
 
   const handleSave = async () => {
     const s1 = Number(team1Score);
     const s2 = Number(team2Score);
     if (Number.isNaN(s1) || Number.isNaN(s2)) {
-      alert("請輸入有效比分");
+      toastError("請輸入有效比分");
       return;
     }
     setSaving(true);
     try {
       await onSaveScore(match.id, s1, s2);
       setEditing(false);
+      success(`第 ${match.round_number} 場比分已儲存`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const ok = await confirm({
+      title: isCompleted ? `刪除第 ${match.round_number} 場？` : `刪除第 ${match.round_number} 場？`,
+      description: isCompleted
+        ? "此場已完成並已計分，刪除後獲勝榜與匯出紀錄也會一併移除。"
+        : "刪除後無法復原。",
+      confirmLabel: "刪除",
+      variant: "danger",
+    });
+    if (!ok) return;
+    setSaving(true);
+    try {
+      await onDelete(match.id);
+      success(`已刪除第 ${match.round_number} 場`);
     } finally {
       setSaving(false);
     }
@@ -91,8 +114,6 @@ function ScoreRow({
 
   const team1 = getTeamPlayers(match, 1);
   const team2 = getTeamPlayers(match, 2);
-
-  const isCompleted = match.status === "completed";
 
   return (
     <tr className="border-t border-slate-100 transition hover:bg-emerald-50/40">
@@ -145,7 +166,8 @@ function ScoreRow({
           {editing ? (
             <Button
               size="sm"
-              disabled={disabled || saving}
+              loading={saving}
+              disabled={disabled}
               onClick={() => void handleSave()}
             >
               <Save className="h-3.5 w-3.5" />
@@ -166,14 +188,7 @@ function ScoreRow({
             size="sm"
             variant="danger"
             disabled={disabled || saving}
-            onClick={() => {
-              const message = isCompleted
-                ? `第 ${match.round_number} 場已完成並已計分。\n\n刪除後獲勝榜與匯出紀錄也會一併移除，確定要刪除嗎？`
-                : `確定刪除第 ${match.round_number} 場？`;
-              if (confirm(message)) {
-                void onDelete(match.id);
-              }
-            }}
+            onClick={() => void handleDelete()}
           >
             <Trash2 className="h-3.5 w-3.5" />
             刪

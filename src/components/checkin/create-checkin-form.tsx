@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Loader2, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { createCheckInFromPaste } from "@/lib/actions/checkin";
 import {
   groupAttendeesByCategory,
@@ -203,14 +203,11 @@ export function CreateCheckInForm({ onCreated }: Props) {
 
         <Button
           className="min-h-14 w-full rounded-2xl text-base font-bold"
-          disabled={pending || !rawText.trim() || !eventDate}
+          loading={pending}
+          disabled={!rawText.trim() || !eventDate}
           onClick={handleSubmit}
         >
-          {pending ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            "開始收款"
-          )}
+          開始收款
         </Button>
       </div>
     </div>

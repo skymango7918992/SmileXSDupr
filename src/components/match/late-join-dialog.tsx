@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { playerDisplayName } from "@/lib/player-display";
 import type { Player } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -29,15 +30,17 @@ export function LateJoinDialog({
   const [playerId, setPlayerId] = useState("");
   const [courtCount, setCourtCount] = useState(4);
   const [loading, setLoading] = useState(false);
+  const { error: toastError, success } = useAppUi();
 
   const handleSubmit = async () => {
     if (!playerId) {
-      alert("請選擇球員");
+      toastError("請選擇晚到球員");
       return;
     }
     setLoading(true);
     try {
       await onSubmit(playerId, courtCount);
+      success("晚到球員已加入並重排場次");
       onClose();
     } finally {
       setLoading(false);
@@ -108,7 +111,8 @@ export function LateJoinDialog({
           <Button
             className="min-h-11 flex-1"
             onClick={() => void handleSubmit()}
-            disabled={loading || !playerId}
+            loading={loading}
+            disabled={!playerId}
           >
             確認加入並排場
           </Button>

@@ -5,7 +5,6 @@ import {
   Check,
   Pencil,
   Plus,
-  RefreshCw,
   Search,
   Trash2,
   UserCheck,
@@ -19,6 +18,7 @@ import {
 } from "@/lib/actions/players";
 import { getDuprEnvStatusAction } from "@/lib/actions/dupr-config";
 import { syncDuprClubMembers } from "@/lib/actions/dupr-sync";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { playerDisplayName } from "@/lib/player-display";
 import type { Player, PlayerSource } from "@/types/database";
 import type { DuprConfigMode, DuprEnvStatus } from "@/types/dupr";
@@ -521,6 +521,7 @@ export function PlayerManagement({ initialPlayers }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { confirm, success: toastSuccess } = useAppUi();
 
   const filteredPlayers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -670,29 +671,37 @@ export function PlayerManagement({ initialPlayers }: Props) {
   };
 
   const handleDelete = (player: Player) => {
-    const hint =
-      player.source === "manual"
-        ? "\n\n若已有 Club 同名球員（含 O/0 打錯），將自動合併至 Club 資料。"
-        : "";
-    if (!confirm(`確定刪除球員「${playerDisplayName(player)}」？${hint}`)) return;
-    setError(null);
-    setSyncMessage(null);
-    startTransition(async () => {
-      try {
-        if (editingId === player.id) cancelRowEdit();
-        const result = await deletePlayer(player.id);
-        if (result.action === "merged") {
-          setSyncMessage("已刪除重複球員，資料已合併至 Club 官方紀錄");
-        } else if (result.action === "deactivated") {
-          setSyncMessage(
-            "此球員曾有對戰紀錄，已改為停用（無法直接刪除，避免影響歷史場次）",
-          );
+    void (async () => {
+      const ok = await confirm({
+        title: `刪除「${playerDisplayName(player)}」？`,
+        description:
+          player.source === "manual"
+            ? "若已有 Club 同名球員（含 O/0 打錯），將自動合併至 Club 資料。"
+            : "刪除後無法復原。",
+        confirmLabel: "刪除",
+        variant: "danger",
+      });
+      if (!ok) return;
+
+      setError(null);
+      setSyncMessage(null);
+      startTransition(async () => {
+        try {
+          if (editingId === player.id) cancelRowEdit();
+          const result = await deletePlayer(player.id);
+          if (result.action === "merged") {
+            toastSuccess("已合併至 Club 並刪除重複球員");
+          } else if (result.action === "deactivated") {
+            toastSuccess("球員已停用（保留對戰紀錄）");
+          } else {
+            toastSuccess("球員已刪除");
+          }
+          await refreshFromServer();
+        } catch (e) {
+          setError(e instanceof Error ? e.message : "刪除失敗");
         }
-        await refreshFromServer();
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "刪除失敗");
-      }
-    });
+      });
+    })();
   };
 
   const rowProps = (player: Player): PlayerRowProps => ({
@@ -760,13 +769,12 @@ DUPR_API_TOKEN=eyJ...`}
           </div>
           <Button
             onClick={handleDuprSync}
+            loading={isPending}
             disabled={
-              isPending ||
-              (duprConfigMode !== "token" && duprConfigMode !== "credentials")
+              duprConfigMode !== "token" && duprConfigMode !== "credentials"
             }
             className="min-h-12 w-full shrink-0 sm:w-auto"
           >
-            <RefreshCw className={cn("h-4 w-4", isPending && "animate-spin")} />
             更新 Club 名單
           </Button>
         </div>

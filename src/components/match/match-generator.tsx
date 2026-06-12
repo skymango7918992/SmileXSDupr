@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,7 @@ export function MatchGenerator({
   cardClassName,
 }: Props) {
   const [courtCount, setCourtCount] = useState(defaultCourtCount);
+  const { confirm } = useAppUi();
 
   return (
     <Card className={cn("h-full", cardClassName)}>
@@ -51,22 +53,29 @@ export function MatchGenerator({
 
       <div className="flex flex-wrap gap-2">
         <Button
-          disabled={loading || selectedCount < 4}
+          loading={loading}
+          disabled={selectedCount < 4}
           onClick={() => onGenerate(courtCount)}
           className="shadow-md shadow-emerald-900/15"
         >
           自動排場
         </Button>
-        <Button variant="secondary" onClick={onManualAdd}>
+        <Button variant="secondary" onClick={onManualAdd} disabled={loading}>
           手動新增
         </Button>
         <Button
           variant="danger"
           disabled={loading}
           onClick={() => {
-            if (confirm("確定要清空本組所有「未打」的場次嗎？已完成場次不受影響。")) {
-              void onClearDay();
-            }
+            void (async () => {
+              const ok = await confirm({
+                title: "清空未打場次？",
+                description: "僅刪除「待進行」場次，已完成場次不受影響。",
+                confirmLabel: "清空",
+                variant: "danger",
+              });
+              if (ok) await onClearDay();
+            })();
           }}
         >
           清空未打

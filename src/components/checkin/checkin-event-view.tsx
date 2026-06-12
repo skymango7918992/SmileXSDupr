@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Loader2, Trash2, UserPlus } from "lucide-react";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { deleteCheckInEvent } from "@/lib/actions/checkin";
 import {
   addWalkInAttendee,
@@ -51,6 +52,7 @@ export function CheckInEventView({ event: initialEvent }: Props) {
   const [walkInOpen, setWalkInOpen] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const { confirm, success } = useAppUi();
 
   const { paid, unpaid, total, revenue, progress } = useMemo(() => {
     const paidList = event.attendees.filter((a) => a.payment_status === "paid");
@@ -86,6 +88,7 @@ export function CheckInEventView({ event: initialEvent }: Props) {
     startTransition(async () => {
       try {
         await markAttendeePaid(id, method);
+        success(`已收款（${PAYMENT_METHOD_LABELS[method]}）`);
         setEvent((prev) => ({
           ...prev,
           attendees: prev.attendees.map((a) =>
@@ -106,23 +109,32 @@ export function CheckInEventView({ event: initialEvent }: Props) {
   };
 
   const undo = (id: string) => {
-    if (!confirm("取消此筆收款？")) return;
-    startTransition(async () => {
-      await resetAttendeePayment(id);
-      setEvent((prev) => ({
-        ...prev,
-        attendees: prev.attendees.map((a) =>
-          a.id === id
-            ? {
-                ...a,
-                payment_status: "unpaid",
-                payment_method: null,
-                checked_in_at: null,
-              }
-            : a,
-        ),
-      }));
-    });
+    void (async () => {
+      const ok = await confirm({
+        title: "取消此筆收款？",
+        description: "將恢復為未收款狀態。",
+        confirmLabel: "取消收款",
+        variant: "danger",
+      });
+      if (!ok) return;
+      startTransition(async () => {
+        await resetAttendeePayment(id);
+        setEvent((prev) => ({
+          ...prev,
+          attendees: prev.attendees.map((a) =>
+            a.id === id
+              ? {
+                  ...a,
+                  payment_status: "unpaid",
+                  payment_method: null,
+                  checked_in_at: null,
+                }
+              : a,
+          ),
+        }));
+        success("已取消收款");
+      });
+    })();
   };
 
   const addWalkIn = () => {
@@ -136,16 +148,20 @@ export function CheckInEventView({ event: initialEvent }: Props) {
   };
 
   const handleDeleteEvent = () => {
-    if (
-      !confirm(`確定刪除此報到活動？\n所有收款紀錄將一併刪除，無法復原。`)
-    ) {
-      return;
-    }
-    startTransition(async () => {
-      await deleteCheckInEvent(event.id);
-      router.push("/checkin");
-      router.refresh();
-    });
+    void (async () => {
+      const ok = await confirm({
+        title: "刪除此報到活動？",
+        description: "所有收款紀錄將一併刪除，無法復原。",
+        confirmLabel: "刪除",
+        variant: "danger",
+      });
+      if (!ok) return;
+      startTransition(async () => {
+        await deleteCheckInEvent(event.id);
+        router.push("/checkin");
+        router.refresh();
+      });
+    })();
   };
 
   return (

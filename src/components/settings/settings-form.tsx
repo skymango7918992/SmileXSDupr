@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { updateSettings } from "@/lib/actions/settings";
 import type { AppSettings } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export function SettingsForm({ initialSettings }: Props) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { success, error: toastError } = useAppUi();
 
   const handleSave = () => {
     setMessage(null);
@@ -32,8 +34,11 @@ export function SettingsForm({ initialSettings }: Props) {
           default_court_count: courtCount,
         });
         setMessage("設定已儲存");
+        success("設定已儲存");
       } catch (e) {
-        setError(e instanceof Error ? e.message : "儲存失敗");
+        const msg = e instanceof Error ? e.message : "儲存失敗";
+        setError(msg);
+        toastError(msg);
       }
     });
   };
@@ -65,7 +70,7 @@ export function SettingsForm({ initialSettings }: Props) {
       </div>
 
       <div className="mt-6">
-        <Button onClick={handleSave} disabled={isPending}>
+        <Button onClick={handleSave} loading={isPending}>
           儲存設定
         </Button>
       </div>

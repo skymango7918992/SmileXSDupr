@@ -24,6 +24,7 @@ import {
   updateMatchScore,
   updateSessionRoster,
 } from "@/lib/actions/sessions";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { exportMatchesToDuprCsv } from "@/lib/export-dupr-csv";
 import type {
   AppSettings,
@@ -72,6 +73,7 @@ export function MatchCenter({
   const [showLateJoin, setShowLateJoin] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { error: toastError, success, info } = useAppUi();
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
   const completedCount = matches.filter((m) => m.status === "completed").length;
@@ -260,7 +262,7 @@ export function MatchCenter({
 
   const handleExport = () => {
     if (matches.length === 0) {
-      alert("目前沒有可匯出的對戰資料");
+      toastError("目前沒有可匯出的對戰資料");
       return;
     }
     const label = activeSession?.name ?? "賽程";
@@ -270,13 +272,17 @@ export function MatchCenter({
         matches,
         label,
       );
+      if (exported === 0) {
+        info("沒有已完成的場次可匯出");
+        return;
+      }
       if (skipped > 0) {
-        alert(
-          `已匯出 ${exported} 場已完成對戰（略過 ${skipped} 場尚未完成）`,
-        );
+        success(`已匯出 ${exported} 場（略過 ${skipped} 場未完成）`);
+      } else {
+        success(`已匯出 ${exported} 場 DUPR CSV`);
       }
     } catch (e) {
-      alert(e instanceof Error ? e.message : "匯出失敗");
+      toastError(e instanceof Error ? e.message : "匯出失敗");
     }
   };
 

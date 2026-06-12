@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { playerDisplayName } from "@/lib/player-display";
 import type { Player } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -32,21 +33,23 @@ export function ManualMatchDialog({
   const [team2p1, setTeam2p1] = useState("");
   const [team2p2, setTeam2p2] = useState("");
   const [loading, setLoading] = useState(false);
+  const { error: toastError, success } = useAppUi();
 
   const handleSubmit = async () => {
     const ids = [team1p1, team1p2, team2p1, team2p2];
     if (ids.some((id) => !id)) {
-      alert("請選滿 4 位球員");
+      toastError("請選滿 4 位球員");
       return;
     }
     if (new Set(ids).size !== 4) {
-      alert("同一位球員不能重複出場");
+      toastError("同一位球員不能重複出場");
       return;
     }
 
     setLoading(true);
     try {
       await onSubmit([team1p1, team1p2], [team2p1, team2p2]);
+      success("已新增手動對戰");
       onClose();
     } finally {
       setLoading(false);
@@ -127,7 +130,7 @@ export function ManualMatchDialog({
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             取消
           </Button>
-          <Button onClick={() => void handleSubmit()} disabled={loading}>
+          <Button onClick={() => void handleSubmit()} loading={loading}>
             新增
           </Button>
         </div>

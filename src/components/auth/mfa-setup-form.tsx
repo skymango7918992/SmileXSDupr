@@ -132,10 +132,11 @@ export function MfaSetupForm() {
 
           <Button
             type="submit"
-            disabled={loading || otp.length < 6}
+            loading={loading}
+            disabled={otp.length < 6}
             className="h-11 w-full"
           >
-            {loading ? "驗證中..." : "完成綁定並進入系統"}
+            {loading ? "驗證中…" : "完成綁定並進入系統"}
           </Button>
         </form>
       </div>

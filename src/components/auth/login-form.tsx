@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { KeyRound, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { usernameToEmail } from "@/lib/auth/config";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ export function LoginForm() {
   const [challengeId, setChallengeId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [statusText, setStatusText] = useState<string | null>(null);
+  const { info } = useAppUi();
 
   useEffect(() => {
     if (searchParams.get("step") === "verify") {
@@ -62,12 +65,14 @@ export function LoginForm() {
   const handleCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setStatusText("正在驗證帳號…");
     setLoading(true);
 
     try {
       const email = usernameToEmail(username);
       if (!email) {
         setError("帳號或密碼錯誤");
+        setStatusText(null);
         return;
       }
 
@@ -79,11 +84,15 @@ export function LoginForm() {
 
       if (signInError) {
         setError("帳號或密碼錯誤");
+        setStatusText(null);
         return;
       }
 
+      setStatusText("帳密正確，檢查雙因素驗證…");
+
       const { data: factors } = await supabase.auth.mfa.listFactors();
       if (!factors?.totp?.length) {
+        info("首次登入，請完成驗證器綁定");
         router.replace("/login/setup");
         return;
       }
@@ -92,14 +101,18 @@ export function LoginForm() {
         await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
       if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+        setStatusText("請輸入 Google 驗證器 6 位數驗證碼");
+        info("請輸入驗證器 OTP");
         await prepareMfaChallenge();
         return;
       }
 
+      setStatusText("登入成功，進入系統…");
       router.replace("/");
       router.refresh();
     } finally {
       setLoading(false);
+      setStatusText(null);
     }
   };
 
@@ -111,6 +124,7 @@ export function LoginForm() {
     }
 
     setError(null);
+    setStatusText("正在驗證 OTP…");
     setLoading(true);
 
     try {
@@ -123,15 +137,18 @@ export function LoginForm() {
 
       if (verifyError) {
         setError("驗證碼錯誤或已過期，請重試");
+        setStatusText(null);
         await prepareMfaChallenge();
         setOtp("");
         return;
       }
 
+      setStatusText("驗證成功，進入系統…");
       router.replace("/");
       router.refresh();
     } finally {
       setLoading(false);
+      setStatusText(null);
     }
   };
 
@@ -164,6 +181,7 @@ export function LoginForm() {
               onChange={setUsername}
               placeholder="Smile"
               autoComplete="username"
+              disabled={loading}
             />
             <Field
               icon={<KeyRound className="h-4 w-4" />}
@@ -173,14 +191,18 @@ export function LoginForm() {
               onChange={setPassword}
               placeholder="••••••••"
               autoComplete="current-password"
+              disabled={loading}
             />
             {error && <ErrorBox message={error} />}
+            {statusText && !error && (
+              <p className="text-center text-xs text-emerald-100/90">{statusText}</p>
+            )}
             <Button
               type="submit"
-              disabled={loading}
+              loading={loading}
               className="h-11 w-full shadow-lg shadow-emerald-900/30"
             >
-              {loading ? "驗證中..." : "下一步"}
+              {loading ? "處理中…" : "下一步"}
             </Button>
           </form>
         ) : (
@@ -203,14 +225,19 @@ export function LoginForm() {
               placeholder="000000"
               inputMode="numeric"
               maxLength={6}
+              disabled={loading}
             />
             {error && <ErrorBox message={error} />}
+            {statusText && !error && (
+              <p className="text-center text-xs text-emerald-100/90">{statusText}</p>
+            )}
             <Button
               type="submit"
-              disabled={loading || otp.length < 6}
+              loading={loading}
+              disabled={otp.length < 6}
               className="h-11 w-full shadow-lg shadow-emerald-900/30"
             >
-              {loading ? "驗證中..." : "登入系統"}
+              {loading ? "驗證中…" : "登入系統"}
             </Button>
             <Button
               type="button"
@@ -255,6 +282,7 @@ function Field({
   autoComplete,
   inputMode,
   maxLength,
+  disabled,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -265,6 +293,7 @@ function Field({
   autoComplete?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   maxLength?: number;
+  disabled?: boolean;
 }) {
   return (
     <div>
@@ -280,7 +309,8 @@ function Field({
         autoComplete={autoComplete}
         inputMode={inputMode}
         maxLength={maxLength}
-        className="border-white/20 bg-white/90"
+        disabled={disabled}
+        className="border-white/20 bg-white/90 disabled:opacity-60"
         required
       />
     </div>

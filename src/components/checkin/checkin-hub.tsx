@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Plus, Trash2 } from "lucide-react";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import { deleteCheckInEvent } from "@/lib/actions/checkin";
 import type { CheckInEventWithStats } from "@/types/checkin";
 import { SPORT_LABELS } from "@/types/checkin";
@@ -17,23 +18,27 @@ export function CheckInHub({ events }: Props) {
   const router = useRouter();
   const [showCreate, setShowCreate] = useState(events.length === 0);
   const [pending, startTransition] = useTransition();
+  const { confirm, success } = useAppUi();
 
   const today = new Date().toISOString().slice(0, 10);
   const todayEvents = events.filter((e) => e.event_date === today);
   const pastEvents = events.filter((e) => e.event_date !== today);
 
   const handleDelete = (event: CheckInEventWithStats) => {
-    if (
-      !confirm(
-        `確定刪除「${event.title || event.event_date}」？\n所有報到與收款紀錄將一併刪除。`,
-      )
-    ) {
-      return;
-    }
-    startTransition(async () => {
-      await deleteCheckInEvent(event.id);
-      router.refresh();
-    });
+    void (async () => {
+      const ok = await confirm({
+        title: `刪除「${event.title || event.event_date}」？`,
+        description: "所有報到與收款紀錄將一併刪除，無法復原。",
+        confirmLabel: "刪除",
+        variant: "danger",
+      });
+      if (!ok) return;
+      startTransition(async () => {
+        await deleteCheckInEvent(event.id);
+        success("報到活動已刪除");
+        router.refresh();
+      });
+    })();
   };
 
   return (

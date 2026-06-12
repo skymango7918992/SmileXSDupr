@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import { useAppUi } from "@/components/providers/app-ui-provider";
 import type { ScheduleSessionWithStats } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,8 @@ export function SessionTabs({
   onDelete,
   loading,
 }: Props) {
+  const { confirm } = useAppUi();
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
@@ -35,13 +38,15 @@ export function SessionTabs({
               onClick={() => {
                 const session = sessions.find((s) => s.id === activeId);
                 if (!session) return;
-                if (
-                  confirm(
-                    `確定刪除「${session.name}」？\n此賽程所有場次與名單將一併刪除。`,
-                  )
-                ) {
-                  onDelete(session.id, session.name);
-                }
+                void (async () => {
+                  const ok = await confirm({
+                    title: `刪除「${session.name}」？`,
+                    description: "此賽程所有場次與名單將一併刪除，無法復原。",
+                    confirmLabel: "刪除",
+                    variant: "danger",
+                  });
+                  if (ok) onDelete(session.id, session.name);
+                })();
               }}
             >
               <Trash2 className="h-4 w-4" />
