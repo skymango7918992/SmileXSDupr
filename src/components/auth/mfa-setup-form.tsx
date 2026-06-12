@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -91,44 +91,44 @@ export function MfaSetupForm({ trustedDeviceDays = 7 }: Props) {
   return (
     <div className="w-full max-w-lg">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-white">綁定 OTP 驗證器</h1>
-        <p className="mt-2 text-sm text-emerald-100/80">
+        <h1 className="text-xl font-semibold text-foreground">綁定 OTP 驗證器</h1>
+        <p className="mt-1 text-sm text-muted">
           首次登入需綁定 Google Authenticator；可選擇信任此裝置以略過後續 OTP
         </p>
       </div>
 
-      <div className="space-y-5 rounded-3xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-xl">
-        <div className="rounded-2xl border border-emerald-200/30 bg-emerald-900/20 p-4 text-sm text-emerald-50">
-          <div className="mb-2 flex items-center gap-2 font-medium">
-            <QrCode className="h-4 w-4" />
+      <div className="glass-card-solid space-y-5 p-6">
+        <div className="rounded-[10px] border border-border bg-surface-muted/40 p-4 text-sm">
+          <div className="mb-2 flex items-center gap-2 font-medium text-foreground">
+            <QrCode className="h-4 w-4 text-primary" />
             步驟 1：掃描 QR Code
           </div>
-          <p className="text-emerald-100/80">
+          <p className="text-muted">
             使用 Google Authenticator 掃描下方 QR Code，或手動輸入金鑰。
           </p>
         </div>
 
         {qrCode ? (
           <div
-            className="mx-auto flex w-fit items-center justify-center rounded-2xl bg-white p-4"
+            className="mx-auto flex w-fit items-center justify-center rounded-[10px] border border-border bg-surface p-4"
             dangerouslySetInnerHTML={{ __html: qrCode }}
           />
         ) : (
-          <div className="flex h-48 items-center justify-center rounded-2xl bg-white/10 text-sm text-emerald-100">
+          <div className="flex h-48 items-center justify-center rounded-[10px] bg-surface-muted/40 text-sm text-muted">
             {loading ? "產生 QR Code 中..." : "無法載入 QR Code"}
           </div>
         )}
 
         {secret && (
-          <div className="rounded-xl bg-black/20 px-3 py-2 text-center font-mono text-xs text-emerald-100">
+          <div className="rounded-[10px] bg-surface-muted/50 px-3 py-2 text-center font-mono text-xs text-muted">
             手動金鑰：{secret}
           </div>
         )}
 
         <form onSubmit={(e) => void handleVerify(e)} className="space-y-4">
           <div>
-            <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-emerald-100">
-              <ShieldCheck className="h-4 w-4" />
+            <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted">
+              <ShieldCheck className="h-4 w-4 text-primary" />
               步驟 2：輸入驗證器顯示的 6 位數
             </label>
             <Input
@@ -137,16 +137,12 @@ export function MfaSetupForm({ trustedDeviceDays = 7 }: Props) {
               placeholder="000000"
               inputMode="numeric"
               maxLength={6}
-              className="border-white/20 bg-white/90 text-center text-lg tracking-[0.3em]"
+              className="text-center text-lg tracking-[0.3em]"
               required
             />
           </div>
 
-          {error && (
-            <div className="rounded-xl border border-red-300/50 bg-red-500/20 px-3 py-2 text-sm text-red-100">
-              {error}
-            </div>
-          )}
+          {error && <div className="alert-danger">{error}</div>}
 
           <TrustDeviceCheckbox
             checked={trustDevice}

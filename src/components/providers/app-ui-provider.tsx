@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   createContext,
@@ -42,6 +42,12 @@ type AppUiContextValue = {
 const AppUiContext = createContext<AppUiContextValue | null>(null);
 
 const TOAST_MS = 3200;
+
+const toastStyles: Record<ToastVariant, string> = {
+  success: "glass-toast text-foreground",
+  error: "glass-toast text-danger",
+  info: "glass-toast text-foreground",
+};
 
 export function AppUiProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -101,7 +107,6 @@ export function AppUiProvider({ children }: { children: React.ReactNode }) {
     <AppUiContext.Provider value={{ toast, success, error, info, confirm }}>
       {children}
 
-      {/* Toast */}
       <div
         className="pointer-events-none fixed inset-x-0 bottom-4 z-[100] flex flex-col items-center gap-2 px-4 sm:bottom-auto sm:right-4 sm:top-4 sm:items-end"
         aria-live="polite"
@@ -112,13 +117,8 @@ export function AppUiProvider({ children }: { children: React.ReactNode }) {
             key={t.id}
             role="status"
             className={cn(
-              "toast-enter pointer-events-auto max-w-sm rounded-2xl px-4 py-3 text-sm font-medium shadow-lg ring-1 backdrop-blur-md",
-              t.variant === "success" &&
-                "bg-emerald-900/95 text-white ring-emerald-700/50",
-              t.variant === "error" &&
-                "bg-red-900/95 text-white ring-red-700/50",
-              t.variant === "info" &&
-                "bg-slate-900/95 text-white ring-slate-700/50",
+              "toast-enter pointer-events-auto max-w-sm rounded-[10px] px-4 py-3 text-sm font-medium",
+              toastStyles[t.variant],
             )}
           >
             {t.message}
@@ -126,32 +126,31 @@ export function AppUiProvider({ children }: { children: React.ReactNode }) {
         ))}
       </div>
 
-      {/* Confirm */}
       {confirmState && (
         <div
           className="fixed inset-0 z-[110] flex items-end justify-center p-4 sm:items-center"
           role="presentation"
           onClick={() => closeConfirm(false)}
         >
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
+          <div className="glass-overlay absolute inset-0" />
           <div
             role="alertdialog"
             aria-modal="true"
             aria-labelledby={titleId}
             aria-describedby={confirmState.description ? descId : undefined}
-            className="relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl ring-1 ring-slate-200"
+            className="glass-modal relative w-full max-w-sm p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <h2
               id={titleId}
-              className="text-base font-semibold text-slate-900"
+              className="text-base font-semibold text-foreground"
             >
               {confirmState.title}
             </h2>
             {confirmState.description && (
               <p
                 id={descId}
-                className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-600"
+                className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted"
               >
                 {confirmState.description}
               </p>
@@ -170,11 +169,7 @@ export function AppUiProvider({ children }: { children: React.ReactNode }) {
                 variant={
                   confirmState.variant === "danger" ? "danger" : "default"
                 }
-                className={cn(
-                  "min-h-11 flex-1",
-                  confirmState.variant === "danger" &&
-                    "border border-red-200 bg-red-600 text-white hover:bg-red-700",
-                )}
+                className="min-h-11 flex-1"
                 onClick={() => closeConfirm(true)}
               >
                 {confirmState.confirmLabel ?? "確定"}

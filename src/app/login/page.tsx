@@ -6,7 +6,7 @@ export default async function LoginPage() {
   const trustedDeviceDays = await getTrustedDeviceDays();
 
   return (
-    <Suspense fallback={<div className="text-white">載入中...</div>}>
+    <Suspense fallback={<div className="text-center text-sm text-muted">載入中…</div>}>
       <LoginForm trustedDeviceDays={trustedDeviceDays} />
     </Suspense>
   );

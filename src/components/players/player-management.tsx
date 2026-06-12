@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
@@ -23,6 +23,8 @@ import { playerDisplayName } from "@/lib/player-display";
 import type { Player, PlayerSource } from "@/types/database";
 import type { DuprConfigMode, DuprEnvStatus } from "@/types/dupr";
 import { cn } from "@/lib/utils";
+import { CuteAvatar } from "@/components/brand/cute-avatar";
+import { PageHero } from "@/components/brand/page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -38,10 +40,8 @@ function SourceBadge({ source }: { source: PlayerSource }) {
   return (
     <span
       className={cn(
-        "rounded-full px-2 py-0.5 text-[10px] font-semibold",
-        source === "club"
-          ? "bg-sky-100 text-sky-800"
-          : "bg-violet-100 text-violet-800",
+        "tag text-[10px]",
+        source === "club" ? "tag-primary" : "tag-neutral",
       )}
     >
       {source === "club" ? "Club" : "手動"}
@@ -180,18 +180,18 @@ function PlayerCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
-        isEditing && "border-emerald-300 bg-emerald-50/60 ring-1 ring-emerald-200",
+        "rounded-2xl border border-border bg-surface p-4 shadow-sm",
+        isEditing && "border-primary/30 bg-primary/8 ring-1 ring-primary/15",
       )}
     >
       {isEditing ? (
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">
+            <label className="mb-1 block text-xs font-medium text-muted">
               DUPR 名稱
             </label>
             {isClub ? (
-              <p className="min-h-11 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-base text-slate-700">
+              <p className="min-h-11 rounded-md border border-border bg-surface-muted/40 px-3 py-2.5 text-base text-foreground">
                 {rowDraft?.name}
               </p>
             ) : (
@@ -210,7 +210,7 @@ function PlayerCard({
             )}
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">
+            <label className="mb-1 block text-xs font-medium text-muted">
               顯示名稱
             </label>
             <Input
@@ -228,11 +228,11 @@ function PlayerCard({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">
+            <label className="mb-1 block text-xs font-medium text-muted">
               DUPR ID
             </label>
             {isClub ? (
-              <p className="min-h-11 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 font-mono text-base text-slate-700">
+              <p className="min-h-11 rounded-md border border-border bg-surface-muted/40 px-3 py-2.5 font-mono text-base text-foreground">
                 {rowDraft?.dupr_id}
               </p>
             ) : (
@@ -251,11 +251,11 @@ function PlayerCard({
             )}
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">
+            <label className="mb-1 block text-xs font-medium text-muted">
               DUPR 評分
             </label>
             {isClub ? (
-              <p className="min-h-11 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-base text-slate-700">
+              <p className="min-h-11 rounded-md border border-border bg-surface-muted/40 px-3 py-2.5 text-base text-foreground">
                 {rowDraft?.rating || "NR"}
               </p>
             ) : (
@@ -279,35 +279,38 @@ function PlayerCard({
         </div>
       ) : (
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-semibold text-slate-900">
+          <div className="flex min-w-0 flex-1 gap-3">
+            <CuteAvatar name={playerDisplayName(player)} variant="chibi" size="md" />
+            <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-semibold text-foreground">
               {playerDisplayName(player)}
             </p>
             {player.display_name?.trim() &&
               player.display_name.trim() !== player.name && (
-                <p className="mt-0.5 truncate text-xs text-slate-500">
+                <p className="mt-0.5 truncate text-xs text-muted">
                   DUPR：{player.name}
                 </p>
               )}
-            <p className="mt-0.5 font-mono text-sm text-slate-600">
+            <p className="mt-0.5 font-mono text-sm text-muted">
               {player.dupr_id}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <span
                 className={
                   player.active
-                    ? "rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
-                    : "rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-500"
+                    ? "tag tag-success"
+                    : "tag tag-neutral"
                 }
               >
                 {player.active ? "有效" : "停用"}
               </span>
               <SourceBadge source={player.source ?? "manual"} />
               {player.dupr_rating != null && (
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-muted">
                   評分 {player.dupr_rating}
                 </span>
               )}
+            </div>
             </div>
           </div>
         </div>
@@ -349,14 +352,14 @@ function PlayerTableRow({
   return (
     <tr
       className={cn(
-        "border-b border-slate-50 transition-colors",
-        isEditing && "bg-emerald-50/80",
+        "border-b border-border/60 transition-colors",
+        isEditing && "bg-primary/8",
       )}
     >
       <td className="px-3 py-2">
         {isEditing ? (
           isClub ? (
-            <span className="text-sm text-slate-600">{rowDraft?.name}</span>
+            <span className="text-sm text-muted">{rowDraft?.name}</span>
           ) : (
             <Input
               value={rowDraft?.name ?? ""}
@@ -372,7 +375,7 @@ function PlayerTableRow({
             />
           )
         ) : (
-          <span className="text-sm text-slate-700">{player.name}</span>
+          <span className="text-sm text-foreground">{player.name}</span>
         )}
       </td>
       <td className="px-3 py-2">
@@ -391,15 +394,18 @@ function PlayerTableRow({
             placeholder="對戰中心顯示"
           />
         ) : (
-          <span className="text-sm font-medium text-slate-900">
-            {playerDisplayName(player)}
-          </span>
+          <div className="flex items-center gap-2">
+            <CuteAvatar name={playerDisplayName(player)} variant="chibi" size="sm" />
+            <span className="text-sm font-medium text-foreground">
+              {playerDisplayName(player)}
+            </span>
+          </div>
         )}
       </td>
       <td className="px-3 py-2">
         {isEditing ? (
           isClub ? (
-            <span className="font-mono text-sm text-slate-600">
+            <span className="font-mono text-sm text-muted">
               {rowDraft?.dupr_id}
             </span>
           ) : (
@@ -417,13 +423,13 @@ function PlayerTableRow({
             />
           )
         ) : (
-          <span className="font-mono text-sm text-slate-600">{player.dupr_id}</span>
+          <span className="font-mono text-sm text-muted">{player.dupr_id}</span>
         )}
       </td>
       <td className="px-3 py-2">
         {isEditing ? (
           isClub ? (
-            <span className="text-sm text-slate-600">
+            <span className="text-sm text-muted">
               {rowDraft?.rating || "NR"}
             </span>
           ) : (
@@ -444,7 +450,7 @@ function PlayerTableRow({
             />
           )
         ) : (
-          <span className="text-sm text-slate-600">
+          <span className="text-sm text-muted">
             {player.dupr_rating ?? "NR"}
           </span>
         )}
@@ -454,8 +460,8 @@ function PlayerTableRow({
           <span
             className={
               player.active
-                ? "rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
-                : "rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500"
+                ? "tag tag-success"
+                : "tag tag-neutral"
             }
           >
             {player.active ? "有效" : "停用"}
@@ -493,7 +499,7 @@ function DuprEnvDiagnostics({ status }: { status: DuprEnvStatus | null }) {
   }
 
   return (
-    <p className="mt-2 text-xs text-amber-800">
+    <p className="mt-2 text-xs text-muted">
       伺服器未讀到：
       {missing.length > 0 ? missing.join("、") : "DUPR 相關變數"}
       。請在 Cloudflare → Workers → <strong>Variables and Secrets</strong>（執行期）
@@ -723,25 +729,27 @@ export function PlayerManagement({ initialPlayers }: Props) {
 
   return (
     <div className="space-y-4 sm:space-y-5">
-      <Card className="border-sky-100 bg-gradient-to-br from-white to-sky-50/50 p-4 sm:p-5">
+      <PageHero variant="players" />
+
+      <Card className="p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
-            <CardTitle className="text-sky-900">DUPR Club 同步</CardTitle>
-            <p className="mt-1 text-sm text-slate-600">
+            <CardTitle>DUPR Club 同步</CardTitle>
+            <p className="mt-1 text-sm text-muted">
               Club 4668804565 · 目前 Club {clubCount} 人 · 手動 {manualCount}{" "}
               人
             </p>
             {duprConfigMode === null ? (
-              <p className="mt-2 text-xs text-slate-500">正在檢查 DUPR 連線設定…</p>
+              <p className="mt-2 text-xs text-muted">正在檢查 DUPR 連線設定…</p>
             ) : duprConfigMode === "none" ? (
-              <div className="mt-3 rounded-xl bg-amber-50 px-3 py-3 text-sm text-amber-900">
+              <div className="mt-3 rounded-[10px] border border-warning/25 bg-warning/10 px-3 py-3 text-sm text-foreground">
                 <p className="font-semibold">尚未設定 DUPR 連線</p>
-                <p className="mt-2 text-xs leading-relaxed text-amber-800">
+                <p className="mt-2 text-xs leading-relaxed text-muted">
                   請在 <strong>Cloudflare → Workers → Variables and Secrets</strong>{" "}
                   （執行期 Secrets）或本機{" "}
-                  <code className="rounded bg-white px-1">.env</code> 加入（擇一即可）：
+                  <code className="rounded bg-surface px-1">.env</code> 加入（擇一即可）：
                 </p>
-                <pre className="mt-2 overflow-x-auto rounded-lg bg-white p-2 text-[11px] leading-relaxed text-slate-700">
+                <pre className="mt-2 overflow-x-auto rounded-lg bg-surface p-2 text-[11px] leading-relaxed text-foreground">
 {`# 方式 A（建議）：DUPR 登入帳密
 DUPR_EMAIL=你的DUPR信箱
 DUPR_PASSWORD=你的DUPR密碼
@@ -750,14 +758,14 @@ DUPR_CLUB_ID=4668804565
 # 方式 B：Bearer Token
 DUPR_API_TOKEN=eyJ...`}
                 </pre>
-                <p className="mt-2 text-xs text-amber-800">
+                <p className="mt-2 text-xs text-primary">
                   Cloudflare 新增或修改變數後，請重新部署才會生效。DUPR 密碼請用
                   Secrets，不要加密選項。
                 </p>
                 <DuprEnvDiagnostics status={duprEnvStatus} />
               </div>
             ) : (
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-muted">
                 已設定：
                 {duprConfigMode === "credentials"
                   ? " DUPR 帳密登入"
@@ -779,7 +787,7 @@ DUPR_API_TOKEN=eyJ...`}
           </Button>
         </div>
         {syncMessage && (
-          <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          <p className="mt-3 rounded-[10px] border border-info/25 bg-info/10 px-3 py-2 text-sm text-info">
             {syncMessage}
           </p>
         )}
@@ -831,7 +839,7 @@ DUPR_API_TOKEN=eyJ...`}
         <div className="mb-4 space-y-3">
           <CardTitle>球員列表</CardTitle>
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted/70" />
             <Input
               placeholder="搜尋顯示名稱、DUPR 名稱或 DUPR ID..."
               value={search}
@@ -839,7 +847,7 @@ DUPR_API_TOKEN=eyJ...`}
               className="min-h-11 pl-9 text-base"
             />
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted">
             共 {players.length} 位球員
             {search.trim() && ` · 搜尋結果 ${filteredPlayers.length} 位`}
             {filteredPlayers.length > 0 && ` · 每頁 ${PAGE_SIZE} 位`}
@@ -857,7 +865,7 @@ DUPR_API_TOKEN=eyJ...`}
         <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[880px]">
             <thead>
-              <tr className="border-b border-slate-100 text-left text-xs text-slate-500">
+              <tr className="border-b border-border text-left text-xs text-muted">
                 <th className="px-3 py-2 font-medium">DUPR 名稱</th>
                 <th className="px-3 py-2 font-medium">顯示名稱</th>
                 <th className="px-3 py-2 font-medium">DUPR ID</th>
@@ -875,10 +883,10 @@ DUPR_API_TOKEN=eyJ...`}
         </div>
 
         {players.length === 0 && (
-          <p className="py-8 text-center text-sm text-slate-500">尚無球員資料</p>
+          <p className="py-8 text-center text-sm text-muted">尚無球員資料</p>
         )}
         {players.length > 0 && filteredPlayers.length === 0 && (
-          <p className="py-8 text-center text-sm text-slate-500">
+          <p className="py-8 text-center text-sm text-muted">
             找不到符合「{search}」的球員
           </p>
         )}
@@ -893,7 +901,7 @@ DUPR_API_TOKEN=eyJ...`}
         />
 
         {error && (
-          <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="alert-danger mt-3">
             {error}
           </p>
         )}

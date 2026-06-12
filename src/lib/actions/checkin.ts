@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { parseRegistrationText } from "@/lib/checkin-parser";
+import {
+  mergeAttendeesDedupe,
+  parseRegistrationText,
+  type ParsedAttendee,
+} from "@/lib/checkin-parser";
 import { createClient } from "@/lib/supabase/server";
 import type {
   AttendeeCategory,
@@ -92,17 +96,22 @@ export async function createCheckInFromPaste(
     eventDate?: string;
     title?: string;
     feeAmount?: number;
+    extraAttendees?: ParsedAttendee[];
   },
 ): Promise<string> {
   const parsed = parseRegistrationText(rawText, sportType);
+  const attendees = mergeAttendeesDedupe(
+    parsed.attendees,
+    options?.extraAttendees ?? [],
+  );
   const eventDate = options?.eventDate || parsed.eventDate;
 
   if (!eventDate) {
     throw new Error("請選擇活動日期");
   }
 
-  if (parsed.attendees.length === 0) {
-    throw new Error("無法從貼文解析出名單，請確認格式後再試");
+  if (attendees.length === 0) {
+    throw new Error("無法從貼文解析出名單，請確認格式或手動新增人員");
   }
 
   const supabase = await createClient();
@@ -124,7 +133,7 @@ export async function createCheckInFromPaste(
 
   if (eventError) throw new Error(eventError.message);
 
-  const rows = parsed.attendees.map((a, index) => ({
+  const rows = attendees.map((a, index) => ({
     event_id: event.id,
     name: a.name,
     category: a.category,
@@ -146,7 +155,7 @@ export async function addWalkInAttendee(
   eventId: string,
   name: string,
   category: AttendeeCategory = "play",
-): Promise<void> {
+): Promise<CheckInAttendee> {
   const trimmed = name.trim();
   if (!trimmed) throw new Error("請輸入姓名");
 
@@ -159,16 +168,21 @@ export async function addWalkInAttendee(
     .limit(1)
     .maybeSingle();
 
-  const { error } = await supabase.from("check_in_attendees").insert({
-    event_id: eventId,
-    name: trimmed,
-    category,
-    is_walk_in: true,
-    sort_order: (last?.sort_order ?? -1) + 1,
-  });
+  const { data, error } = await supabase
+    .from("check_in_attendees")
+    .insert({
+      event_id: eventId,
+      name: trimmed,
+      category,
+      is_walk_in: true,
+      sort_order: (last?.sort_order ?? -1) + 1,
+    })
+    .select()
+    .single();
 
   if (error) throw new Error(error.message);
   revalidateCheckIn(eventId);
+  return data as CheckInAttendee;
 }
 
 export async function markAttendeePaid(

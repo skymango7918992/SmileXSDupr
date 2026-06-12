@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { playerDisplayName } from "@/lib/player-display";
 import { cn } from "@/lib/utils";
@@ -58,26 +58,26 @@ export function PlayerChipGrid({
               type="button"
               onClick={() => togglePlayer(player.id)}
               className={cn(
-                "rounded-2xl border px-4 py-2 text-left text-sm transition duration-200",
+                "cursor-pointer rounded-[10px] border px-4 py-2 text-left text-sm transition-colors duration-150",
                 selected
-                  ? "border-emerald-300 bg-emerald-100 text-emerald-900 shadow-lg"
-                  : "border-gray-200 bg-white text-gray-700 shadow-sm hover:border-emerald-200 hover:bg-emerald-50",
+                  ? "border-primary/35 bg-primary-subtle text-foreground"
+                  : "border-border bg-surface text-secondary-foreground hover:border-primary/25 hover:bg-primary-subtle/50 hover:text-foreground",
               )}
             >
-              <span className="font-semibold">{playerDisplayName(player)}</span>
-              <span className="ml-2 text-xs opacity-60">{player.dupr_id}</span>
+              <span className="font-medium">{playerDisplayName(player)}</span>
+              <span className="ml-2 text-xs opacity-70">{player.dupr_id}</span>
             </button>
           );
         })}
       </div>
 
       {players.length === 0 && (
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-muted">
           尚無有效球員，請先到球員管理新增。
         </p>
       )}
 
-      <p className="mt-4 text-xs text-gray-500">
+      <p className="mt-4 text-xs text-muted">
         已選 {selectedIds.length} 人（至少 4 人才能排場）
       </p>
     </Card>

@@ -56,14 +56,14 @@ export function BadgeMedal({
       <div className={cn("flex flex-col items-center gap-1", className)}>
         <div
           className={cn(
-            "flex items-center justify-center rounded-full bg-slate-100 ring-2 ring-slate-200/80",
+            "flex items-center justify-center rounded-full bg-surface-muted ring-1 ring-border",
             s.box,
           )}
         >
-          <span className={cn("font-bold text-slate-400", s.text)}>—</span>
+          <span className={cn("font-medium text-muted", s.text)}>—</span>
         </div>
         {showLabel && (
-          <span className="text-center text-[10px] text-slate-400">待啟程</span>
+          <span className="text-center text-[10px] text-muted">待啟程</span>
         )}
       </div>
     );
@@ -75,17 +75,17 @@ export function BadgeMedal({
     <div className={cn("flex flex-col items-center gap-1", className)}>
       <div
         className={cn(
-          "flex items-center justify-center rounded-full bg-gradient-to-br shadow-md ring-2",
-          badge.gradient,
+          "flex items-center justify-center rounded-full ring-1",
+          badge.bg,
           badge.ring,
           s.box,
         )}
         title={`${badge.name} · ${badge.description}`}
       >
-        <Icon className={cn("text-white drop-shadow", s.icon)} />
+        <Icon className={cn(badge.iconColor, s.icon)} />
       </div>
       {showLabel && (
-        <span className="max-w-[4.5rem] text-center text-[10px] font-medium leading-tight text-slate-600">
+        <span className="max-w-[4.5rem] text-center text-[10px] font-medium leading-tight text-muted">
           {badge.name}
         </span>
       )}

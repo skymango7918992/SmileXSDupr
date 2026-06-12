@@ -57,16 +57,17 @@ export function ManualMatchDialog({
   };
 
   const selectClass =
-    "h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
+    "glass-input h-10 w-full rounded-[10px] px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <Card className="w-full max-w-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="glass-overlay absolute inset-0" aria-hidden />
+      <Card className="glass-modal relative w-full max-w-lg">
         <CardTitle className="mb-4">手動新增對戰</CardTitle>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">隊伍 1</p>
+            <p className="mb-2 text-sm font-medium text-muted">隊伍 1</p>
             <div className="space-y-2">
               <select
                 className={selectClass}
@@ -96,7 +97,7 @@ export function ManualMatchDialog({
           </div>
 
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">隊伍 2</p>
+            <p className="mb-2 text-sm font-medium text-muted">隊伍 2</p>
             <div className="space-y-2">
               <select
                 className={selectClass}

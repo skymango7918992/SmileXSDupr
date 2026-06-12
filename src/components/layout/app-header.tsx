@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Settings } from "lucide-react";
+import { ClubLogo } from "@/components/brand/club-logo";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,41 +27,40 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/50 bg-white/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
+    <header className="glass-header sticky top-0 z-30">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-amber-500 text-sm font-black text-slate-900 shadow-lg shadow-amber-500/30">
-            XS
-          </div>
+          <ClubLogo size={40} className="ring-2 ring-white/80" priority />
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-slate-900">
+            <h1 className="text-base font-semibold text-foreground">
               星鑽 XS 匹克球
             </h1>
-            <p className="text-xs text-slate-500">
-              DUPR 專業賽事管理 · 即時計分 · CSV 匯出
+            <p className="flex items-center gap-1 text-[11px] text-muted">
+              <span aria-hidden>🏓</span>
+              DUPR 賽事管理 · 即時計分 · CSV 匯出
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 sm:flex">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-            <span className="text-xs font-medium text-emerald-800">已登入</span>
-          </div>
+        <div className="flex items-center gap-1">
+          <span className="tag tag-primary mr-1 hidden items-center gap-1 sm:inline-flex">
+            <span aria-hidden>●</span>
+            已登入
+          </span>
           <Link href="/settings">
-            <Button variant="secondary" size="sm">
+            <Button variant="ghost" size="sm">
               <Settings className="h-4 w-4" />
-              設定
+              <span className="hidden sm:inline">設定</span>
             </Button>
           </Link>
           <Button variant="ghost" size="sm" onClick={() => void handleLogout()}>
             <LogOut className="h-4 w-4" />
-            登出
+            <span className="hidden sm:inline">登出</span>
           </Button>
         </div>
       </div>
 
-      <nav className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-4">
+      <nav className="glass-nav-bar mx-auto flex max-w-7xl gap-1 overflow-x-auto px-3 py-1.5">
         {navItems.map((item) => {
           const active =
             "exact" in item && item.exact
@@ -71,10 +71,10 @@ export function AppHeader() {
               key={item.href}
               href={item.href}
               className={cn(
-                "rounded-xl px-4 py-2 text-sm font-medium transition-all",
+                "relative cursor-pointer whitespace-nowrap px-3 py-2 text-sm font-medium transition-colors duration-150",
                 active
-                  ? "bg-gradient-to-r from-emerald-800 to-emerald-700 text-white shadow-md shadow-emerald-900/20"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                  ? "glass-nav-active text-foreground"
+                  : "rounded-[8px] text-secondary-foreground hover:bg-surface-muted hover:text-foreground",
               )}
             >
               {item.label}

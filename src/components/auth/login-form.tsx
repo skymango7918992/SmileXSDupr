@@ -11,6 +11,7 @@ import {
 } from "@/lib/actions/trusted-device";
 import { usernameToEmail } from "@/lib/auth/config";
 import { createClient } from "@/lib/supabase/client";
+import { ClubLogo } from "@/components/brand/club-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -184,19 +185,13 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
 
   return (
     <div className="w-full max-w-md">
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 text-xl font-black text-slate-900 shadow-xl shadow-amber-500/30">
-          XS
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">
-          星鑽 XS 匹克球
-        </h1>
-        <p className="mt-2 text-sm text-emerald-100/80">
-          專業 DUPR 賽事管理系統
-        </p>
+      <div className="mb-6 text-center">
+        <ClubLogo size={72} className="mx-auto mb-4 ring-4 ring-white/90" priority />
+        <h1 className="text-xl font-semibold text-foreground">星鑽 XS 匹克球</h1>
+        <p className="mt-1 text-sm text-muted">專業 DUPR 賽事管理系統</p>
       </div>
 
-      <div className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-xl">
+      <div className="glass-card-solid p-6">
         <div className="mb-6 flex gap-2">
           <StepBadge active={step === "credentials"} label="1. 帳密" />
           <StepBadge active={step === "verify"} label="2. OTP 驗證" />
@@ -225,24 +220,20 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
             />
             {error && <ErrorBox message={error} />}
             {statusText && !error && (
-              <p className="text-center text-xs text-emerald-100/90">{statusText}</p>
+              <p className="text-center text-xs text-muted">{statusText}</p>
             )}
-            <Button
-              type="submit"
-              loading={loading}
-              className="h-11 w-full shadow-lg shadow-emerald-900/30"
-            >
+            <Button type="submit" loading={loading} className="h-11 w-full">
               {loading ? "處理中…" : "下一步"}
             </Button>
           </form>
         ) : (
           <form onSubmit={(e) => void handleVerifyOtp(e)} className="space-y-4">
-            <div className="rounded-2xl border border-emerald-200/30 bg-emerald-900/20 p-4 text-sm text-emerald-50">
+            <div className="rounded-[10px] border border-border bg-surface-muted/40 p-4 text-sm text-foreground">
               <div className="mb-2 flex items-center gap-2 font-medium">
-                <ShieldCheck className="h-4 w-4" />
+                <ShieldCheck className="h-4 w-4 text-primary" />
                 Google 驗證器 OTP
               </div>
-              <p className="text-emerald-100/80">
+              <p className="text-muted">
                 請開啟手機上的 Google Authenticator（或其他驗證器 App），輸入
                 6 位數驗證碼。
               </p>
@@ -265,20 +256,20 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
               disabled={loading}
             />
             {statusText && !error && (
-              <p className="text-center text-xs text-emerald-100/90">{statusText}</p>
+              <p className="text-center text-xs text-muted">{statusText}</p>
             )}
             <Button
               type="submit"
               loading={loading}
               disabled={otp.length < 6}
-              className="h-11 w-full shadow-lg shadow-emerald-900/30"
+              className="h-11 w-full"
             >
               {loading ? "驗證中…" : "登入系統"}
             </Button>
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-emerald-100 hover:bg-white/10 hover:text-white"
+              className="w-full"
               onClick={() => {
                 setStep("credentials");
                 setOtp("");
@@ -299,8 +290,8 @@ function StepBadge({ active, label }: { active: boolean; label: string }) {
     <span
       className={
         active
-          ? "flex-1 rounded-xl bg-white/20 py-2 text-center text-xs font-semibold text-white"
-          : "flex-1 rounded-xl bg-white/5 py-2 text-center text-xs text-emerald-100/60"
+          ? "glass-nav-active flex-1 py-2 text-center text-xs font-medium text-foreground"
+          : "flex-1 rounded-[8px] bg-surface-muted py-2 text-center text-xs text-muted"
       }
     >
       {label}
@@ -333,7 +324,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-emerald-100">
+      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted">
         {icon}
         {label}
       </label>
@@ -346,7 +337,6 @@ function Field({
         inputMode={inputMode}
         maxLength={maxLength}
         disabled={disabled}
-        className="border-white/20 bg-white/90 disabled:opacity-60"
         required
       />
     </div>
@@ -354,9 +344,5 @@ function Field({
 }
 
 function ErrorBox({ message }: { message: string }) {
-  return (
-    <div className="rounded-xl border border-red-300/50 bg-red-500/20 px-3 py-2 text-sm text-red-100">
-      {message}
-    </div>
-  );
+  return <div className="alert-danger">{message}</div>;
 }

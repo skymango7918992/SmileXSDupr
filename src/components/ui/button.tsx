@@ -3,24 +3,25 @@ import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex cursor-pointer items-center justify-center gap-2 rounded-[8px] text-sm font-medium transition-[background,box-shadow,transform,color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-page disabled:pointer-events-none disabled:opacity-50 max-md:min-h-12 max-md:text-base",
   {
     variants: {
       variant: {
-        default:
-          "bg-gradient-to-r from-emerald-800 to-emerald-700 text-white shadow-md shadow-emerald-900/20 hover:from-emerald-700 hover:to-emerald-600",
-        secondary:
-          "border border-slate-200 bg-white text-slate-700 hover:border-emerald-200 hover:bg-emerald-50",
-        ghost: "text-slate-600 hover:bg-slate-100",
-        danger: "text-red-600 hover:bg-red-50",
+        default: "glass-btn-primary",
+        secondary: "glass-btn-secondary text-foreground hover:text-foreground",
+        ghost:
+          "text-secondary-foreground hover:bg-surface-muted hover:text-foreground",
+        danger:
+          "bg-live/10 text-live hover:bg-live/15 border border-live/20",
         outline:
-          "border border-emerald-700 text-emerald-800 bg-white hover:bg-emerald-50",
+          "border border-border bg-surface text-foreground hover:bg-surface-muted",
+        accent: "ds-btn-accent",
       },
       size: {
-        default: "h-10 px-4 text-sm",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-11 px-6 text-sm",
-        icon: "h-9 w-9",
+        default: "h-10 px-4 max-md:h-12 max-md:px-5",
+        sm: "h-8 px-3 text-xs max-md:h-10 max-md:text-sm",
+        lg: "h-11 px-5 max-md:h-12 max-md:px-6",
+        icon: "h-9 w-9 max-md:h-12 max-md:w-12",
       },
     },
     defaultVariants: {

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
@@ -8,6 +8,7 @@ import type { Player } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type Props = {
   players: Player[];
@@ -47,23 +48,27 @@ export function LateJoinDialog({
     }
   };
 
-  const selectClass =
-    "min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20";
+  const selectClass = cn(
+    "glass-input min-h-11 w-full rounded-[10px] px-3 text-base text-foreground outline-none",
+    "focus:border-primary focus:ring-2 focus:ring-primary/20",
+  );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      <Card className="w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+      <div className="glass-overlay absolute inset-0" aria-hidden />
+      <Card className="glass-modal relative w-full max-w-md">
         <CardTitle className="mb-1 flex items-center gap-2">
-          <UserPlus className="h-5 w-5 text-emerald-700" />
+          <UserPlus className="h-5 w-5 text-primary" />
           晚到加入
         </CardTitle>
-        <p className="mb-4 text-xs leading-relaxed text-slate-500">
-          已完成 <strong>{completedRounds}</strong> 場將維持不變；所有「未打」場次會清除，並用更新名單重排後續場次（盡量避免重複搭檔）。
+        <p className="mb-4 text-xs leading-relaxed text-muted">
+          已完成 <strong className="text-foreground">{completedRounds}</strong>{" "}
+          場將維持不變；所有「未打」場次會清除，並用更新名單重排後續場次（盡量避免重複搭檔）。
         </p>
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">
+            <label className="mb-1 block text-xs font-medium text-muted">
               選擇晚到球員
             </label>
             <select
@@ -79,13 +84,11 @@ export function LateJoinDialog({
               ))}
             </select>
             {available.length === 0 && (
-              <p className="mt-1 text-xs text-amber-600">
-                沒有可加入的球員（皆已在名單中）
-              </p>
+              <p className="mt-1 text-xs text-warning">沒有可加入的球員（皆已在名單中）</p>
             )}
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">
+            <label className="mb-1 block text-xs font-medium text-muted">
               重排後續場數
             </label>
             <Input

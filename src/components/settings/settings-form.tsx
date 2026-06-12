@@ -54,16 +54,14 @@ export function SettingsForm({ initialSettings }: Props) {
 
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-xs text-gray-500">球隊名稱</label>
+          <label className="mb-1 block text-xs text-muted">球隊名稱</label>
           <Input
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-gray-500">
-            預設排場場數
-          </label>
+          <label className="mb-1 block text-xs text-muted">預設排場場數</label>
           <Input
             type="number"
             min={1}
@@ -73,7 +71,7 @@ export function SettingsForm({ initialSettings }: Props) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-gray-500">
+          <label className="mb-1 block text-xs text-muted">
             信任此裝置天數
           </label>
           <Input
@@ -83,7 +81,7 @@ export function SettingsForm({ initialSettings }: Props) {
             value={trustedDeviceDays}
             onChange={(e) => setTrustedDeviceDays(Number(e.target.value))}
           />
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-muted">
             登入 OTP 後勾選「信任此裝置」的有效期限（預設 7 天）。僅影響新註冊的信任裝置。
           </p>
         </div>
@@ -124,8 +122,8 @@ export function SettingsForm({ initialSettings }: Props) {
         </Button>
       </div>
 
-      {message && <p className="mt-3 text-sm text-emerald-600">{message}</p>}
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {message && <p className="mt-3 text-sm text-success">{message}</p>}
+      {error && <p className="alert-danger mt-3">{error}</p>}
     </Card>
   );
 }

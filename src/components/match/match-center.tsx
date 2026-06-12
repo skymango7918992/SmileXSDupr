@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import {
@@ -32,6 +32,8 @@ import type {
   Player,
   ScheduleSessionWithStats,
 } from "@/types/database";
+import { cn } from "@/lib/utils";
+import { PageHero } from "@/components/brand/page-hero";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LateJoinDialog } from "@/components/match/late-join-dialog";
@@ -288,33 +290,50 @@ export function MatchCenter({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <section className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/75 p-4 shadow-[0_30px_80px_rgba(15,77,60,0.12)] backdrop-blur-xl sm:p-6">
-        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <PageHero variant="match" />
+
+      <section className="glass-card p-4 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
-              <Sparkles className="h-3.5 w-3.5" />
+            <span className="tag tag-neutral mb-2">
+              <Sparkles className="mr-1 inline h-3 w-3" />
               星鑽 XS 賽事控台
-            </p>
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            </span>
+            <h2 className="text-xl font-semibold text-foreground sm:text-2xl">
               {settings?.team_name ?? "星鑽 XS 匹克球"}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted">
               多賽程組 · 晚到加入 · 智慧避重搭檔
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <Stat icon={<Users className="h-4 w-4" />} value={selectedIds.length} label="到場" />
-            <Stat icon={<CalendarDays className="h-4 w-4" />} value={matches.length} label="場次" />
-            <Stat icon={<Sparkles className="h-4 w-4" />} value={completedCount} label="完成" />
+            <Stat
+              icon={<Users className="h-4 w-4" />}
+              value={selectedIds.length}
+              label="到場"
+              tone="accent"
+            />
+            <Stat
+              icon={<CalendarDays className="h-4 w-4" />}
+              value={matches.length}
+              label="場次"
+              tone="primary"
+            />
+            <Stat
+              icon={<Sparkles className="h-4 w-4" />}
+              value={completedCount}
+              label="完成"
+              tone="success"
+            />
           </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-sm backdrop-blur">
+      <section className="glass-card p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-wrap items-end gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-500">
+              <label className="mb-1 block text-xs font-medium text-muted">
                 比賽日期
               </label>
               <Input
@@ -330,12 +349,12 @@ export function MatchCenter({
                 歷史
               </Button>
               {showHistory && historyDates.length > 0 && (
-                <div className="absolute left-0 top-full z-20 mt-2 max-h-48 w-52 overflow-y-auto rounded-2xl border bg-white py-1 shadow-xl">
+                <div className="glass-popover absolute left-0 top-full z-20 mt-2 max-h-48 w-52 overflow-y-auto py-1">
                   {historyDates.map((date) => (
                     <button
                       key={date}
                       type="button"
-                      className="block w-full px-4 py-2.5 text-left text-sm hover:bg-emerald-50"
+                      className="block w-full cursor-pointer px-4 py-2.5 text-left text-sm hover:bg-surface-muted/50"
                       onClick={() => {
                         handleDateChange(date);
                         setShowHistory(false);
@@ -358,7 +377,7 @@ export function MatchCenter({
           </Button>
         </div>
 
-        <div className="mt-4 border-t border-slate-100 pt-4">
+        <div className="mt-4 border-t border-border pt-4">
           <SessionTabs
             sessions={sessions}
             activeId={activeSessionId}
@@ -371,13 +390,11 @@ export function MatchCenter({
       </section>
 
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
+        <div className="alert-danger px-4 py-3">{error}</div>
       )}
 
       {!activeSessionId ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 py-12 text-center text-sm text-slate-500">
+        <div className="rounded-[14px] border border-dashed border-border py-12 text-center text-sm text-muted">
           請先新增賽程組
         </div>
       ) : (
@@ -387,7 +404,7 @@ export function MatchCenter({
               players={players}
               selectedIds={selectedIds}
               onSelectionChange={handleSelectionChange}
-              cardClassName="border-white/70 bg-white/85 backdrop-blur"
+              cardClassName=""
             />
             <div className="space-y-3">
               <MatchGenerator
@@ -397,7 +414,7 @@ export function MatchCenter({
                 onManualAdd={() => setShowManual(true)}
                 onClearDay={handleClearScheduled}
                 loading={isPending}
-                cardClassName="border-white/70 bg-white/85 backdrop-blur"
+                cardClassName=""
               />
               <Button
                 variant="outline"
@@ -443,20 +460,33 @@ export function MatchCenter({
   );
 }
 
+const statTones = {
+  accent: "border-border bg-surface text-foreground",
+  primary: "border-border bg-primary-soft/40 text-primary",
+  success: "border-border bg-surface text-success",
+} as const;
+
 function Stat({
   icon,
   value,
   label,
+  tone,
 }: {
   icon: React.ReactNode;
   value: number;
   label: string;
+  tone: keyof typeof statTones;
 }) {
   return (
-    <div className="rounded-2xl border border-white/80 bg-white/90 px-3 py-2 text-center shadow-sm sm:px-4 sm:py-3">
-      <div className="mx-auto mb-1 text-emerald-700">{icon}</div>
-      <p className="text-lg font-bold text-slate-900">{value}</p>
-      <p className="text-xs text-slate-500">{label}</p>
+    <div
+      className={cn(
+        "rounded-[12px] border px-3 py-2 text-center sm:px-4 sm:py-3",
+        statTones[tone],
+      )}
+    >
+      <div className="mx-auto mb-1 opacity-90">{icon}</div>
+      <p className="font-data text-xl font-semibold text-foreground">{value}</p>
+      <p className="text-xs font-medium text-muted">{label}</p>
     </div>
   );
 }

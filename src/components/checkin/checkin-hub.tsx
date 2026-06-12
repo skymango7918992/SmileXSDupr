@@ -8,6 +8,10 @@ import { useAppUi } from "@/components/providers/app-ui-provider";
 import { deleteCheckInEvent } from "@/lib/actions/checkin";
 import type { CheckInEventWithStats } from "@/types/checkin";
 import { SPORT_LABELS } from "@/types/checkin";
+import { cn } from "@/lib/utils";
+import { CuteAvatar } from "@/components/brand/cute-avatar";
+import { PageHero } from "@/components/brand/page-hero";
+import { Button } from "@/components/ui/button";
 import { CreateCheckInForm } from "./create-checkin-form";
 
 type Props = {
@@ -43,15 +47,17 @@ export function CheckInHub({ events }: Props) {
 
   return (
     <div className="space-y-5">
+      <PageHero variant="checkin" />
+
       {!showCreate && (
-        <button
+        <Button
           type="button"
+          className="min-h-14 w-full text-base"
           onClick={() => setShowCreate(true)}
-          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-700 text-base font-bold text-white shadow-lg active:scale-[0.99]"
         >
           <Plus className="h-5 w-5" />
           新增報到
-        </button>
+        </Button>
       )}
 
       {showCreate && (
@@ -66,7 +72,7 @@ export function CheckInHub({ events }: Props) {
           <button
             type="button"
             onClick={() => setShowCreate(false)}
-            className="w-full py-2 text-sm text-slate-500"
+            className="w-full cursor-pointer py-2 text-sm text-muted"
           >
             取消
           </button>
@@ -93,7 +99,7 @@ export function CheckInHub({ events }: Props) {
       )}
 
       {events.length === 0 && !showCreate && (
-        <p className="py-8 text-center text-sm text-slate-500">
+        <p className="py-8 text-center text-sm text-muted">
           貼上名單，空一行分打球／練球，即可開始收款
         </p>
       )}
@@ -116,7 +122,7 @@ function EventSection({
 }) {
   return (
     <section className="space-y-2">
-      <h2 className="px-1 text-xs font-bold text-slate-500">{title}</h2>
+      <h2 className="px-1 text-xs font-semibold text-muted">{title}</h2>
       {events.map((event) => {
         const pct = event.attendee_count
           ? Math.round((event.paid_count / event.attendee_count) * 100)
@@ -125,44 +131,52 @@ function EventSection({
         return (
           <div
             key={event.id}
-            className="flex items-stretch gap-1 rounded-2xl bg-white shadow-sm ring-1 ring-slate-100"
+            className="flex items-stretch gap-1 rounded-[12px] border border-border bg-surface shadow-[var(--shadow-soft)]"
           >
             <Link
               href={`/checkin/${event.id}`}
-              className="flex min-w-0 flex-1 items-center gap-3 p-4 active:scale-[0.99]"
+              className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 p-4"
             >
-              <div
-                className={
-                  highlight
-                    ? "flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-2xl bg-emerald-700 text-white"
-                    : "flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-2xl bg-slate-100 text-slate-600"
-                }
-              >
-                <span className="text-lg font-black leading-none">{pct}%</span>
+              <div className="relative shrink-0">
+                <CuteAvatar
+                  name={event.title || event.event_date}
+                  variant="chibi"
+                  size="md"
+                />
+                <span
+                  className={cn(
+                    "absolute -bottom-1 -right-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums shadow-sm",
+                    highlight
+                      ? "bg-primary text-white"
+                      : "bg-surface-muted text-muted",
+                  )}
+                >
+                  {pct}%
+                </span>
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-500">
+                  <span className="text-xs font-medium text-muted">
                     {SPORT_LABELS[event.sport_type]}
                   </span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-muted/70">
                     {event.event_date}
                   </span>
                 </div>
-                <p className="truncate font-bold text-slate-900">
+                <p className="truncate font-medium text-foreground">
                   {event.title || "報到活動"}
                 </p>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted">
                   待收 {event.unpaid_count} · 已收 {event.paid_count}
                 </p>
               </div>
-              <ChevronRight className="h-5 w-5 shrink-0 text-slate-300" />
+              <ChevronRight className="h-5 w-5 shrink-0 text-muted/50" />
             </Link>
             <button
               type="button"
               disabled={disabled}
               onClick={() => onDelete(event)}
-              className="flex w-12 shrink-0 items-center justify-center rounded-r-2xl text-red-500 hover:bg-red-50 disabled:opacity-40"
+              className="flex w-12 shrink-0 cursor-pointer items-center justify-center rounded-r-[12px] text-danger hover:bg-danger/10 disabled:opacity-40"
               aria-label="刪除"
             >
               <Trash2 className="h-5 w-5" />

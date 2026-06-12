@@ -1,8 +1,10 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { ChevronRight, Trophy } from "lucide-react";
+import { CuteAvatar } from "@/components/brand/cute-avatar";
 import type { LeaderboardEntry } from "@/types/leaderboard";
 import { cn } from "@/lib/utils";
 import { BadgeMedal } from "./badge-medal";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   entries: LeaderboardEntry[];
@@ -16,8 +18,8 @@ const PODIUM = [
     medal: "🥈",
     bar: "h-20 sm:h-24",
     order: "order-1",
-    ring: "ring-slate-300/70",
-    bg: "from-slate-200 to-slate-300",
+    barBg: "bg-primary-soft",
+    avatarSize: "lg" as const,
   },
   {
     rank: 1,
@@ -25,8 +27,8 @@ const PODIUM = [
     medal: "🥇",
     bar: "h-28 sm:h-32",
     order: "order-2",
-    ring: "ring-amber-300/80",
-    bg: "from-amber-300 to-amber-500",
+    barBg: "bg-primary/45",
+    avatarSize: "xl" as const,
   },
   {
     rank: 3,
@@ -34,8 +36,8 @@ const PODIUM = [
     medal: "🥉",
     bar: "h-16 sm:h-20",
     order: "order-3",
-    ring: "ring-orange-300/70",
-    bg: "from-orange-300 to-orange-500",
+    barBg: "bg-primary/30",
+    avatarSize: "lg" as const,
   },
 ] as const;
 
@@ -54,11 +56,11 @@ function PodiumSlot({
           slot.order,
         )}
       >
-        <div className="mb-2 flex h-16 w-full max-w-[7rem] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-2 py-3 text-center sm:max-w-[8.5rem]">
+        <div className="mb-2 flex h-16 w-full max-w-[7rem] flex-col items-center justify-center rounded-[12px] border border-dashed border-border bg-surface-muted/30 px-2 py-3 text-center sm:max-w-[8.5rem]">
           <span className="text-xl opacity-40">{slot.medal}</span>
-          <p className="mt-1 text-xs text-slate-400">{slot.label}</p>
+          <p className="mt-1 text-xs text-muted">{slot.label}</p>
         </div>
-        <div className="mt-2 h-3 w-full max-w-[7rem] rounded-t-xl bg-slate-100 sm:max-w-[8.5rem]" />
+        <div className="mt-2 h-3 w-full max-w-[7rem] rounded-t-[8px] bg-surface-muted sm:max-w-[8.5rem]" />
       </div>
     );
   }
@@ -70,25 +72,38 @@ function PodiumSlot({
         slot.order,
       )}
     >
-      <div className="mb-2 flex w-full max-w-[7rem] flex-col items-center rounded-2xl border border-white/80 bg-white/90 px-2 py-3 text-center shadow-sm sm:max-w-[8.5rem]">
-        <span className="text-2xl">{slot.medal}</span>
-        <p className="mt-1 line-clamp-1 text-sm font-bold text-slate-900">
+      <div
+        className={cn(
+          "mb-2 flex w-full max-w-[7rem] flex-col items-center rounded-[12px] border border-border bg-surface px-2 py-3 text-center shadow-[var(--shadow-card)] sm:max-w-[8.5rem]",
+          slot.rank === 1 && "border-warning/30 bg-gradient-to-b from-warning/10 to-surface",
+        )}
+      >
+        <span className="text-xl leading-none sm:text-2xl">{slot.medal}</span>
+        <div className="relative -mt-1 mb-1">
+          <CuteAvatar
+            name={entry.name}
+            variant="chibi"
+            size={slot.avatarSize}
+            className={slot.rank === 1 ? "ring-2 ring-warning/40 ring-offset-1" : undefined}
+          />
+        </div>
+        <p className="line-clamp-1 text-sm font-semibold text-foreground">
           {entry.name}
         </p>
-        <p className="text-[10px] text-slate-500">{entry.duprId}</p>
-        <div className="mt-2">
+        <p className="text-[10px] text-muted">{entry.duprId}</p>
+        <div className="mt-1.5">
           <BadgeMedal wins={entry.wins} size="sm" />
         </div>
-        <p className="mt-2 text-lg font-black tabular-nums text-emerald-800">
+        <p className="mt-1.5 text-lg font-semibold tabular-nums text-foreground">
           {entry.wins}
-          <span className="ml-0.5 text-xs font-medium text-slate-500">勝</span>
+          <span className="ml-0.5 text-xs font-medium text-muted">勝</span>
         </p>
-        <p className="text-[10px] text-slate-500">{entry.winRate}% 勝率</p>
+        <p className="text-[10px] text-muted">{entry.winRate}% 勝率</p>
       </div>
       <div
         className={cn(
-          "flex w-full max-w-[7rem] items-end justify-center rounded-t-xl bg-gradient-to-t text-xs font-bold text-slate-800 sm:max-w-[8.5rem]",
-          slot.bg,
+          "flex w-full max-w-[7rem] items-end justify-center rounded-t-[8px] text-xs font-medium text-foreground sm:max-w-[8.5rem]",
+          slot.barBg,
           slot.bar,
         )}
       >
@@ -102,33 +117,38 @@ export function LeaderboardTop3({ entries, error }: Props) {
   const byRank = new Map(entries.map((e) => [e.rank, e]));
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-white/60 bg-white/75 shadow-[0_20px_60px_rgba(15,77,60,0.1)] backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-3 border-b border-slate-100/80 px-4 py-4 sm:px-6">
+    <section className="glass-card overflow-hidden">
+      <div className="flex items-center justify-between gap-3 border-b border-divider bg-surface-muted/50 px-4 py-4 sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-amber-500 shadow-lg shadow-amber-500/25">
-            <Trophy className="h-5 w-5 text-slate-900" />
-          </div>
+          <CuteAvatar name="TOP3" variant="chibi" size="md" />
           <div>
-            <h2 className="text-lg font-bold text-slate-900">獲勝榜 TOP 3</h2>
-            <p className="text-xs text-slate-500">冠軍 · 亞軍 · 季軍</p>
+            <h2 className="text-base font-semibold text-primary">
+              獲勝榜 TOP 3
+            </h2>
+            <p className="text-xs text-muted">冠軍 · 亞軍 · 季軍</p>
           </div>
         </div>
-        <Link
-          href="/leaderboard"
-          className="inline-flex items-center gap-1 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
-        >
-          完整排名
-          <ChevronRight className="h-4 w-4" />
+        <Link href="/leaderboard">
+          <Button variant="secondary" size="sm">
+            完整排名
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </Link>
       </div>
 
       {error ? (
         <div className="px-4 py-8 text-center sm:px-6">
-          <p className="text-sm text-amber-800">獲勝榜暫時無法載入：{error}</p>
+          <p className="text-sm text-danger">獲勝榜暫時無法載入：{error}</p>
         </div>
       ) : entries.length === 0 ? (
         <div className="px-4 py-10 text-center sm:px-6">
-          <p className="text-sm text-slate-500">
+          <CuteAvatar
+            name="加油"
+            variant="chibi"
+            size="xl"
+            className="mx-auto mb-3"
+          />
+          <p className="text-sm text-muted">
             尚無已完成對戰，開始計分後即可上榜
           </p>
         </div>

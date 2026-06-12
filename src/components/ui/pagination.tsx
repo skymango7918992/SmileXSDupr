@@ -29,11 +29,11 @@ export function Pagination({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between",
         className,
       )}
     >
-      <p className="text-center text-xs text-slate-500 sm:text-left">
+      <p className="text-center text-xs text-muted sm:text-left">
         顯示 {from}–{to} / 共 {totalItems} 位
       </p>
 
@@ -50,7 +50,7 @@ export function Pagination({
           <span className="sm:inline">上一頁</span>
         </Button>
 
-        <span className="min-w-[4.5rem] text-center text-sm font-medium text-slate-700">
+        <span className="min-w-[4.5rem] text-center text-sm font-medium text-foreground">
           {page} / {totalPages}
         </span>
 

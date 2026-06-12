@@ -180,6 +180,22 @@ export function parseRegistrationText(
   return { ...meta, attendees };
 }
 
+export function mergeAttendeesDedupe(
+  ...lists: ParsedAttendee[][]
+): ParsedAttendee[] {
+  const seen = new Set<string>();
+  const result: ParsedAttendee[] = [];
+  for (const list of lists) {
+    for (const a of list) {
+      const key = a.name.trim().toLowerCase();
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      result.push({ ...a, name: a.name.trim() });
+    }
+  }
+  return result;
+}
+
 export function groupAttendeesByCategory(attendees: ParsedAttendee[]) {
   const groups: Record<AttendeeCategory, ParsedAttendee[]> = {
     play: [],

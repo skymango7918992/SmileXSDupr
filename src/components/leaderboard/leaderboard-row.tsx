@@ -1,3 +1,4 @@
+﻿import { CuteAvatar } from "@/components/brand/cute-avatar";
 import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "@/types/leaderboard";
 import { BadgeMedal } from "./badge-medal";
@@ -5,27 +6,27 @@ import { BadgeMedal } from "./badge-medal";
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
     return (
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-xs font-black text-slate-900 shadow">
+      <span className="absolute -left-1 -top-1 z-[2] flex h-5 w-5 items-center justify-center rounded-full bg-warning text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
         1
       </span>
     );
   }
   if (rank === 2) {
     return (
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-slate-300 to-slate-400 text-xs font-black text-slate-800 shadow">
+      <span className="absolute -left-1 -top-1 z-[2] flex h-5 w-5 items-center justify-center rounded-full bg-slate-400 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
         2
       </span>
     );
   }
   if (rank === 3) {
     return (
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-orange-300 to-orange-500 text-xs font-black text-slate-900 shadow">
+      <span className="absolute -left-1 -top-1 z-[2] flex h-5 w-5 items-center justify-center rounded-full bg-amber-700 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
         3
       </span>
     );
   }
   return (
-    <span className="flex h-7 w-7 items-center justify-center text-sm font-semibold text-slate-500">
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center text-sm font-medium text-muted">
       {rank}
     </span>
   );
@@ -37,26 +38,40 @@ type Props = {
 };
 
 export function LeaderboardRow({ entry, compact }: Props) {
+  const isTop3 = entry.rank <= 3;
+
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-2xl border border-white/70 bg-white/80 px-3 py-2.5 transition hover:bg-white",
-        entry.rank <= 3 && "border-amber-100/80 bg-gradient-to-r from-amber-50/50 to-white/80",
+        "flex items-center gap-3 rounded-[12px] border border-border bg-surface px-3 py-2.5 transition-colors hover:bg-surface-muted/30",
+        isTop3 && "border-primary/20 bg-primary-soft/20",
       )}
     >
-      <RankBadge rank={entry.rank} />
-      <BadgeMedal wins={entry.wins} size={compact ? "sm" : "md"} />
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-slate-900">{entry.name}</p>
-        <p className="truncate text-xs text-slate-500">{entry.duprId}</p>
+      {!isTop3 && <RankBadge rank={entry.rank} />}
+
+      <div className="relative shrink-0">
+        {isTop3 && <RankBadge rank={entry.rank} />}
+        <CuteAvatar
+          name={entry.name}
+          variant="chibi"
+          size={compact ? "md" : "lg"}
+        />
       </div>
+
+      <BadgeMedal wins={entry.wins} size={compact ? "sm" : "md"} />
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium text-foreground">{entry.name}</p>
+        <p className="truncate text-xs text-muted">{entry.duprId}</p>
+      </div>
+
       <div className="text-right">
-        <p className="text-lg font-bold tabular-nums text-emerald-800">
+        <p className="text-lg font-semibold tabular-nums text-foreground">
           {entry.wins}
-          <span className="ml-0.5 text-xs font-medium text-slate-500">勝</span>
+          <span className="ml-0.5 text-xs font-medium text-muted">勝</span>
         </p>
         {!compact && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted">
             {entry.winRate}% · {entry.matches} 場
           </p>
         )}

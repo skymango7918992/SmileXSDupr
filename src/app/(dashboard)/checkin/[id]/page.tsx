@@ -21,7 +21,7 @@ export default async function CheckInEventPage({ params }: Props) {
     if (!event) {
       return (
         <div className="py-16 text-center">
-          <p className="text-slate-600">找不到此報到活動</p>
+          <p className="text-muted">找不到此報到活動</p>
           <Link href="/checkin" className="mt-4 inline-block">
             <Button variant="secondary">返回列表</Button>
           </Link>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Plus, Trash2 } from "lucide-react";
 import { useAppUi } from "@/components/providers/app-ui-provider";
@@ -28,7 +28,7 @@ export function SessionTabs({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-slate-700">今日賽程組</p>
+        <p className="text-sm font-medium text-foreground">今日賽程組</p>
         <div className="flex gap-2">
           {activeId && onDelete && (
             <Button
@@ -74,19 +74,14 @@ export function SessionTabs({
               type="button"
               onClick={() => onSelect(session.id)}
               className={cn(
-                "min-w-[140px] shrink-0 rounded-2xl border px-4 py-3 text-left transition-all",
+                "min-w-[140px] shrink-0 cursor-pointer rounded-[12px] border px-4 py-3 text-left transition-colors duration-150",
                 active
-                  ? "border-emerald-600 bg-emerald-700 text-white shadow-md"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-emerald-200",
+                  ? "glass-nav-active text-foreground"
+                  : "border border-border bg-surface text-secondary-foreground hover:bg-surface-muted hover:text-foreground",
               )}
             >
               <p className="truncate text-sm font-semibold">{session.name}</p>
-              <p
-                className={cn(
-                  "mt-1 text-xs",
-                  active ? "text-emerald-100" : "text-slate-500",
-                )}
-              >
+              <p className="mt-1 text-xs text-muted">
                 {session.player_count} 人 · {session.match_count} 場 · 完成{" "}
                 {session.completed_count}
               </p>
@@ -96,7 +91,7 @@ export function SessionTabs({
       </div>
 
       {sessions.length === 0 && (
-        <p className="rounded-xl border border-dashed border-slate-200 py-6 text-center text-sm text-slate-500">
+        <p className="rounded-[12px] border border-dashed border-border py-6 text-center text-sm text-muted">
           尚無賽程組，請點「新增賽程」開始
         </p>
       )}

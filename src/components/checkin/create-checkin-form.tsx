@@ -1,35 +1,36 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Sparkles } from "lucide-react";
+import { Plus, Sparkles, X } from "lucide-react";
 import { createCheckInFromPaste } from "@/lib/actions/checkin";
 import {
   groupAttendeesByCategory,
+  mergeAttendeesDedupe,
   parseRegistrationText,
+  type ParsedAttendee,
 } from "@/lib/checkin-parser";
-import type { SportType } from "@/types/checkin";
+import type { AttendeeCategory, SportType } from "@/types/checkin";
 import { CATEGORY_LABELS, SPORT_LABELS } from "@/types/checkin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toISODate } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { toISODate, cn } from "@/lib/utils";
 
 type Props = {
   onCreated: (eventId: string) => void;
 };
 
-function NameChips({ names, color }: { names: string[]; color: string }) {
+const MANUAL_CATEGORIES: AttendeeCategory[] = [
+  "play",
+  "practice",
+  "waitlist_play",
+];
+
+function NameChips({ names, tagClass }: { names: string[]; tagClass: string }) {
   if (!names.length) return null;
   return (
     <div className="flex flex-wrap gap-1.5">
       {names.map((name) => (
-        <span
-          key={name}
-          className={cn(
-            "rounded-lg px-2.5 py-1 text-xs font-medium",
-            color,
-          )}
-        >
+        <span key={name} className={cn("tag", tagClass)}>
           {name}
         </span>
       ))}
@@ -43,6 +44,10 @@ export function CreateCheckInForm({ onCreated }: Props) {
   const [eventDate, setEventDate] = useState(toISODate(new Date()));
   const [title, setTitle] = useState("");
   const [feeAmount, setFeeAmount] = useState("200");
+  const [manualAttendees, setManualAttendees] = useState<ParsedAttendee[]>([]);
+  const [manualName, setManualName] = useState("");
+  const [manualCategory, setManualCategory] =
+    useState<AttendeeCategory>("play");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -51,7 +56,36 @@ export function CreateCheckInForm({ onCreated }: Props) {
     return parseRegistrationText(rawText, sportType);
   }, [rawText, sportType]);
 
-  const groups = preview ? groupAttendeesByCategory(preview.attendees) : null;
+  const allAttendees = useMemo(
+    () => mergeAttendeesDedupe(preview?.attendees ?? [], manualAttendees),
+    [preview, manualAttendees],
+  );
+
+  const groups = allAttendees.length
+    ? groupAttendeesByCategory(allAttendees)
+    : null;
+
+  const addManualPerson = () => {
+    const name = manualName.trim();
+    if (!name) return;
+    const exists = allAttendees.some(
+      (a) => a.name.trim().toLowerCase() === name.toLowerCase(),
+    );
+    if (exists) {
+      setError(`「${name}」已在名單中`);
+      return;
+    }
+    setError(null);
+    setManualAttendees((prev) => [
+      ...prev,
+      { name, category: manualCategory, listNumber: null },
+    ]);
+    setManualName("");
+  };
+
+  const removeManualPerson = (name: string) => {
+    setManualAttendees((prev) => prev.filter((a) => a.name !== name));
+  };
 
   const handleSubmit = () => {
     setError(null);
@@ -61,8 +95,10 @@ export function CreateCheckInForm({ onCreated }: Props) {
           eventDate,
           title: title || undefined,
           feeAmount: parseInt(feeAmount, 10) || 200,
+          extraAttendees: manualAttendees,
         });
         setRawText("");
+        setManualAttendees([]);
         onCreated(id);
       } catch (e) {
         setError(e instanceof Error ? e.message : "建立失敗");
@@ -71,11 +107,11 @@ export function CreateCheckInForm({ onCreated }: Props) {
   };
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-b from-white to-emerald-50/30 shadow-lg">
-      <div className="border-b border-emerald-100/80 bg-white/80 px-4 py-4 sm:px-6">
-        <h2 className="text-lg font-bold text-slate-900">建立今日報到</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          貼名單即可 · 空一行上方打球、下方練球
+    <div className="glass-card overflow-hidden p-0">
+      <div className="border-b border-border bg-surface-muted/30 px-4 py-4 sm:px-6">
+        <h2 className="text-lg font-semibold text-foreground">建立今日報到</h2>
+        <p className="mt-1 text-sm text-muted">
+          貼名單後可再手動補人 · 空一行上方打球、下方練球
         </p>
       </div>
 
@@ -87,10 +123,10 @@ export function CreateCheckInForm({ onCreated }: Props) {
               type="button"
               onClick={() => setSportType(sport)}
               className={cn(
-                "min-h-12 rounded-2xl text-sm font-bold transition",
+                "min-h-12 cursor-pointer rounded-[10px] text-sm font-medium transition-colors",
                 sportType === sport
-                  ? "bg-emerald-700 text-white shadow-md"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200",
+                  ? "glass-nav-active text-foreground"
+                  : "border border-border bg-surface text-muted hover:bg-surface-muted/40",
               )}
             >
               {SPORT_LABELS[sport]}
@@ -100,18 +136,18 @@ export function CreateCheckInForm({ onCreated }: Props) {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+            <label className="mb-1.5 block text-xs font-medium text-muted">
               日期
             </label>
             <Input
               type="date"
               value={eventDate}
               onChange={(e) => setEventDate(e.target.value)}
-              className="min-h-12 rounded-2xl"
+              className="min-h-12"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+            <label className="mb-1.5 block text-xs font-medium text-muted">
               球費 / 人
             </label>
             <Input
@@ -119,92 +155,162 @@ export function CreateCheckInForm({ onCreated }: Props) {
               min={0}
               value={feeAmount}
               onChange={(e) => setFeeAmount(e.target.value)}
-              className="min-h-12 rounded-2xl"
+              className="min-h-12"
             />
           </div>
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+          <label className="mb-1.5 block text-xs font-medium text-muted">
             活動名稱（選填）
           </label>
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="例：6/12 鳳山奧本羽球"
-            className="min-h-12 rounded-2xl"
+            className="min-h-12"
           />
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+          <label className="mb-1.5 block text-xs font-medium text-muted">
             貼上名單
           </label>
           <textarea
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
             placeholder={`1.靖峰   2.一芳\n3.龍     4.翊庭\n...\n\n（空一行）\n\n1.芳寧   2.秀敏\n3.芃鈞   4.俊彬友`}
-            className="min-h-44 w-full rounded-2xl border-0 bg-white px-4 py-3 text-sm leading-relaxed shadow-inner ring-1 ring-slate-200 outline-none focus:ring-2 focus:ring-emerald-500/40"
+            className="glass-input min-h-44 w-full rounded-[10px] px-4 py-3 text-sm leading-relaxed text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-2 text-xs text-muted/70">
             也可貼完整 LINE 報名文，會自動辨識歡樂區／練球區
           </p>
         </div>
 
-        {groups && preview && preview.attendees.length > 0 && (
-          <div className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-slate-100">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <Sparkles className="h-4 w-4 text-emerald-600" />
-              已辨識 {preview.attendees.length} 人
+        <div className="rounded-[12px] border border-border bg-surface-muted/25 p-4">
+          <p className="mb-2 text-xs font-medium text-muted">手動新增人員</p>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {MANUAL_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setManualCategory(cat)}
+                className={cn(
+                  "cursor-pointer rounded-md border px-2.5 py-1 text-xs font-medium transition-colors",
+                  manualCategory === cat
+                    ? "border-primary/30 bg-primary-soft text-primary"
+                    : "border-border bg-surface text-muted hover:bg-surface-muted",
+                )}
+              >
+                {CATEGORY_LABELS[cat]}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={manualName}
+              onChange={(e) => setManualName(e.target.value)}
+              placeholder="輸入姓名"
+              className="min-h-10 flex-1"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addManualPerson();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="shrink-0"
+              onClick={addManualPerson}
+              disabled={!manualName.trim()}
+            >
+              <Plus className="h-4 w-4" />
+              新增
+            </Button>
+          </div>
+          {manualAttendees.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {manualAttendees.map((a) => (
+                <span
+                  key={a.name}
+                  className="tag tag-neutral inline-flex items-center gap-1 pr-1"
+                >
+                  {a.name}
+                  <span className="text-[10px] text-muted">
+                    ({CATEGORY_LABELS[a.category]})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeManualPerson(a.name)}
+                    className="cursor-pointer rounded p-0.5 hover:bg-surface-muted"
+                    aria-label={`移除 ${a.name}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {groups && allAttendees.length > 0 && (
+          <div className="space-y-3 rounded-[12px] border border-border bg-surface-muted/25 p-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <Sparkles className="h-4 w-4 text-primary" />
+              共 {allAttendees.length} 人
+              {manualAttendees.length > 0 && (
+                <span className="text-xs font-normal text-muted">
+                  （含手動 {manualAttendees.length} 人）
+                </span>
+              )}
             </div>
             {groups.play.length > 0 && (
               <div>
-                <p className="mb-2 text-xs font-bold text-emerald-700">
+                <p className="mb-2 text-xs font-medium text-primary">
                   {CATEGORY_LABELS.play} {groups.play.length}
                 </p>
                 <NameChips
                   names={groups.play.map((a) => a.name)}
-                  color="bg-emerald-100 text-emerald-800"
+                  tagClass="tag-primary"
                 />
               </div>
             )}
             {groups.practice.length > 0 && (
               <div>
-                <p className="mb-2 text-xs font-bold text-blue-700">
+                <p className="mb-2 text-xs font-medium text-info">
                   {CATEGORY_LABELS.practice} {groups.practice.length}
                 </p>
                 <NameChips
                   names={groups.practice.map((a) => a.name)}
-                  color="bg-blue-100 text-blue-800"
+                  tagClass="tag-info"
                 />
               </div>
             )}
             {(groups.waitlist_play.length > 0 ||
               groups.waitlist_practice.length > 0) && (
               <div>
-                <p className="mb-2 text-xs font-bold text-amber-700">候補</p>
+                <p className="mb-2 text-xs font-medium text-warning">候補</p>
                 <NameChips
                   names={[
                     ...groups.waitlist_play,
                     ...groups.waitlist_practice,
                   ].map((a) => a.name)}
-                  color="bg-amber-100 text-amber-800"
+                  tagClass="tag-warning"
                 />
               </div>
             )}
           </div>
         )}
 
-        {error && (
-          <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+        {error && <p className="alert-danger">{error}</p>}
 
         <Button
-          className="min-h-14 w-full rounded-2xl text-base font-bold"
+          className="min-h-12 w-full text-base"
           loading={pending}
-          disabled={!rawText.trim() || !eventDate}
+          disabled={allAttendees.length === 0 || !eventDate}
           onClick={handleSubmit}
         >
           開始收款
