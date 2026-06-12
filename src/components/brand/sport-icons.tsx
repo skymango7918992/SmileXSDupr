@@ -61,3 +61,31 @@ export function PickleballPaddleIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/** 羽球 */
+export function BadmintonIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      fill="none"
+      className={cn("shrink-0", className)}
+      aria-hidden
+    >
+      <path
+        d="M8 24c6-8 12-12 18-14-2 6-6 12-14 18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+      <circle cx="9" cy="23" r="2.5" fill="currentColor" opacity="0.7" />
+      <path
+        d="M9 25.5v4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+    </svg>
+  );
+}

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/", label: "對戰中心", exact: true },
+  { href: "/play-map", label: "打球軌跡" },
   { href: "/checkin", label: "報到收款" },
   { href: "/leaderboard", label: "獲勝榜" },
   { href: "/players", label: "球員管理" },
