@@ -17,10 +17,11 @@ import {
   deletePlayer,
   updatePlayer,
 } from "@/lib/actions/players";
+import { getDuprEnvStatusAction } from "@/lib/actions/dupr-config";
 import { syncDuprClubMembers } from "@/lib/actions/dupr-sync";
-import type { DuprConfigMode } from "@/lib/env";
 import { playerDisplayName } from "@/lib/player-display";
 import type { Player, PlayerSource } from "@/types/database";
+import type { DuprConfigMode, DuprEnvStatus } from "@/types/dupr";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -31,7 +32,6 @@ const PAGE_SIZE = 10;
 
 type Props = {
   initialPlayers: Player[];
-  duprConfigMode: DuprConfigMode;
 };
 
 function SourceBadge({ source }: { source: PlayerSource }) {
@@ -480,11 +480,36 @@ function PlayerTableRow({
   );
 }
 
-export function PlayerManagement({
-  initialPlayers,
-  duprConfigMode,
-}: Props) {
+function DuprEnvDiagnostics({ status }: { status: DuprEnvStatus | null }) {
+  if (!status || status.mode !== "none") return null;
+
+  const missing: string[] = [];
+  if (!status.hasToken) {
+    if (!status.hasEmail) missing.push("DUPR_EMAIL");
+    if (!status.hasPassword) missing.push("DUPR_PASSWORD");
+    if (!status.hasEmail && !status.hasPassword) {
+      missing.push("或 DUPR_API_TOKEN");
+    }
+  }
+
+  return (
+    <p className="mt-2 text-xs text-amber-800">
+      伺服器未讀到：
+      {missing.length > 0 ? missing.join("、") : "DUPR 相關變數"}
+      。請確認 Vercel 變數名稱完全一致（是 DUPR 不是 DUPP），並勾選 Production
+      後重新部署。
+    </p>
+  );
+}
+
+export function PlayerManagement({ initialPlayers }: Props) {
   const [players, setPlayers] = useState(initialPlayers);
+  const [duprConfigMode, setDuprConfigMode] = useState<DuprConfigMode | null>(
+    null,
+  );
+  const [duprEnvStatus, setDuprEnvStatus] = useState<DuprEnvStatus | null>(
+    null,
+  );
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [newName, setNewName] = useState("");
@@ -522,6 +547,13 @@ export function PlayerManagement({
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
+
+  useEffect(() => {
+    void getDuprEnvStatusAction().then((status) => {
+      setDuprEnvStatus(status);
+      setDuprConfigMode(status.mode);
+    });
+  }, []);
 
   const refreshFromServer = async () => {
     const { getPlayers } = await import("@/lib/actions/players");
@@ -690,26 +722,30 @@ export function PlayerManagement({
               Club 4668804565 · 目前 Club {clubCount} 人 · 手動 {manualCount}{" "}
               人
             </p>
-            {duprConfigMode === "none" ? (
+            {duprConfigMode === null ? (
+              <p className="mt-2 text-xs text-slate-500">正在檢查 DUPR 連線設定…</p>
+            ) : duprConfigMode === "none" ? (
               <div className="mt-3 rounded-xl bg-amber-50 px-3 py-3 text-sm text-amber-900">
                 <p className="font-semibold">尚未設定 DUPR 連線</p>
                 <p className="mt-2 text-xs leading-relaxed text-amber-800">
-                  請在專案根目錄 <code className="rounded bg-white px-1">.env</code>{" "}
+                  請在 <strong>Vercel → Settings → Environment Variables</strong>{" "}
+                  或本機 <code className="rounded bg-white px-1">.env</code>{" "}
                   加入（擇一即可）：
                 </p>
                 <pre className="mt-2 overflow-x-auto rounded-lg bg-white p-2 text-[11px] leading-relaxed text-slate-700">
-{`# 方式 A（建議）：你的 DUPR 登入帳密
+{`# 方式 A（建議）：DUPR 登入帳密
 DUPR_EMAIL=你的DUPR信箱
 DUPR_PASSWORD=你的DUPR密碼
 DUPR_CLUB_ID=4668804565
 
-# 方式 B：直接貼 Bearer Token
-# DUPR_API_TOKEN=eyJ...`}
+# 方式 B：Bearer Token
+DUPR_API_TOKEN=eyJ...`}
                 </pre>
                 <p className="mt-2 text-xs text-amber-800">
-                  儲存後請重新啟動 <code className="rounded bg-white px-1">npm run dev</code>
-                  ，按鈕即可使用。
+                  Vercel 新增或修改變數後，請到 Deployments → <strong>Redeploy</strong>{" "}
+                  才會生效。
                 </p>
+                <DuprEnvDiagnostics status={duprEnvStatus} />
               </div>
             ) : (
               <p className="mt-1 text-xs text-slate-500">
@@ -717,13 +753,17 @@ DUPR_CLUB_ID=4668804565
                 {duprConfigMode === "credentials"
                   ? " DUPR 帳密登入"
                   : " API Token"}
-                · 相同 DUPR ID（含 O/0 打錯）會合併為 Club；離開 Club 者會移除
+                · Club {duprEnvStatus?.clubId ?? "4668804565"} · 相同 DUPR
+                ID（含 O/0 打錯）會合併為 Club
               </p>
             )}
           </div>
           <Button
             onClick={handleDuprSync}
-            disabled={isPending || duprConfigMode === "none"}
+            disabled={
+              isPending ||
+              (duprConfigMode !== "token" && duprConfigMode !== "credentials")
+            }
             className="min-h-12 w-full shrink-0 sm:w-auto"
           >
             <RefreshCw className={cn("h-4 w-4", isPending && "animate-spin")} />

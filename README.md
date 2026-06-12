@@ -21,9 +21,19 @@ npm run dev
 
 在 Supabase SQL Editor 執行 `supabase/migrations/001_initial_schema.sql`。
 
-## 部署
+## 部署（Vercel）
 
-專案已可部署至 [Vercel](https://vercel.com)。請在 Vercel 專案設定中加入環境變數：
+專案可部署至 [Vercel](https://vercel.com)。在 **Settings → Environment Variables** 設定（請勾選 **Production**）：
+
+**必填**
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `ADMIN_USERNAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD`
+
+**DUPR Club 同步（球員管理，擇一）**
+
+- `DUPR_EMAIL` + `DUPR_PASSWORD` + `DUPR_CLUB_ID`
+- 或 `DUPR_API_TOKEN`
+
+變數名稱須完全一致（`DUPR` 不是 `DUPP`）。**新增或修改後請 Deployments → Redeploy**，否則線上讀不到新變數。

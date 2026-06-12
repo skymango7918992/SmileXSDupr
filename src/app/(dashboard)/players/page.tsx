@@ -1,21 +1,21 @@
+import { connection } from "next/server";
 import { PlayerManagement } from "@/components/players/player-management";
 import { SetupGuide } from "@/components/setup/setup-guide";
-import { getDuprConfigMode, hasSupabaseEnv } from "@/lib/env";
+import { hasSupabaseEnv } from "@/lib/env";
 import { getPlayers } from "@/lib/actions/players";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export default async function PlayersPage() {
+  await connection();
   if (!hasSupabaseEnv()) {
     return <SetupGuide />;
   }
 
   try {
     const players = await getPlayers();
-    return (
-      <PlayerManagement
-        initialPlayers={players}
-        duprConfigMode={getDuprConfigMode()}
-      />
-    );
+    return <PlayerManagement initialPlayers={players} />;
   } catch (error) {
     return (
       <SetupGuide

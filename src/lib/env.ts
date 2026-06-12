@@ -1,9 +1,15 @@
+import type { DuprConfigMode } from "@/types/dupr";
+
+export type { DuprConfigMode };
+
 /**
- * 所有環境變數統一從專案根目錄的 `.env` 讀取（Next.js 自動載入）。
- * 修改 .env 後請重新啟動 `npm run dev`。
+ * 環境變數由 Next.js 從 `process.env` 讀取：
+ * - 本機：專案根目錄 `.env`
+ * - Vercel：Dashboard → Settings → Environment Variables（需勾選 Production 並重新部署）
  */
 
-const ENV_FILE_HINT = "請確認專案根目錄已有 .env 檔案並已填入正確參數";
+const ENV_FILE_HINT =
+  "請在本機 .env 或 Vercel → Settings → Environment Variables 設定（變更後請重新部署）";
 
 export function hasSupabaseEnv(): boolean {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
@@ -38,8 +44,6 @@ export function getAdminEnv() {
 export function getServiceRoleKey(): string | undefined {
   return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 }
-
-export type DuprConfigMode = "token" | "credentials" | "none";
 
 /** 是否已設定 DUPR 同步（Token 或帳密擇一） */
 export function getDuprConfigMode(): DuprConfigMode {

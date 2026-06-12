@@ -76,7 +76,7 @@ export async function resolveDuprAccessToken(): Promise<string> {
 
   if (!email || !password) {
     throw new Error(
-      "請在 .env 設定 DUPR_EMAIL + DUPR_PASSWORD（你的 DUPR 登入帳密），或設定 DUPR_API_TOKEN",
+      "缺少 DUPR 連線設定。請在 Vercel → Environment Variables（或本機 .env）設定 DUPR_EMAIL + DUPR_PASSWORD，或 DUPR_API_TOKEN，然後重新部署。",
     );
   }
 
