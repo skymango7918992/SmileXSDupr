@@ -181,7 +181,6 @@ export async function createKhpaMatchWithScore(
     ]);
 
   if (playersError) throw new Error(playersError.message);
-  revalidatePath("/");
 }
 
 export async function deleteKhpaMatch(matchId: string): Promise<void> {

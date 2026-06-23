@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getCurrentUserEmail, requireXsAdmin } from "@/lib/auth/require-xs-admin";
 import { isStaffRole } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +19,101 @@ import type {
   SessionPlayer,
 } from "@/types/database";
 
+function normalizeScoreType(value: unknown): ScoreType {
+  return value === "rally" ? "rally" : "sideout";
+}
+
+async function getInheritedRosterIds(matchDate: string): Promise<string[]> {
+  const supabase = await createClient();
+
+  const { data: recentDays, error: dayError } = await supabase
+    .from("match_days")
+    .select("id, match_date, selected_player_ids")
+    .lt("match_date", matchDate)
+    .order("match_date", { ascending: false })
+    .limit(10);
+
+  if (dayError) throw new Error(dayError.message);
+
+  for (const day of recentDays ?? []) {
+    const ids = (day.selected_player_ids ?? []) as string[];
+    if (ids.length > 0) return ids;
+  }
+
+  const prevDay = recentDays?.[0];
+  if (!prevDay) return [];
+
+  const { data: session, error: sessionError } = await supabase
+    .from("schedule_sessions")
+    .select("id")
+    .eq("match_day_id", prevDay.id)
+    .order("sort_order")
+    .limit(1)
+    .maybeSingle();
+
+  if (sessionError) throw new Error(sessionError.message);
+  if (!session) return [];
+
+  const { data: roster, error: rosterError } = await supabase
+    .from("session_players")
+    .select("player_id")
+    .eq("schedule_session_id", session.id)
+    .eq("joined_after_round", 0);
+
+  if (rosterError) throw new Error(rosterError.message);
+  return (roster ?? []).map((r) => r.player_id as string);
+}
+
+async function getInheritedScoreType(matchDate: string): Promise<ScoreType> {
+  const supabase = await createClient();
+
+  const { data: prevDay, error: dayError } = await supabase
+    .from("match_days")
+    .select("id")
+    .lt("match_date", matchDate)
+    .order("match_date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (dayError) throw new Error(dayError.message);
+  if (!prevDay) return "rally";
+
+  const { data: session, error: sessionError } = await supabase
+    .from("schedule_sessions")
+    .select("score_type")
+    .eq("match_day_id", prevDay.id)
+    .order("sort_order")
+    .limit(1)
+    .maybeSingle();
+
+  if (sessionError) throw new Error(sessionError.message);
+  return normalizeScoreType(session?.score_type);
+}
+
+async function seedSessionPlayers(
+  sessionId: string,
+  playerIds: string[],
+): Promise<void> {
+  if (playerIds.length === 0) return;
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("session_players")
+    .select("player_id")
+    .eq("schedule_session_id", sessionId);
+
+  if ((existing ?? []).length > 0) return;
+
+  const { error } = await supabase.from("session_players").insert(
+    playerIds.map((player_id) => ({
+      schedule_session_id: sessionId,
+      player_id,
+      joined_after_round: 0,
+    })),
+  );
+  if (error) throw new Error(error.message);
+}
+
 async function getOrCreateMatchDay(matchDate: string): Promise<MatchDay> {
   const supabase = await createClient();
   const { data: existing } = await supabase
@@ -30,9 +124,11 @@ async function getOrCreateMatchDay(matchDate: string): Promise<MatchDay> {
 
   if (existing) return existing;
 
+  const inheritedIds = await getInheritedRosterIds(matchDate);
+
   const { data, error } = await supabase
     .from("match_days")
-    .insert({ match_date: matchDate, selected_player_ids: [] })
+    .insert({ match_date: matchDate, selected_player_ids: inheritedIds })
     .select()
     .single();
 
@@ -150,6 +246,28 @@ export async function getMatchDates(): Promise<string[]> {
   return (data ?? []).map((d) => d.match_date);
 }
 
+async function syncDayRosterToSession(
+  matchDay: MatchDay,
+  sessionId: string,
+): Promise<void> {
+  const rosterIds =
+    matchDay.selected_player_ids.length > 0
+      ? matchDay.selected_player_ids
+      : await getInheritedRosterIds(matchDay.match_date);
+
+  if (rosterIds.length === 0) return;
+
+  await seedSessionPlayers(sessionId, rosterIds);
+
+  if (matchDay.selected_player_ids.length === 0) {
+    const supabase = await createClient();
+    await supabase
+      .from("match_days")
+      .update({ selected_player_ids: rosterIds })
+      .eq("id", matchDay.id);
+  }
+}
+
 async function ensureDefaultSession(matchDay: MatchDay): Promise<void> {
   const supabase = await createClient();
   const { data: existing } = await supabase
@@ -158,7 +276,12 @@ async function ensureDefaultSession(matchDay: MatchDay): Promise<void> {
     .eq("match_day_id", matchDay.id)
     .limit(1);
 
-  if (existing && existing.length > 0) return;
+  if (existing && existing.length > 0) {
+    await syncDayRosterToSession(matchDay, existing[0]!.id as string);
+    return;
+  }
+
+  const scoreType = await getInheritedScoreType(matchDay.match_date);
 
   const { data: session, error } = await supabase
     .from("schedule_sessions")
@@ -166,22 +289,14 @@ async function ensureDefaultSession(matchDay: MatchDay): Promise<void> {
       match_day_id: matchDay.id,
       name: "賽程 1",
       sort_order: 0,
-      score_type: "rally",
+      score_type: scoreType,
     })
     .select()
     .single();
 
   if (error) throw new Error(error.message);
 
-  if (matchDay.selected_player_ids.length > 0) {
-    await supabase.from("session_players").insert(
-      matchDay.selected_player_ids.map((player_id) => ({
-        schedule_session_id: session.id,
-        player_id,
-        joined_after_round: 0,
-      })),
-    );
-  }
+  await syncDayRosterToSession(matchDay, session.id as string);
 }
 
 function mapDbError(message: string): string {
@@ -217,45 +332,64 @@ export async function getSessionsForDate(
     return buildSessionStats(retry);
   }
 
-  return buildSessionStats(sessions);
-}
+  await syncDayRosterToSession(matchDay, sessions[0]!.id as string);
 
-function normalizeScoreType(value: unknown): ScoreType {
-  return value === "rally" ? "rally" : "sideout";
+  return buildSessionStats(sessions);
 }
 
 async function buildSessionStats(
   sessions: ScheduleSession[],
 ): Promise<ScheduleSessionWithStats[]> {
+  if (sessions.length === 0) return [];
+
   const supabase = await createClient();
+  const sessionIds = sessions.map((s) => s.id);
 
-  const result: ScheduleSessionWithStats[] = [];
-  for (const session of sessions) {
-    const [{ count: playerCount }, { data: matchRows }] = await Promise.all([
-      supabase
-        .from("session_players")
-        .select("*", { count: "exact", head: true })
-        .eq("schedule_session_id", session.id),
-      supabase
-        .from("matches")
-        .select("status")
-        .eq("schedule_session_id", session.id),
-    ]);
+  const [{ data: rosterRows }, { data: matchRows }] = await Promise.all([
+    supabase
+      .from("session_players")
+      .select("schedule_session_id")
+      .in("schedule_session_id", sessionIds),
+    supabase
+      .from("matches")
+      .select("schedule_session_id, status")
+      .in("schedule_session_id", sessionIds),
+  ]);
 
-    const matches = matchRows ?? [];
-    result.push({
+  const playerCountBySession = new Map<string, number>();
+  for (const row of rosterRows ?? []) {
+    const id = row.schedule_session_id as string;
+    playerCountBySession.set(id, (playerCountBySession.get(id) ?? 0) + 1);
+  }
+
+  const matchStatsBySession = new Map<
+    string,
+    { total: number; completed: number }
+  >();
+  for (const row of matchRows ?? []) {
+    const id = row.schedule_session_id as string;
+    const current = matchStatsBySession.get(id) ?? { total: 0, completed: 0 };
+    current.total += 1;
+    if (row.status === "completed") current.completed += 1;
+    matchStatsBySession.set(id, current);
+  }
+
+  return sessions.map((session) => {
+    const matchStats = matchStatsBySession.get(session.id) ?? {
+      total: 0,
+      completed: 0,
+    };
+    return {
       ...session,
       score_type: normalizeScoreType(
         (session as ScheduleSession & { score_type?: unknown }).score_type,
       ),
-      player_count: playerCount ?? 0,
-      match_count: matches.length,
-      completed_count: matches.filter((m) => m.status === "completed").length,
-    });
-  }
-  return result;
+      player_count: playerCountBySession.get(session.id) ?? 0,
+      match_count: matchStats.total,
+      completed_count: matchStats.completed,
+    };
+  });
 }
-
 
 export async function createSession(
   matchDate: string,
@@ -277,7 +411,8 @@ export async function createSession(
   const nextOrder =
     existing && existing.length > 0 ? existing[0].sort_order + 1 : 0;
   const sessionName = options?.name?.trim() || `賽程 ${nextOrder + 1}`;
-  const scoreType = options?.scoreType ?? "rally";
+  const scoreType =
+    options?.scoreType ?? (await getInheritedScoreType(matchDate));
 
   const { data, error } = await supabase
     .from("schedule_sessions")
@@ -291,7 +426,15 @@ export async function createSession(
     .single();
 
   if (error) throw new Error(error.message);
-  revalidatePath("/");
+
+  const rosterIds =
+    matchDay.selected_player_ids.length > 0
+      ? matchDay.selected_player_ids
+      : await getInheritedRosterIds(matchDate);
+  if (rosterIds.length > 0) {
+    await seedSessionPlayers(data.id as string, rosterIds);
+  }
+
   return data;
 }
 
@@ -303,7 +446,18 @@ export async function deleteSession(sessionId: string): Promise<void> {
     .delete()
     .eq("id", sessionId);
   if (error) throw new Error(error.message);
-  revalidatePath("/");
+}
+
+export async function updateSessionScoreType(
+  sessionId: string,
+  scoreType: ScoreType,
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("schedule_sessions")
+    .update({ score_type: scoreType })
+    .eq("id", sessionId);
+  if (error) throw new Error(error.message);
 }
 
 export async function getSessionPlayers(
@@ -325,6 +479,13 @@ export async function updateSessionRoster(
   playerIds: string[],
 ): Promise<void> {
   const supabase = await createClient();
+
+  const { data: session, error: sessionError } = await supabase
+    .from("schedule_sessions")
+    .select("match_day_id")
+    .eq("id", sessionId)
+    .single();
+  if (sessionError) throw new Error(sessionError.message);
 
   const { data: existing } = await supabase
     .from("session_players")
@@ -369,7 +530,11 @@ export async function updateSessionRoster(
     if (error) throw new Error(error.message);
   }
 
-  revalidatePath("/");
+  const { error: dayError } = await supabase
+    .from("match_days")
+    .update({ selected_player_ids: playerIds })
+    .eq("id", session.match_day_id);
+  if (dayError) throw new Error(dayError.message);
 }
 
 export async function getMatchesForSession(
@@ -464,7 +629,6 @@ export async function generateMatchesForSession(
   );
 
   await insertPairings(sessionId, session.match_day_id, pairings);
-  revalidatePath("/");
 }
 
 export async function addLatePlayerAndReschedule(
@@ -521,7 +685,6 @@ export async function addLatePlayerAndReschedule(
     },
   });
 
-  revalidatePath("/");
   return { joinedAfterRound, deletedScheduled: deletedCount };
 }
 
@@ -540,8 +703,6 @@ export async function updateMatchScore(
     })
     .eq("id", matchId);
   if (error) throw new Error(error.message);
-  revalidatePath("/");
-  revalidatePath("/leaderboard");
 }
 
 export async function deleteMatch(matchId: string): Promise<void> {
@@ -553,8 +714,6 @@ export async function deleteMatch(matchId: string): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase.from("matches").delete().eq("id", matchId);
   if (error) throw new Error(error.message);
-  revalidatePath("/");
-  revalidatePath("/leaderboard");
 }
 
 export async function clearSessionMatches(sessionId: string): Promise<void> {
@@ -565,7 +724,6 @@ export async function clearSessionMatches(sessionId: string): Promise<void> {
     .eq("schedule_session_id", sessionId)
     .eq("status", "scheduled");
   if (error) throw new Error(error.message);
-  revalidatePath("/");
 }
 
 export async function createManualMatch(
@@ -612,5 +770,4 @@ export async function createManualMatch(
     { match_id: match.id, player_id: team2PlayerIds[1], team: 2, position: 2 },
   ]);
   if (playersError) throw new Error(playersError.message);
-  revalidatePath("/");
 }

@@ -23,6 +23,7 @@ import {
   getSessionsForDate,
   updateMatchScore,
   updateSessionRoster,
+  updateSessionScoreType,
 } from "@/lib/actions/sessions";
 import { useAppUi } from "@/components/providers/app-ui-provider";
 import { exportMatchesToDuprCsv } from "@/lib/export-dupr-csv";
@@ -45,6 +46,7 @@ import { MatchGenerator } from "@/components/match/match-generator";
 import { MatchTable } from "@/components/match/match-table";
 import { PlayerChipGrid } from "@/components/match/player-chip-grid";
 import { SessionTabs } from "@/components/match/session-tabs";
+import { SessionScorePicker } from "@/components/match/session-score-picker";
 
 type Props = {
   players: Player[];
@@ -193,6 +195,28 @@ export function MatchCenter({
     const updated = await getSessionsForDate(matchDate);
     setSessions(updated);
     success("出席名單已儲存");
+  };
+
+  const handleScoreTypeChange = (scoreType: ScoreType) => {
+    if (!activeSessionId) return;
+    setError(null);
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === activeSessionId ? { ...s, score_type: scoreType } : s,
+      ),
+    );
+    startTransition(async () => {
+      try {
+        await updateSessionScoreType(activeSessionId, scoreType);
+        success(`已切換為${SCORE_TYPE_LABEL[scoreType]}`);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "更新計分制度失敗";
+        setError(msg);
+        toastError(msg);
+        const updated = await getSessionsForDate(matchDate);
+        setSessions(updated);
+      }
+    });
   };
 
   const handleGenerate = async (courtCount: number) => {
@@ -423,20 +447,27 @@ export function MatchCenter({
       ) : (
         <>
           <div className="grid gap-4 lg:grid-cols-2 lg:gap-5">
-            <PlayerChipGrid
-              players={players}
-              selectedIds={selectedIds}
-              onSave={async (ids) => {
-                try {
-                  await handleSaveRoster(ids);
-                } catch (e) {
-                  setError(e instanceof Error ? e.message : "儲存名單失敗");
-                  toastError(e instanceof Error ? e.message : "儲存名單失敗");
-                  throw e;
-                }
-              }}
-              cardClassName="min-h-[min(420px,55vh)]"
-            />
+            <div className="space-y-3">
+              <PlayerChipGrid
+                players={players}
+                selectedIds={selectedIds}
+                onSave={async (ids) => {
+                  try {
+                    await handleSaveRoster(ids);
+                  } catch (e) {
+                    setError(e instanceof Error ? e.message : "儲存名單失敗");
+                    toastError(e instanceof Error ? e.message : "儲存名單失敗");
+                    throw e;
+                  }
+                }}
+                cardClassName="min-h-[min(420px,55vh)]"
+              />
+              <SessionScorePicker
+                value={activeSession?.score_type ?? "rally"}
+                disabled={isPending}
+                onChange={handleScoreTypeChange}
+              />
+            </div>
             <div className="space-y-3">
               <MatchGenerator
                 defaultCourtCount={settings?.default_court_count ?? 4}

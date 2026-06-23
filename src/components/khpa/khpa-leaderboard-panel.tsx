@@ -5,8 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { KhpaLeaderboardFull } from "@/components/khpa/khpa-leaderboard-full";
 import { KhpaLeaderboardTop3 } from "@/components/khpa/khpa-leaderboard-top3";
 import {
-  getKhpaLeaderboardTop10,
-  getKhpaLeaderboardTop3,
+  getKhpaLeaderboardBundle,
 } from "@/lib/actions/khpa/leaderboard";
 import type { KhpaLeaderboardEntry } from "@/types/khpa";
 import { Button } from "@/components/ui/button";
@@ -48,12 +47,9 @@ export function KhpaLeaderboardPanel({
     setError(null);
     startTransition(async () => {
       try {
-        const [t3, t10] = await Promise.all([
-          getKhpaLeaderboardTop3(nextYear),
-          getKhpaLeaderboardTop10(nextYear),
-        ]);
-        setTop3(t3);
-        setTop10(t10);
+        const bundle = await getKhpaLeaderboardBundle(nextYear);
+        setTop3(bundle.top3);
+        setTop10(bundle.top10);
       } catch (e) {
         setError(e instanceof Error ? e.message : "載入失敗");
       }

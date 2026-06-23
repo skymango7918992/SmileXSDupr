@@ -13,6 +13,7 @@ import {
   ensureKhpaMatchDay,
   getKhpaMatchesForDate,
 } from "@/lib/actions/khpa/sessions";
+import { getKhpaLeaderboardTop10 } from "@/lib/actions/khpa/leaderboard";
 import { exportKhpaMatchesToDuprCsv } from "@/lib/khpa/export-csv";
 import { khpaHomePath } from "@/lib/khpa/paths";
 import type { KhpaLeaderboardEntry } from "@/types/khpa";
@@ -52,14 +53,15 @@ export function KhpaMatchCenter({
   });
   const [showManual, setShowManual] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [leaderboardEntries, setLeaderboardEntries] = useState(leaderboard);
   const [isPending, startTransition] = useTransition();
   const { error: toastError, success } = useAppUi();
 
   const matches = matchesByVenue[activeVenue.id] ?? [];
 
   const playerWins = useMemo(
-    () => Object.fromEntries(leaderboard.map((e) => [e.playerId, e.wins])),
-    [leaderboard],
+    () => Object.fromEntries(leaderboardEntries.map((e) => [e.playerId, e.wins])),
+    [leaderboardEntries],
   );
 
   const matchCounts = useMemo(
@@ -133,11 +135,17 @@ export function KhpaMatchCenter({
       input.scoreType,
     );
     await loadMatches(activeVenue.id, matchDate);
+    const year = Number(matchDate.slice(0, 4)) || new Date().getFullYear();
+    const top10 = await getKhpaLeaderboardTop10(year);
+    setLeaderboardEntries(top10);
   };
 
   const handleDelete = async (matchId: string) => {
     await deleteKhpaMatch(matchId);
     await loadMatches(activeVenue.id, matchDate);
+    const year = Number(matchDate.slice(0, 4)) || new Date().getFullYear();
+    const top10 = await getKhpaLeaderboardTop10(year);
+    setLeaderboardEntries(top10);
   };
 
   const handleExport = () => {

@@ -8,7 +8,6 @@ type CompletedMatch = {
   id: string;
   team1_score: number | null;
   team2_score: number | null;
-  match_date: string;
 };
 
 type MatchPlayerRow = {
@@ -22,6 +21,12 @@ type PlayerStats = {
   wins: number;
   losses: number;
   matches: number;
+};
+
+export type KhpaLeaderboardBundle = {
+  all: KhpaLeaderboardEntry[];
+  top3: KhpaLeaderboardEntry[];
+  top10: KhpaLeaderboardEntry[];
 };
 
 function aggregateStats(
@@ -91,52 +96,42 @@ function toEntries(stats: Map<string, PlayerStats>): KhpaLeaderboardEntry[] {
   }));
 }
 
-function extractMatchDate(row: Record<string, unknown>): string {
-  const sessions = row.khpa_schedule_sessions;
-  if (!sessions) return "";
-  const session = Array.isArray(sessions) ? sessions[0] : sessions;
-  if (!session || typeof session !== "object") return "";
-  const days = (session as Record<string, unknown>).khpa_match_days;
-  if (!days) return "";
-  const day = Array.isArray(days) ? days[0] : days;
-  if (!day || typeof day !== "object") return "";
-  const date = (day as Record<string, unknown>).match_date;
-  return typeof date === "string" ? date : "";
-}
-
+/** 僅查詢指定年份的已完成場次（避免載入全部歷史） */
 async function fetchYearCompletedMatches(year: number): Promise<CompletedMatch[]> {
   const supabase = await createClient();
   const yearStart = `${year}-01-01`;
   const yearEnd = `${year}-12-31`;
 
+  const { data: days, error: dayError } = await supabase
+    .from("khpa_match_days")
+    .select("id")
+    .gte("match_date", yearStart)
+    .lte("match_date", yearEnd);
+
+  if (dayError) throw new Error(dayError.message);
+  if (!days?.length) return [];
+
+  const dayIds = days.map((d) => d.id as string);
+
+  const { data: sessions, error: sessionError } = await supabase
+    .from("khpa_schedule_sessions")
+    .select("id")
+    .in("match_day_id", dayIds);
+
+  if (sessionError) throw new Error(sessionError.message);
+  if (!sessions?.length) return [];
+
+  const sessionIds = sessions.map((s) => s.id as string);
+
   const { data, error } = await supabase
     .from("khpa_matches")
-    .select(
-      `
-      id,
-      team1_score,
-      team2_score,
-      khpa_schedule_sessions!inner(
-        khpa_match_days!inner(match_date)
-      )
-    `,
-    )
-    .eq("status", "completed");
+    .select("id, team1_score, team2_score")
+    .eq("status", "completed")
+    .in("schedule_session_id", sessionIds);
 
   if (error) throw new Error(error.message);
 
-  return (data ?? [])
-    .map((row) => ({
-      id: row.id as string,
-      team1_score: row.team1_score as number | null,
-      team2_score: row.team2_score as number | null,
-      match_date: extractMatchDate(row as Record<string, unknown>),
-    }))
-    .filter(
-      (m) =>
-        m.match_date >= yearStart &&
-        m.match_date <= yearEnd,
-    );
+  return (data ?? []) as CompletedMatch[];
 }
 
 export async function getKhpaLeaderboard(
@@ -172,6 +167,17 @@ export async function getKhpaLeaderboard(
   );
 
   return toEntries(aggregateStats(completed, rows, playerMap));
+}
+
+export async function getKhpaLeaderboardBundle(
+  year = new Date().getFullYear(),
+): Promise<KhpaLeaderboardBundle> {
+  const all = await getKhpaLeaderboard(year);
+  return {
+    all,
+    top3: all.slice(0, 3),
+    top10: all.slice(0, 10),
+  };
 }
 
 export async function getKhpaLeaderboardTop3(

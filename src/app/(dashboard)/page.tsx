@@ -6,7 +6,6 @@ import { SetupGuide } from "@/components/setup/setup-guide";
 import { getLeaderboardTop3 } from "@/lib/actions/leaderboard";
 import type { LeaderboardEntry } from "@/types/leaderboard";
 import {
-  getMatchDay,
   getMatchesForSession,
   getSessionPlayers,
   getSessionsForDate,
@@ -78,8 +77,6 @@ export default async function HomePage({ searchParams }: Props) {
       matches = matchList;
       selectedIds = roster.map((r) => r.player_id);
     }
-
-    await getMatchDay(today);
 
     return (
       <div className="space-y-6">

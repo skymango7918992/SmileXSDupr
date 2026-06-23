@@ -23,6 +23,11 @@ type PlayerStats = {
   matches: number;
 };
 
+export type LeaderboardBundle = {
+  all: LeaderboardEntry[];
+  top3: LeaderboardEntry[];
+};
+
 function aggregateStats(
   matches: CompletedMatch[],
   matchPlayers: MatchPlayerRow[],
@@ -94,19 +99,53 @@ function toEntries(stats: Map<string, PlayerStats>): LeaderboardEntry[] {
   }));
 }
 
-export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
+/** 僅查詢指定年份的已完成場次（避免載入全部歷史） */
+async function fetchYearCompletedMatches(
+  year: number,
+): Promise<CompletedMatch[]> {
   const supabase = await createClient();
+  const yearStart = `${year}-01-01`;
+  const yearEnd = `${year}-12-31`;
 
-  const { data: matches, error: matchError } = await supabase
+  const { data: days, error: dayError } = await supabase
+    .from("match_days")
+    .select("id")
+    .gte("match_date", yearStart)
+    .lte("match_date", yearEnd);
+
+  if (dayError) throw new Error(dayError.message);
+  if (!days?.length) return [];
+
+  const dayIds = days.map((d) => d.id as string);
+
+  const { data: sessions, error: sessionError } = await supabase
+    .from("schedule_sessions")
+    .select("id")
+    .in("match_day_id", dayIds);
+
+  if (sessionError) throw new Error(sessionError.message);
+  if (!sessions?.length) return [];
+
+  const sessionIds = sessions.map((s) => s.id as string);
+
+  const { data, error } = await supabase
     .from("matches")
     .select("id, team1_score, team2_score")
-    .eq("status", "completed");
+    .eq("status", "completed")
+    .in("schedule_session_id", sessionIds);
 
-  if (matchError) throw new Error(matchError.message);
+  if (error) throw new Error(error.message);
 
-  const completed = (matches ?? []) as CompletedMatch[];
+  return (data ?? []) as CompletedMatch[];
+}
+
+export async function getLeaderboard(
+  year = new Date().getFullYear(),
+): Promise<LeaderboardEntry[]> {
+  const completed = await fetchYearCompletedMatches(year);
   if (completed.length === 0) return [];
 
+  const supabase = await createClient();
   const matchIds = completed.map((m) => m.id);
 
   const { data: matchPlayers, error: mpError } = await supabase
@@ -135,7 +174,19 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
   return toEntries(aggregateStats(completed, rows, playerMap));
 }
 
-export async function getLeaderboardTop3(): Promise<LeaderboardEntry[]> {
-  const all = await getLeaderboard();
+export async function getLeaderboardBundle(
+  year = new Date().getFullYear(),
+): Promise<LeaderboardBundle> {
+  const all = await getLeaderboard(year);
+  return {
+    all,
+    top3: all.slice(0, 3),
+  };
+}
+
+export async function getLeaderboardTop3(
+  year = new Date().getFullYear(),
+): Promise<LeaderboardEntry[]> {
+  const all = await getLeaderboard(year);
   return all.slice(0, 3);
 }

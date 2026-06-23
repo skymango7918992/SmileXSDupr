@@ -2,13 +2,11 @@ import { redirect } from "next/navigation";
 import { KhpaDashboard } from "@/components/khpa/khpa-dashboard";
 import {
   getKhpaAvailableYears,
-  getKhpaLeaderboardTop10,
-  getKhpaLeaderboardTop3,
+  getKhpaLeaderboardBundle,
 } from "@/lib/actions/khpa/leaderboard";
-import { getKhpaAllPlayers, getKhpaPlayers } from "@/lib/actions/khpa/players";
+import { getKhpaAllPlayers } from "@/lib/actions/khpa/players";
 import {
   ensureKhpaMatchDay,
-  getKhpaCanDelete,
   getKhpaMatchesForDate,
 } from "@/lib/actions/khpa/sessions";
 import { getKhpaVenues } from "@/lib/actions/khpa/venues";
@@ -46,17 +44,17 @@ export async function KhpaHomeContent({ searchParams }: { searchParams: Search }
 
   await ensureKhpaMatchDay(activeVenue.id, today);
 
-  const [allPlayers, activePlayers, matches, availableYears, leaderboardTop10, canDelete] =
+  const [allPlayers, matches, availableYears, leaderboard, canDelete] =
     await Promise.all([
       getKhpaAllPlayers(),
-      getKhpaPlayers(true),
       getKhpaMatchesForDate(activeVenue.id, today),
       getKhpaAvailableYears(),
-      getKhpaLeaderboardTop10(currentYear),
-      getKhpaCanDelete(),
+      getKhpaLeaderboardBundle(currentYear),
+      Promise.resolve(isAdminRole(user?.email)),
     ]);
 
-  const leaderboardTop3 = await getKhpaLeaderboardTop3(currentYear);
+  const activePlayers = allPlayers.filter((p) => p.active);
+  const { top3: leaderboardTop3, top10: leaderboardTop10 } = leaderboard;
 
   if (searchParams.venue && !venues.some((v) => v.slug === searchParams.venue)) {
     redirect(khpaHomePath());
