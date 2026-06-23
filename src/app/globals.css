@@ -559,11 +559,175 @@ body {
 
 .login-portal-tabs {
   width: 100%;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
 }
 
-.login-portal-hero h1 {
-  word-break: keep-all;
-  overflow-wrap: anywhere;
+.login-portal-tab--active {
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  color: #14532d;
+  font-weight: 700;
+  box-shadow:
+    0 2px 12px rgba(21, 128, 61, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.login-portal-hero {
+  isolation: isolate;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+}
+
+.login-portal-hero--khpa {
+  background: linear-gradient(
+    145deg,
+    #0b3d2c 0%,
+    #1a6b4a 38%,
+    #2d8a5e 62%,
+    #c9a227 100%
+  );
+}
+
+.login-portal-hero--xs {
+  background: linear-gradient(
+    145deg,
+    #0c1e3d 0%,
+    #1e3a8a 42%,
+    #2563eb 68%,
+    #7c3aed 100%
+  );
+}
+
+.login-portal-hero__stripes {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background: repeating-linear-gradient(
+    -48deg,
+    transparent,
+    transparent 14px,
+    rgba(255, 255, 255, 0.07) 14px,
+    rgba(255, 255, 255, 0.07) 28px
+  );
+  pointer-events: none;
+}
+
+.login-portal-hero__shine {
+  position: absolute;
+  inset: -50% -20%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 60%
+  );
+  animation: login-shine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes login-shine {
+  0%, 100% { transform: translateX(-30%) rotate(0deg); opacity: 0.4; }
+  50% { transform: translateX(30%) rotate(0deg); opacity: 0.85; }
+}
+
+.login-portal-hero__badge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+
+.login-portal-hero__live {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: #4ade80;
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.35);
+  animation: login-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes login-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(0.88); }
+}
+
+.login-portal-hero__title {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(1.35rem, 4.5vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.login-portal-hero__tagline {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin-top: 0.65rem;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  font-size: clamp(0.8rem, 2.8vw, 0.9rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #14532d;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.login-portal-hero--xs .login-portal-hero__tagline {
+  color: #1e3a8a;
+}
+
+.login-form-card--khpa {
+  border-color: rgba(201, 162, 39, 0.35);
+  box-shadow:
+    0 8px 32px rgba(21, 128, 61, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.login-form-card--xs {
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow:
+    0 8px 32px rgba(37, 99, 235, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.login-submit--khpa {
+  border: none;
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 45%, #ca8a04 100%) !important;
+  color: #fff !important;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow:
+    0 4px 20px rgba(21, 128, 61, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.login-submit--khpa:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow:
+    0 6px 24px rgba(21, 128, 61, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .login-page input,
@@ -592,20 +756,20 @@ body {
   inset: -32px;
   background-size: cover;
   background-position: center;
-  filter: blur(28px) saturate(1.08);
-  transform: scale(1.06);
+  filter: blur(20px) saturate(1.25) brightness(0.92);
+  transform: scale(1.08);
 }
 
 .login-page__photo--a {
   background-image: var(--login-photo-a);
   clip-path: polygon(0 0, 62% 0, 48% 100%, 0 100%);
-  opacity: 0.92;
+  opacity: 0.95;
 }
 
 .login-page__photo--b {
   background-image: var(--login-photo-b);
   clip-path: polygon(38% 0, 100% 0, 100% 100%, 52% 100%);
-  opacity: 0.88;
+  opacity: 0.9;
 }
 
 .login-page__scrim {
@@ -615,12 +779,28 @@ body {
   pointer-events: none;
   background:
     linear-gradient(
-      115deg,
-      rgba(15, 23, 42, 0.52) 0%,
-      rgba(15, 23, 42, 0.28) 42%,
-      rgba(248, 250, 252, 0.88) 72%,
-      rgba(248, 250, 252, 0.96) 100%
+      125deg,
+      rgba(6, 40, 28, 0.72) 0%,
+      rgba(15, 23, 42, 0.45) 38%,
+      rgba(248, 250, 252, 0.9) 68%,
+      rgba(248, 250, 252, 0.97) 100%
     );
+}
+
+.login-page__pitch-glow {
+  position: fixed;
+  left: -10%;
+  top: 10%;
+  z-index: 1;
+  width: 55%;
+  height: 55%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(74, 222, 128, 0.22) 0%,
+    transparent 68%
+  );
+  filter: blur(40px);
 }
 
 .login-page__inner {
@@ -630,8 +810,37 @@ body {
   min-height: 100dvh;
   max-width: 72rem;
   margin: 0 auto;
-  padding: max(1rem, env(safe-area-inset-top)) 0.75rem max(1.5rem, env(safe-area-inset-bottom));
+  padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(1.5rem, env(safe-area-inset-bottom));
   box-sizing: border-box;
+}
+
+.login-page__mobile-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: rgba(6, 40, 28, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.login-page__live-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #4ade80;
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.4);
+  animation: login-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 @media (min-width: 640px) {
@@ -648,6 +857,10 @@ body {
     gap: 3rem;
     padding: 3rem 2rem;
   }
+
+  .login-page__mobile-strip {
+    display: none;
+  }
 }
 
 .login-page__brand {
@@ -656,31 +869,68 @@ body {
 }
 
 .login-page__brand-content {
-  max-width: 26rem;
+  max-width: 28rem;
 }
 
 .login-page__eyebrow {
-  margin-bottom: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.82);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .login-page__headline {
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: clamp(2rem, 3.5vw, 2.85rem);
+  font-weight: 800;
+  line-height: 1.15;
   color: #ffffff;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.35),
+    0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.login-page__headline-accent {
+  background: linear-gradient(90deg, #fde68a 0%, #fbbf24 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
 }
 
 .login-page__subline {
-  margin-top: 1rem;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.78);
+  margin-top: 1.25rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.login-page__features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.login-page__features li {
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  backdrop-filter: blur(4px);
 }
 
 .login-page__form {
@@ -695,16 +945,17 @@ body {
 @media (max-width: 1023px) {
   .login-page__inner {
     align-content: start;
-    padding-top: max(1.25rem, env(safe-area-inset-top));
+    padding-top: max(1rem, env(safe-area-inset-top));
   }
 
   .login-page__form {
     align-items: flex-start;
-    padding-top: 0.5rem;
+    padding-top: 0.25rem;
   }
+
   .login-page__photo--a {
     clip-path: none;
-    opacity: 0.75;
+    opacity: 0.82;
   }
 
   .login-page__photo--b {
@@ -714,9 +965,23 @@ body {
   .login-page__scrim {
     background: linear-gradient(
       180deg,
-      rgba(15, 23, 42, 0.35) 0%,
-      rgba(248, 250, 252, 0.92) 55%,
+      rgba(6, 40, 28, 0.55) 0%,
+      rgba(15, 23, 42, 0.25) 28%,
+      rgba(248, 250, 252, 0.94) 58%,
       rgba(248, 250, 252, 0.98) 100%
+    );
+  }
+
+  .login-page__pitch-glow {
+    left: 50%;
+    top: 0;
+    width: 100%;
+    height: 40%;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      ellipse at center top,
+      rgba(74, 222, 128, 0.28) 0%,
+      transparent 70%
     );
   }
 }
@@ -1707,32 +1972,13 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  opacity: 0.6;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--color-primary) 4%, transparent) 0%,
-    transparent 35%
+    color-mix(in srgb, var(--color-primary) 3%, transparent) 0%,
+    transparent 28%,
+    transparent 72%,
+    color-mix(in srgb, #facc15 4%, transparent) 100%
   );
   border-radius: inherit;
-}
-
-.khpa-pro .khpa-team-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  border-radius: 9999px;
-  padding: 0.125rem 0.5rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.khpa-pro .khpa-team-tag--1 {
-  background: color-mix(in srgb, var(--color-primary-soft) 80%, white);
-  color: var(--color-primary);
-}
-
-.khpa-pro .khpa-team-tag--2 {
-  background: color-mix(in srgb, #facc15 25%, white);
-  color: #a16207;
 }

@@ -308,7 +308,7 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
   return (
     <div className="login-page-shell w-full min-w-0 max-w-md sm:max-w-lg">
       <div
-        className="login-portal-tabs mb-4 grid grid-cols-2 gap-1 rounded-xl bg-surface-muted/80 p-1"
+        className="login-portal-tabs mb-4 grid grid-cols-2 gap-1.5 rounded-xl p-1.5"
         role="tablist"
         aria-label="選擇登入平台"
       >
@@ -328,35 +328,51 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
         />
       </div>
 
-      <div className="login-portal-hero mb-4 text-center">
-        {portal === "khpa" ? (
-          <>
-            <KhpaLogo
-              size={72}
-              className="mx-auto mb-3 ring-4 ring-primary/15 sm:hidden"
-              priority
-            />
-            <h1 className="text-lg font-bold leading-snug text-foreground sm:text-xl">
-              高雄市匹克球協會
-            </h1>
-            <p className="mt-1 text-sm text-muted">協會對戰管理平台</p>
-          </>
-        ) : (
-          <>
-            <ClubLogo
-              size={72}
-              className="mx-auto mb-3 ring-4 ring-white/90 sm:hidden"
-              priority
-            />
-            <h1 className="text-lg font-bold leading-snug text-foreground sm:text-xl">
-              星鑽 XS 匹克球
-            </h1>
-            <p className="mt-1 text-sm text-muted">專業 DUPR 賽事管理系統</p>
-          </>
+      <div
+        className={cn(
+          "login-portal-hero relative mb-4 overflow-hidden rounded-2xl px-4 py-6 text-center sm:mb-5 sm:px-6 sm:py-7",
+          portal === "khpa" ? "login-portal-hero--khpa" : "login-portal-hero--xs",
         )}
+      >
+        <div className="login-portal-hero__shine" aria-hidden />
+        <div className="login-portal-hero__stripes" aria-hidden />
+
+        {portal === "khpa" ? (
+          <KhpaLogo
+            size={76}
+            className="relative z-[1] mx-auto mb-3 ring-4 ring-white/35 shadow-lg sm:mb-4"
+            priority
+          />
+        ) : (
+          <ClubLogo
+            size={76}
+            className="relative z-[1] mx-auto mb-3 ring-4 ring-white/40 shadow-lg sm:mb-4"
+            priority
+          />
+        )}
+
+        <p className="login-portal-hero__badge">
+          <span className="login-portal-hero__live" aria-hidden />
+          {portal === "khpa" ? "官方協會賽事平台" : "DUPR 認證賽事系統"}
+        </p>
+
+        <h1 className="login-portal-hero__title">
+          {portal === "khpa" ? "高雄市匹克球協會" : "星鑽 XS 匹克球"}
+        </h1>
+
+        <p className="login-portal-hero__tagline">
+          {portal === "khpa"
+            ? "協會對戰管理 · 榮耀殿堂"
+            : "專業 DUPR 賽事管理系統"}
+        </p>
       </div>
 
-      <div className="glass-card-solid p-4 sm:p-6">
+      <div
+        className={cn(
+          "glass-card-solid p-4 sm:p-6",
+          portal === "khpa" ? "login-form-card--khpa" : "login-form-card--xs",
+        )}
+      >
         {portal === "xs" && (
           <div
             className="mb-4 grid grid-cols-2 gap-1 rounded-lg bg-surface-muted/80 p-1"
@@ -435,7 +451,7 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
               type="submit"
               loading={loading}
               disabled={!captchaToken || !captchaAnswer.trim()}
-              className="h-11 w-full"
+              className="login-submit--khpa h-11 w-full"
             >
               登入協會平台
             </Button>
@@ -590,10 +606,10 @@ function PortalTab({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        "btn-touch flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-lg px-2 py-2.5 transition-colors",
+        "btn-touch flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-lg px-2 py-2.5 transition-all",
         active
-          ? "glass-nav-active shadow-sm"
-          : "text-muted hover:bg-surface hover:text-foreground",
+          ? "login-portal-tab--active shadow-md"
+          : "text-muted hover:bg-white/60 hover:text-foreground",
       )}
     >
       {logo}

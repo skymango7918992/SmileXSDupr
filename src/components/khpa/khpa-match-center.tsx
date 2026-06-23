@@ -20,7 +20,6 @@ import type { KhpaLeaderboardEntry } from "@/types/khpa";
 import type { KhpaMatchWithPlayers, KhpaPlayer, KhpaVenue } from "@/types/khpa";
 import type { ScoreType } from "@/types/database";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 type Props = {
@@ -194,41 +193,31 @@ export function KhpaMatchCenter({
         </div>
       </div>
 
-      <div className="sticky bottom-3 z-10 flex gap-2 rounded-2xl border border-border bg-surface/95 p-2 shadow-lg backdrop-blur-sm sm:bottom-4">
-        <Button
-          onClick={() => setShowManual(true)}
-          className="btn-touch h-12 flex-1 text-base"
-          disabled={isPending || players.length < 4}
-        >
-          <Plus className="h-5 w-5" />
-          新增成績
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={handleExport}
-          className="btn-touch h-12 shrink-0"
-          disabled={isPending || matches.length === 0}
-        >
-          <Download className="h-4 w-4" />
-          匯出
-        </Button>
-      </div>
-
       {error && <div className="alert-danger">{error}</div>}
 
-      <Card>
-        <CardTitle className="mb-1 text-base sm:text-lg">
-          {activeVenue.name}
-        </CardTitle>
-        <p className="mb-4 text-sm text-muted">
-          {matchDate} · 共 {matches.length} 場
-        </p>
+      <section className="overflow-hidden rounded-xl border border-border bg-surface">
+        <div className="flex items-baseline justify-between gap-3 border-b border-divider px-3 py-2.5 sm:px-4">
+          <div className="min-w-0">
+            <h3 className="truncate text-sm font-semibold text-foreground sm:text-base">
+              {activeVenue.name}
+            </h3>
+            <p className="text-xs text-muted">
+              {matchDate} · {matches.length} 場
+            </p>
+          </div>
+          {matches.length > 0 && (
+            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+              最新在上
+            </span>
+          )}
+        </div>
+
         {matches.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted">
+          <p className="px-4 py-8 text-center text-sm text-muted">
             此地點尚無對戰紀錄，請按「新增成績」
           </p>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5 p-2 sm:gap-2 sm:p-3">
             {matches.map((match, index) => (
               <KhpaMatchCard
                 key={match.id}
@@ -242,7 +231,27 @@ export function KhpaMatchCenter({
             ))}
           </div>
         )}
-      </Card>
+      </section>
+
+      <div className="sticky bottom-3 z-10 flex gap-2 rounded-xl border border-border bg-surface/95 p-1.5 shadow-lg backdrop-blur-sm sm:bottom-4">
+        <Button
+          onClick={() => setShowManual(true)}
+          className="btn-touch h-11 flex-1"
+          disabled={isPending || players.length < 4}
+        >
+          <Plus className="h-4 w-4" />
+          新增成績
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={handleExport}
+          className="btn-touch h-11 shrink-0 px-3"
+          disabled={isPending || matches.length === 0}
+        >
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">匯出</span>
+        </Button>
+      </div>
 
       {showManual && (
         <KhpaManualMatchDialog

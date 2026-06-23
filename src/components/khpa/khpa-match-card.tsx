@@ -63,88 +63,83 @@ export function KhpaMatchCard({
   };
 
   return (
-    <article className="khpa-match-card rounded-2xl border border-border bg-surface p-4 shadow-sm">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <span className="font-data text-xs font-bold tabular-nums text-muted">
-          MATCH #{displayIndex}
+    <article
+      className={cn(
+        "khpa-match-card group relative overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-sm",
+        team1Wins && "border-l-[3px] !border-l-primary",
+        team2Wins && "border-r-[3px] !border-r-amber-500",
+      )}
+    >
+      <div className="flex items-center gap-2 border-b border-divider/60 px-3 py-1.5">
+        <span className="font-data shrink-0 text-[11px] font-bold tabular-nums text-muted">
+          #{displayIndex}
         </span>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-medium text-muted">
-            {SCORE_TYPE_LABEL[scoreType]}
-          </span>
-          <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">
-            已鎖定
-          </span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
-        <div className="min-w-0">
-          <span className="khpa-team-tag khpa-team-tag--1 mb-2">隊伍 1</span>
-          <TeamBlock
-            players={team1}
-            playerWins={playerWins}
-            align="left"
-            highlight={team1Wins}
-          />
-        </div>
-        <p className="font-data text-center text-xl font-bold tabular-nums sm:text-2xl">
-          <span className={cn(team1Wins && "text-primary")}>{s1}</span>
-          <span className="mx-1 text-muted">:</span>
-          <span className={cn(team2Wins && "text-primary")}>{s2}</span>
-        </p>
-        <div className="min-w-0 sm:text-right">
-          <span className="khpa-team-tag khpa-team-tag--2 mb-2">隊伍 2</span>
-          <TeamBlock
-            players={team2}
-            playerWins={playerWins}
-            align="left"
-            alignDesktop="right"
-            highlight={team2Wins}
-          />
-        </div>
-      </div>
-
-      {canDelete && onDelete && (
-        <div className="mt-4 flex justify-end border-t border-divider pt-3">
+        <span className="min-w-0 truncate text-[10px] text-muted">
+          {SCORE_TYPE_LABEL[scoreType]}
+        </span>
+        {canDelete && onDelete && (
           <Button
             size="sm"
-            variant="danger"
+            variant="ghost"
             disabled={disabled || saving}
             onClick={() => void handleDelete()}
-            className="btn-touch"
+            className="ml-auto h-7 w-7 shrink-0 p-0 text-muted hover:text-danger"
+            aria-label={`刪除第 ${displayIndex} 場`}
           >
-            <Trash2 className="h-4 w-4" />
-            刪除
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-2 px-3 py-2.5 sm:gap-x-3 sm:py-3">
+        <CompactTeam
+          players={team1}
+          playerWins={playerWins}
+          side="left"
+          highlight={team1Wins}
+        />
+
+        <div
+          className={cn(
+            "flex min-w-[3.5rem] flex-col items-center justify-center rounded-lg px-2 py-1.5 sm:min-w-[4rem]",
+            "bg-surface-muted/60 ring-1 ring-border/50",
+          )}
+          aria-label={`比分 ${s1} 比 ${s2}`}
+        >
+          <p className="font-data text-xl font-bold leading-none tabular-nums sm:text-2xl">
+            <span className={cn(team1Wins && "text-primary")}>{s1}</span>
+            <span className="mx-0.5 text-muted/70">:</span>
+            <span className={cn(team2Wins && "text-amber-700")}>{s2}</span>
+          </p>
         </div>
-      )}
+
+        <CompactTeam
+          players={team2}
+          playerWins={playerWins}
+          side="right"
+          highlight={team2Wins}
+        />
+      </div>
     </article>
   );
 }
 
-function TeamBlock({
+function CompactTeam({
   players,
   playerWins,
-  align,
-  alignDesktop,
+  side,
   highlight,
 }: {
   players: ReturnType<typeof getTeamPlayers>;
   playerWins: Record<string, number>;
-  align: "left" | "right";
-  alignDesktop?: "left" | "right";
+  side: "left" | "right";
   highlight?: boolean;
 }) {
-  const desktop = alignDesktop ?? align;
   return (
     <div
       className={cn(
-        "flex flex-col gap-2",
-        align === "right" && "items-end text-right",
-        highlight && "text-success",
-        desktop === "right" && "sm:items-end sm:text-right",
-        desktop === "left" && "sm:items-start sm:text-left",
+        "flex min-w-0 flex-col gap-1",
+        side === "right" && "items-end",
       )}
     >
       {players.map((player) =>
@@ -152,22 +147,25 @@ function TeamBlock({
           <div
             key={player.id}
             className={cn(
-              "flex items-center gap-2",
-              (align === "right" || desktop === "right") &&
-                "sm:flex-row-reverse sm:text-right",
+              "flex max-w-full items-center gap-1.5",
+              side === "right" && "flex-row-reverse",
+              highlight && "text-foreground",
             )}
+            title={player.dupr_id ? `${player.display_name} · ${player.dupr_id}` : player.display_name}
           >
             <KhpaBadgeAvatar
               wins={playerWins[player.id] ?? 0}
               name={player.display_name}
-              size="md"
+              size="sm"
             />
-            <div className={cn(desktop === "right" && "sm:text-right")}>
-              <p className="text-sm font-medium leading-tight">
-                {player.display_name}
-              </p>
-              <p className="text-[10px] text-muted">{player.dupr_id}</p>
-            </div>
+            <span
+              className={cn(
+                "truncate text-xs font-semibold leading-tight sm:text-sm",
+                highlight ? "text-inherit" : "text-secondary-foreground",
+              )}
+            >
+              {player.display_name}
+            </span>
           </div>
         ) : null,
       )}
