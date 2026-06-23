@@ -34,6 +34,7 @@ const PAGE_SIZE = 10;
 
 type Props = {
   initialPlayers: Player[];
+  readOnly?: boolean;
 };
 
 function SourceBadge({ source }: { source: PlayerSource }) {
@@ -68,6 +69,7 @@ type PlayerRowProps = {
   onCancel: () => void;
   onToggleActive: () => void;
   onDelete: () => void;
+  readOnly?: boolean;
 };
 
 function PlayerRowActions({
@@ -81,6 +83,7 @@ function PlayerRowActions({
   onToggleActive,
   onDelete,
   layout = "row",
+  readOnly = false,
 }: {
   isEditing: boolean;
   isPending: boolean;
@@ -92,8 +95,11 @@ function PlayerRowActions({
   onToggleActive: () => void;
   onDelete: () => void;
   layout?: "row" | "grid";
+  readOnly?: boolean;
 }) {
   const btnClass = layout === "grid" ? "min-h-11 flex-1" : "";
+
+  if (readOnly) return null;
 
   if (isEditing) {
     return (
@@ -174,6 +180,7 @@ function PlayerCard({
   onCancel,
   onToggleActive,
   onDelete,
+  readOnly,
 }: PlayerRowProps) {
   const isClub = player.source === "club";
 
@@ -316,6 +323,7 @@ function PlayerCard({
         </div>
       )}
 
+      {!readOnly && (
       <div className="mt-4">
         <PlayerRowActions
           isEditing={isEditing}
@@ -327,9 +335,11 @@ function PlayerCard({
           onCancel={onCancel}
           onToggleActive={onToggleActive}
           onDelete={onDelete}
+          readOnly={readOnly}
           layout="grid"
         />
       </div>
+      )}
     </div>
   );
 }
@@ -346,6 +356,7 @@ function PlayerTableRow({
   onCancel,
   onToggleActive,
   onDelete,
+  readOnly,
 }: PlayerRowProps) {
   const isClub = player.source === "club";
 
@@ -469,6 +480,7 @@ function PlayerTableRow({
           <SourceBadge source={player.source ?? "manual"} />
         </div>
       </td>
+      {!readOnly && (
       <td className="px-3 py-2">
         <PlayerRowActions
           isEditing={isEditing}
@@ -480,8 +492,10 @@ function PlayerTableRow({
           onCancel={onCancel}
           onToggleActive={onToggleActive}
           onDelete={onDelete}
+          readOnly={readOnly}
         />
       </td>
+      )}
     </tr>
   );
 }
@@ -508,7 +522,7 @@ function DuprEnvDiagnostics({ status }: { status: DuprEnvStatus | null }) {
   );
 }
 
-export function PlayerManagement({ initialPlayers }: Props) {
+export function PlayerManagement({ initialPlayers, readOnly = false }: Props) {
   const [players, setPlayers] = useState(initialPlayers);
   const [duprConfigMode, setDuprConfigMode] = useState<DuprConfigMode | null>(
     null,
@@ -722,6 +736,7 @@ export function PlayerManagement({ initialPlayers }: Props) {
     onCancel: cancelRowEdit,
     onToggleActive: () => toggleActive(player),
     onDelete: () => handleDelete(player),
+    readOnly,
   });
 
   const clubCount = players.filter((p) => p.source === "club").length;
@@ -730,6 +745,12 @@ export function PlayerManagement({ initialPlayers }: Props) {
   return (
     <div className="space-y-4 sm:space-y-5">
       <PageHero variant="players" />
+
+      {readOnly && (
+        <div className="rounded-[10px] border border-border bg-surface-muted/50 px-4 py-3 text-sm text-muted">
+          一般使用者模式：球員資料僅供查閱，無法新增、編輯或刪除。
+        </div>
+      )}
 
       <Card className="p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -775,6 +796,7 @@ DUPR_API_TOKEN=eyJ...`}
               </p>
             )}
           </div>
+          {!readOnly && (
           <Button
             onClick={handleDuprSync}
             loading={isPending}
@@ -785,6 +807,7 @@ DUPR_API_TOKEN=eyJ...`}
           >
             更新 Club 名單
           </Button>
+          )}
         </div>
         {syncMessage && (
           <p className="mt-3 rounded-[10px] border border-info/25 bg-info/10 px-3 py-2 text-sm text-info">
@@ -793,6 +816,7 @@ DUPR_API_TOKEN=eyJ...`}
         )}
       </Card>
 
+      {!readOnly && (
       <Card className="p-4 sm:p-5">
         <CardTitle className="mb-4">手動新增球員</CardTitle>
         <div className="grid gap-3">
@@ -834,6 +858,7 @@ DUPR_API_TOKEN=eyJ...`}
           </Button>
         </div>
       </Card>
+      )}
 
       <Card className="p-4 sm:p-5">
         <div className="mb-4 space-y-3">
@@ -871,7 +896,9 @@ DUPR_API_TOKEN=eyJ...`}
                 <th className="px-3 py-2 font-medium">DUPR ID</th>
                 <th className="px-3 py-2 font-medium">評分</th>
                 <th className="px-3 py-2 font-medium">狀態</th>
-                <th className="px-3 py-2 font-medium">操作</th>
+                {!readOnly && (
+                  <th className="px-3 py-2 font-medium">操作</th>
+                )}
               </tr>
             </thead>
             <tbody>

@@ -4,17 +4,17 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { ExternalLink, KeyRound } from "lucide-react";
 import { useAppUi } from "@/components/providers/app-ui-provider";
-import { updateKhpaPassword } from "@/lib/actions/khpa-auth";
-import type { KhpaAccountStatus } from "@/lib/actions/khpa-auth";
+import { updateXsStaffPassword } from "@/lib/actions/xs-staff-auth";
+import type { XsStaffAccountStatus } from "@/lib/actions/xs-staff-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 type Props = {
-  account: KhpaAccountStatus;
+  account: XsStaffAccountStatus;
 };
 
-export function KhpaSettingsCard({ account }: Props) {
+export function XsStaffSettingsCard({ account }: Props) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -31,13 +31,13 @@ export function KhpaSettingsCard({ account }: Props) {
     }
     startTransition(async () => {
       try {
-        await updateKhpaPassword(password);
+        await updateXsStaffPassword(password);
         setPassword("");
         setConfirmPassword("");
         success(
           account.exists
-            ? "協會密碼已更新"
-            : "協會帳號已建立，請至 /login 登入",
+            ? "一般使用者密碼已更新"
+            : "一般使用者帳號已建立，請至 /login 登入",
         );
       } catch (e) {
         toastError(e instanceof Error ? e.message : "更新失敗");
@@ -48,12 +48,12 @@ export function KhpaSettingsCard({ account }: Props) {
   return (
     <Card className="max-w-lg">
       <CardTitle className="mb-2 flex items-center gap-2">
-        <KeyRound className="h-5 w-5 text-teal-600" />
-        高雄匹克球協會帳號
+        <KeyRound className="h-5 w-5 text-primary" />
+        星鑽 XS 一般使用者帳號
       </CardTitle>
       <p className="mb-4 text-sm text-muted">
-        協會人員共用帳號 <strong>{account.username}</strong>（
-        {account.email}）。登入時需輸入圖形驗證碼，建議定期更換密碼。
+        現場人員共用帳號 <strong>{account.username}</strong>（
+        {account.email}）。登入時需輸入圖形驗證碼，無法進入打球軌跡與報到收款。
       </p>
 
       <div className="mb-4 rounded-lg border border-border bg-surface-muted/40 px-3 py-2 text-sm">
@@ -66,10 +66,10 @@ export function KhpaSettingsCard({ account }: Props) {
           )}
         </p>
         <Link
-          href="/login?platform=khpa"
+          href="/login?platform=xs&mode=staff"
           className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"
         >
-          協會登入入口 /login
+          一般使用者登入入口 /login
           <ExternalLink className="h-3 w-3" />
         </Link>
       </div>
@@ -99,7 +99,7 @@ export function KhpaSettingsCard({ account }: Props) {
           loading={isPending}
           disabled={!password}
         >
-          {account.exists ? "更新協會密碼" : "建立協會帳號"}
+          {account.exists ? "更新一般使用者密碼" : "建立一般使用者帳號"}
         </Button>
       </div>
     </Card>

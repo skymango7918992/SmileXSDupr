@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireXsAdmin } from "@/lib/auth/require-xs-admin";
 import { fetchAllClubMembers } from "@/lib/dupr/client";
 import {
   deduplicatePlayersByDuprId,
@@ -37,6 +38,7 @@ function clubPlayerPayload(member: {
 }
 
 export async function syncDuprClubMembers(): Promise<DuprSyncResult> {
+  await requireXsAdmin();
   const members = await fetchAllClubMembers();
   const clubIds = new Set(members.map((m) => m.duprId));
 

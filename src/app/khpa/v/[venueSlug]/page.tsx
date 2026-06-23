@@ -1,10 +1,21 @@
 import { redirect } from "next/navigation";
+import { khpaHomePath } from "@/lib/khpa/paths";
 
 type Props = {
   params: Promise<{ venueSlug: string }>;
+  searchParams: Promise<{ tab?: string }>;
 };
 
-export default async function KhpaVenueRedirect({ params }: Props) {
+export default async function LegacyKhpaVenueRedirect({
+  params,
+  searchParams,
+}: Props) {
   const { venueSlug } = await params;
-  redirect(`/khpa?venue=${venueSlug}&tab=matches`);
+  const sp = await searchParams;
+  redirect(
+    khpaHomePath({
+      venue: venueSlug,
+      tab: sp.tab ?? "matches",
+    }),
+  );
 }

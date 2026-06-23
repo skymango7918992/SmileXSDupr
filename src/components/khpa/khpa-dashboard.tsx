@@ -3,7 +3,7 @@
 import { Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { KhpaBottomNav, type KhpaTab } from "@/components/khpa/khpa-bottom-nav";
+import { KhpaTabBar, type KhpaTab } from "@/components/khpa/khpa-tab-bar";
 import { KhpaHeader } from "@/components/khpa/khpa-header";
 import { KhpaLeaderboardPanel } from "@/components/khpa/khpa-leaderboard-panel";
 import { KhpaMatchCenter } from "@/components/khpa/khpa-match-center";
@@ -16,6 +16,7 @@ import type {
 } from "@/types/khpa";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { khpaHomePath } from "@/lib/khpa/paths";
 
 type Props = {
   venues: KhpaVenue[];
@@ -57,9 +58,11 @@ function KhpaDashboardInner({
 
   const goTab = useCallback(
     (next: KhpaTab) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("tab", next);
-      router.replace(`/khpa?${params.toString()}`, { scroll: false });
+      const venue = searchParams.get("venue");
+      router.replace(
+        khpaHomePath({ tab: next, venue: venue ?? undefined }),
+        { scroll: false },
+      );
     },
     [router, searchParams],
   );
@@ -68,9 +71,12 @@ function KhpaDashboardInner({
 
   return (
     <>
-      <KhpaHeader venues={venues} isAdmin={isAdmin} />
+      <div className="khpa-sticky-shell sticky top-0 z-40">
+        <KhpaHeader venues={venues} isAdmin={isAdmin} />
+        <KhpaTabBar />
+      </div>
 
-      <main className="relative z-[1] mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-4 sm:px-6 sm:pb-24">
+      <main className="relative z-[1] mx-auto w-full max-w-3xl flex-1 px-3 pb-6 pt-3 sm:px-6 sm:pb-8 sm:pt-4">
         {showGuide && (
           <Card className="mb-4 border-primary/25 bg-gradient-to-br from-primary/5 to-white p-4">
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -144,8 +150,6 @@ function KhpaDashboardInner({
           />
         )}
       </main>
-
-      <KhpaBottomNav />
     </>
   );
 }

@@ -54,6 +54,7 @@ type Props = {
   initialMatches: MatchWithPlayers[];
   initialSelectedIds: string[];
   settings: AppSettings | null;
+  canDeleteMatches?: boolean;
 };
 
 export function MatchCenter({
@@ -64,6 +65,7 @@ export function MatchCenter({
   initialMatches,
   initialSelectedIds,
   settings,
+  canDeleteMatches = true,
 }: Props) {
   const [matchDate, setMatchDate] = useState(initialMatchDate);
   const [sessions, setSessions] = useState(initialSessions);
@@ -183,18 +185,14 @@ export function MatchCenter({
     });
   };
 
-  const handleSelectionChange = (ids: string[]) => {
+  const handleSaveRoster = async (ids: string[]) => {
     if (!activeSessionId) return;
+    setError(null);
+    await updateSessionRoster(activeSessionId, ids);
     setSelectedIds(ids);
-    startTransition(async () => {
-      try {
-        await updateSessionRoster(activeSessionId, ids);
-        const updated = await getSessionsForDate(matchDate);
-        setSessions(updated);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "儲存名單失敗");
-      }
-    });
+    const updated = await getSessionsForDate(matchDate);
+    setSessions(updated);
+    success("出席名單已儲存");
   };
 
   const handleGenerate = async (courtCount: number) => {
@@ -270,10 +268,18 @@ export function MatchCenter({
   ) => {
     if (!activeSessionId) return;
     setError(null);
-    await createManualMatch(activeSessionId, team1, team2);
-    await loadSessionData(activeSessionId);
-    const updated = await getSessionsForDate(matchDate);
-    setSessions(updated);
+    try {
+      await createManualMatch(activeSessionId, team1, team2);
+      await loadSessionData(activeSessionId);
+      const updated = await getSessionsForDate(matchDate);
+      setSessions(updated);
+      success("已手動新增對戰");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "新增失敗";
+      setError(msg);
+      toastError(msg);
+      throw e;
+    }
   };
 
   const handleExport = () => {
@@ -288,7 +294,7 @@ export function MatchCenter({
         matches,
         {
           sessionName: label,
-          scoreType: activeSession?.score_type ?? "sideout",
+          scoreType: activeSession?.score_type ?? "rally",
         },
       );
       if (exported === 0) {
@@ -400,7 +406,7 @@ export function MatchCenter({
             activeId={activeSessionId}
             onSelect={handleSessionSelect}
             onCreate={() => setShowCreateSession(true)}
-            onDelete={handleDeleteSession}
+            onDelete={canDeleteMatches ? handleDeleteSession : undefined}
             loading={isPending}
           />
         </div>
@@ -420,8 +426,16 @@ export function MatchCenter({
             <PlayerChipGrid
               players={players}
               selectedIds={selectedIds}
-              onSelectionChange={handleSelectionChange}
-              cardClassName=""
+              onSave={async (ids) => {
+                try {
+                  await handleSaveRoster(ids);
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : "儲存名單失敗");
+                  toastError(e instanceof Error ? e.message : "儲存名單失敗");
+                  throw e;
+                }
+              }}
+              cardClassName="min-h-[min(420px,55vh)]"
             />
             <div className="space-y-3">
               <MatchGenerator
@@ -449,6 +463,7 @@ export function MatchCenter({
             matches={matches}
             onSaveScore={handleSaveScore}
             onDelete={handleDelete}
+            canDelete={canDeleteMatches}
             loading={isPending}
             sessionName={activeSession?.name}
           />

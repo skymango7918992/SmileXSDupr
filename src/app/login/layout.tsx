@@ -14,14 +14,16 @@ export default function LoginLayout({
       <div className="login-page__inner">
         <aside className="login-page__brand hidden lg:flex">
           <div className="login-page__brand-content">
-            <p className="login-page__eyebrow">星鑽 XS 匹克球</p>
+            <p className="login-page__eyebrow">匹克球賽事管理</p>
             <h2 className="login-page__headline">
-              場館級賽事管理
+              高雄市匹克球協會
               <br />
-              從報到到大滿貫
+              星鑽 XS 匹克球
             </h2>
             <p className="login-page__subline">
-              DUPR 計分 · 多賽程組 · 即時對戰表 · CSV 匯出
+              協會對戰紀錄 · 圖形驗證碼登入
+              <br />
+              DUPR 計分 · 多賽程組 · CSV 匯出
             </p>
           </div>
         </aside>

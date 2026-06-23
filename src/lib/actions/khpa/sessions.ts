@@ -181,7 +181,7 @@ export async function createKhpaMatchWithScore(
     ]);
 
   if (playersError) throw new Error(playersError.message);
-  revalidatePath("/khpa");
+  revalidatePath("/");
 }
 
 export async function deleteKhpaMatch(matchId: string): Promise<void> {
@@ -193,7 +193,7 @@ export async function deleteKhpaMatch(matchId: string): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase.from("khpa_matches").delete().eq("id", matchId);
   if (error) throw new Error(error.message);
-  revalidatePath("/khpa");
+  revalidatePath("/");
 }
 
 export async function getKhpaCanDelete(): Promise<boolean> {

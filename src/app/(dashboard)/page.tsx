@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { KhpaHomeContent } from "@/components/khpa/khpa-home-content";
 import { LeaderboardTop3 } from "@/components/leaderboard/leaderboard-top3";
 import { MatchCenter } from "@/components/match/match-center";
 import { SetupGuide } from "@/components/setup/setup-guide";
@@ -10,13 +12,39 @@ import {
   getSessionsForDate,
 } from "@/lib/actions/sessions";
 import { getPlayers } from "@/lib/actions/players";
+import { getRoleFromEmail, isAdminRole } from "@/lib/auth/roles";
 import { hasSupabaseEnv } from "@/lib/env";
 import { getSettings } from "@/lib/actions/settings";
+import { isKhpaPortal, khpaHomePath } from "@/lib/khpa/paths";
+import { createClient } from "@/lib/supabase/server";
 import { toISODate } from "@/lib/utils";
 
-export default async function HomePage() {
+type Props = {
+  searchParams: Promise<{
+    portal?: string;
+    tab?: string;
+    venue?: string;
+  }>;
+};
+
+export default async function HomePage({ searchParams }: Props) {
   if (!hasSupabaseEnv()) {
     return <SetupGuide />;
+  }
+
+  const params = await searchParams;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const role = getRoleFromEmail(user?.email) ?? null;
+
+  if (isKhpaPortal(params.portal, role)) {
+    return (
+      <KhpaHomeContent
+        searchParams={{ tab: params.tab, venue: params.venue }}
+      />
+    );
   }
 
   const today = toISODate(new Date());
@@ -64,6 +92,7 @@ export default async function HomePage() {
           initialMatches={matches}
           initialSelectedIds={selectedIds}
           settings={settings}
+          canDeleteMatches={isAdminRole(user?.email)}
         />
       </div>
     );

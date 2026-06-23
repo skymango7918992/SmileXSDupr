@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { KhpaPlayer } from "@/types/khpa";
 
 function revalidateKhpaPlayers() {
-  revalidatePath("/khpa");
+  revalidatePath("/");
 }
 
 function validateDuprId(duprId: string): string {

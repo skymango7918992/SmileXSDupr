@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { KhpaBadgeAvatar } from "@/components/khpa/badge-avatar";
 import type { KhpaPlayer } from "@/types/khpa";
@@ -51,6 +51,15 @@ export function KhpaPlayerPicker({
     setQuery("");
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   return (
     <>
       <div>
@@ -94,8 +103,8 @@ export function KhpaPlayerPicker({
               setQuery("");
             }}
           />
-          <div className="glass-modal relative flex max-h-[min(85vh,640px)] w-full flex-col rounded-t-2xl sm:max-w-md sm:rounded-2xl">
-            <div className="flex items-center justify-between border-b border-divider px-4 py-3">
+          <div className="glass-modal relative flex h-[min(92dvh,100%)] max-h-[92dvh] w-full min-h-0 flex-col overflow-hidden rounded-t-2xl sm:h-auto sm:max-h-[min(85dvh,640px)] sm:max-w-md sm:rounded-2xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-divider px-4 py-3">
               <p className="font-semibold">{label}</p>
               <button
                 type="button"
@@ -110,7 +119,7 @@ export function KhpaPlayerPicker({
               </button>
             </div>
 
-            <div className="border-b border-divider px-4 py-3">
+            <div className="shrink-0 border-b border-divider px-4 py-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                 <Input
@@ -122,11 +131,11 @@ export function KhpaPlayerPicker({
                 />
               </div>
               <p className="mt-2 text-xs text-muted">
-                共 {players.length} 位啟用球員 · 顯示 {options.length} 筆
+                共 {players.length} 位 · 顯示 {options.length} 筆
               </p>
             </div>
 
-            <ul className="flex-1 overflow-y-auto overscroll-contain px-2 py-2">
+            <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2 [-webkit-overflow-scrolling:touch]">
               {options.length === 0 ? (
                 <li className="px-3 py-8 text-center text-sm text-muted">找不到符合的球員</li>
               ) : (
@@ -162,7 +171,7 @@ export function KhpaPlayerPicker({
             </ul>
 
             {value && (
-              <div className="border-t border-divider p-3">
+              <div className="shrink-0 border-t border-divider p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <button
                   type="button"
                   className="btn-touch w-full rounded-xl py-3 text-sm text-muted hover:bg-surface-muted"

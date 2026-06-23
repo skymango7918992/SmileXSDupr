@@ -17,7 +17,7 @@ type Props = {
   loading?: boolean;
 };
 
-const SCORE_OPTIONS: ScoreType[] = ["sideout", "rally"];
+const SCORE_OPTIONS: ScoreType[] = ["rally", "sideout"];
 
 export function CreateSessionDialog({
   defaultName = "",
@@ -26,12 +26,12 @@ export function CreateSessionDialog({
   loading,
 }: Props) {
   const [name, setName] = useState(defaultName);
-  const [scoreType, setScoreType] = useState<ScoreType>("sideout");
+  const [scoreType, setScoreType] = useState<ScoreType>("rally");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
       <div
-        className="glass-card w-full max-w-md p-5 shadow-modal"
+        className="glass-card max-h-[92dvh] w-full max-w-md overflow-y-auto overscroll-contain p-5 shadow-modal [-webkit-overflow-scrolling:touch]"
         role="dialog"
         aria-labelledby="create-session-title"
       >
@@ -54,13 +54,13 @@ export function CreateSessionDialog({
 
           <div>
             <span className="mb-2 block text-sm text-muted">計分制度</span>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               {SCORE_OPTIONS.map((type) => (
                 <button
                   key={type}
                   type="button"
                   className={cn(
-                    "w-full rounded-[10px] border px-3 py-3 text-left transition-colors",
+                    "w-full min-w-0 rounded-[10px] border px-3 py-3 text-left transition-colors",
                     scoreType === type
                       ? "border-primary bg-primary-subtle text-primary"
                       : "border-border bg-surface text-secondary-foreground hover:bg-surface-muted",

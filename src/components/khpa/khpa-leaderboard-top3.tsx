@@ -47,14 +47,14 @@ export function KhpaLeaderboardTop3({
       ) : entries.length === 0 ? (
         <p className="text-sm text-muted">{year} 年尚無完成對戰紀錄。</p>
       ) : (
-        <div className="flex items-end justify-center gap-1.5 px-1 pb-1 sm:gap-3">
+        <div className="flex items-end justify-center gap-1 px-0.5 pb-1 sm:gap-3 sm:px-1">
           {PODIUM.map((slot) => {
             const entry = byRank.get(slot.rank);
             return (
               <div
                 key={slot.rank}
                 className={cn(
-                  "flex flex-1 max-w-[7rem] flex-col items-center sm:max-w-[9rem]",
+                  "flex min-w-0 flex-1 max-w-[6rem] flex-col items-center sm:max-w-[8rem]",
                   slot.order,
                 )}
               >
@@ -63,7 +63,14 @@ export function KhpaLeaderboardTop3({
                     <KhpaBadgeAvatar
                       wins={entry.wins}
                       name={entry.name}
-                      size={compact ? "lg" : "xl"}
+                      size={compact ? "sm" : "md"}
+                      className="sm:hidden"
+                    />
+                    <KhpaBadgeAvatar
+                      wins={entry.wins}
+                      name={entry.name}
+                      size={compact ? "md" : "lg"}
+                      className="hidden sm:flex"
                     />
                     <p className="mt-1.5 line-clamp-2 text-center text-xs font-semibold sm:text-sm">
                       {entry.name}

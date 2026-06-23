@@ -1,11 +1,25 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { getRoleFromEmail } from "@/lib/auth/roles";
+import { getRoleFromEmail, isStaffBlockedRoute } from "@/lib/auth/roles";
 import { getSupabaseEnv, hasSupabaseEnv } from "@/lib/env";
 import {
   getTrustedDeviceCookie,
   hasValidTrustedDevice,
 } from "@/lib/trusted-device-server";
+
+const XS_ONLY_PREFIXES = [
+  "/play-map",
+  "/checkin",
+  "/leaderboard",
+  "/players",
+  "/settings",
+];
+
+function isXsOnlyRoute(pathname: string): boolean {
+  return XS_ONLY_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+}
 
 function isServerActionOrRsc(request: NextRequest): boolean {
   return (
@@ -46,17 +60,13 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isKhpaRoute = pathname.startsWith("/khpa");
-  const isKhpaAuthRoute = pathname.startsWith("/khpa/login");
-  const isXsAuthRoute = pathname.startsWith("/login");
-  const isAuthRoute = isKhpaAuthRoute || isXsAuthRoute;
-
-  const loginPath = isKhpaRoute ? "/khpa/login" : "/login";
+  const isAuthRoute = pathname.startsWith("/login");
+  const isSetupRoute = pathname.startsWith("/login/setup");
 
   if (!user) {
     if (!isAuthRoute && !skipAuthRedirect) {
       const url = request.nextUrl.clone();
-      url.pathname = loginPath;
+      url.pathname = "/login";
       return NextResponse.redirect(url);
     }
     return supabaseResponse;
@@ -68,28 +78,45 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // KHPA 帳號僅能使用協會平台
-  if (role === "khpa" && !isKhpaRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/khpa";
-    return NextResponse.redirect(url);
-  }
-
-  // 協會平台：僅帳密 + Captcha，不強制 Google Authenticator
-  if (isKhpaRoute) {
-    if (isKhpaAuthRoute) {
+  // 協會帳號：免 MFA，僅使用首頁協會平台
+  if (role === "khpa") {
+    if (isAuthRoute) {
       const url = request.nextUrl.clone();
-      url.pathname = "/khpa";
+      url.pathname = "/";
       url.searchParams.delete("step");
+      url.searchParams.delete("platform");
+      url.searchParams.delete("mode");
+      return NextResponse.redirect(url);
+    }
+    if (isXsOnlyRoute(pathname)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
       return NextResponse.redirect(url);
     }
     return supabaseResponse;
   }
 
-  // 以下為星鑽 XS 後台：維持 MFA
+  // 星鑽 XS 一般使用者：免 MFA，隱藏打球軌跡／報到收款／設定
+  if (role === "staff") {
+    if (isAuthRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      url.searchParams.delete("step");
+      url.searchParams.delete("platform");
+      url.searchParams.delete("mode");
+      return NextResponse.redirect(url);
+    }
+    if (isStaffBlockedRoute(pathname)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  // 星鑽 XS 管理員：維持 MFA
   const { data: factors } = await supabase.auth.mfa.listFactors();
   const hasTotp = (factors?.totp?.length ?? 0) > 0;
-  const isSetupRoute = pathname.startsWith("/login/setup");
 
   if (!hasTotp) {
     if (!isSetupRoute) {
@@ -129,6 +156,7 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("step", "verify");
+      url.searchParams.set("platform", "xs");
       return NextResponse.redirect(url);
     }
     return supabaseResponse;
@@ -138,6 +166,7 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.searchParams.delete("step");
+    url.searchParams.delete("platform");
     return NextResponse.redirect(url);
   }
 

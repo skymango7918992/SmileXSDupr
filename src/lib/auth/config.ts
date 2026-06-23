@@ -1,6 +1,7 @@
-import { getAdminEnv, getKhpaEnv } from "@/lib/env";
+import { getAdminEnv, getKhpaEnv, getStaffEnv } from "@/lib/env";
 
 export type LoginPortal = "xs" | "khpa";
+export type XsLoginMode = "admin" | "staff";
 
 export function getAdminUsername(): string {
   return getAdminEnv().username;
@@ -18,12 +19,24 @@ export function getKhpaEmail(): string {
   return getKhpaEnv().email;
 }
 
+export function getStaffUsername(): string {
+  return getStaffEnv().username;
+}
+
+export function getStaffEmail(): string {
+  return getStaffEnv().email;
+}
+
 export function isValidAdminUsername(username: string): boolean {
   return username.trim().toLowerCase() === getAdminUsername().toLowerCase();
 }
 
 export function isValidKhpaUsername(username: string): boolean {
   return username.trim().toLowerCase() === getKhpaUsername().toLowerCase();
+}
+
+export function isValidStaffUsername(username: string): boolean {
+  return username.trim().toLowerCase() === getStaffUsername().toLowerCase();
 }
 
 export function usernameToEmail(
@@ -37,5 +50,6 @@ export function usernameToEmail(
     return null;
   }
   if (isValidAdminUsername(username)) return getAdminEmail();
+  if (isValidStaffUsername(username)) return getStaffEmail();
   return null;
 }

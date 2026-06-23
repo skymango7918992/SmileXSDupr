@@ -1,19 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { KeyRound, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import { ImageCaptchaField } from "@/components/khpa/image-captcha-field";
+import { KhpaLogo } from "@/components/khpa/khpa-logo";
 import { TrustDeviceCheckbox } from "@/components/auth/trust-device-checkbox";
 import { useAppUi } from "@/components/providers/app-ui-provider";
 import {
   isCurrentDeviceTrusted,
   registerTrustedDevice,
 } from "@/lib/actions/trusted-device";
-import { usernameToEmail } from "@/lib/auth/config";
+import { khpaSignIn } from "@/lib/actions/khpa-auth";
+import { xsStaffSignIn } from "@/lib/actions/xs-staff-auth";
+import {
+  getAdminUsername,
+  getKhpaUsername,
+  getStaffUsername,
+  isValidStaffUsername,
+  type LoginPortal,
+  type XsLoginMode,
+  usernameToEmail,
+} from "@/lib/auth/config";
+import { khpaHomePath } from "@/lib/khpa/paths";
 import { createClient } from "@/lib/supabase/client";
 import { ClubLogo } from "@/components/brand/club-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type Step = "credentials" | "verify";
 
@@ -24,10 +38,15 @@ type Props = {
 export function LoginForm({ trustedDeviceDays = 7 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [portal, setPortal] = useState<LoginPortal>("khpa");
+  const [xsMode, setXsMode] = useState<XsLoginMode>("admin");
   const [step, setStep] = useState<Step>("credentials");
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(getKhpaUsername());
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [challengeId, setChallengeId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,8 +55,43 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
   const [trustDevice, setTrustDevice] = useState(true);
   const { info, success } = useAppUi();
 
+  const resetCaptcha = useCallback(() => {
+    setCaptchaToken("");
+    setCaptchaAnswer("");
+    setCaptchaKey((k) => k + 1);
+  }, []);
+
+  const switchPortal = (next: LoginPortal) => {
+    setPortal(next);
+    setXsMode("admin");
+    setStep("credentials");
+    setError(null);
+    setStatusText(null);
+    setOtp("");
+    resetCaptcha();
+    setUsername(next === "khpa" ? getKhpaUsername() : getAdminUsername());
+  };
+
+  const switchXsMode = (next: XsLoginMode) => {
+    setXsMode(next);
+    setStep("credentials");
+    setError(null);
+    setStatusText(null);
+    setOtp("");
+    resetCaptcha();
+    setUsername(next === "staff" ? getStaffUsername() : getAdminUsername());
+  };
+
   useEffect(() => {
+    const platform = searchParams.get("platform");
+    const mode = searchParams.get("mode");
+    if (platform === "xs") {
+      switchPortal("xs");
+      if (mode === "staff") switchXsMode("staff");
+    } else if (platform === "khpa") switchPortal("khpa");
     if (searchParams.get("step") === "verify") {
+      setPortal("xs");
+      setXsMode("admin");
       setStep("verify");
       void prepareMfaChallenge();
     }
@@ -73,14 +127,82 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
     setStep("verify");
   };
 
-  const handleCredentials = async (e: React.FormEvent) => {
+  const handleKhpaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!captchaToken || !captchaAnswer.trim()) {
+      setError("請輸入圖形驗證碼");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await khpaSignIn({
+        username,
+        password,
+        captchaToken,
+        captchaAnswer,
+      });
+
+      if (!result.ok) {
+        setError(result.message);
+        resetCaptcha();
+        return;
+      }
+
+      router.replace(khpaHomePath());
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleXsStaffSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!captchaToken || !captchaAnswer.trim()) {
+      setError("請輸入圖形驗證碼");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await xsStaffSignIn({
+        username,
+        password,
+        captchaToken,
+        captchaAnswer,
+      });
+
+      if (!result.ok) {
+        setError(result.message);
+        resetCaptcha();
+        return;
+      }
+
+      router.replace("/");
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleXsCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setStatusText("正在驗證帳號…");
     setLoading(true);
 
     try {
-      const email = usernameToEmail(username);
+      if (isValidStaffUsername(username)) {
+        setError("請切換至「一般使用者」分頁登入");
+        setStatusText(null);
+        return;
+      }
+
+      const email = usernameToEmail(username, "xs");
       if (!email) {
         setError("帳號或密碼錯誤");
         setStatusText(null);
@@ -184,21 +306,185 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="mb-6 text-center">
-        <ClubLogo size={72} className="mx-auto mb-4 ring-4 ring-white/90" priority />
-        <h1 className="text-xl font-semibold text-foreground">星鑽 XS 匹克球</h1>
-        <p className="mt-1 text-sm text-muted">專業 DUPR 賽事管理系統</p>
+    <div className="login-page-shell w-full min-w-0 max-w-md sm:max-w-lg">
+      <div
+        className="login-portal-tabs mb-4 grid grid-cols-2 gap-1 rounded-xl bg-surface-muted/80 p-1"
+        role="tablist"
+        aria-label="選擇登入平台"
+      >
+        <PortalTab
+          active={portal === "khpa"}
+          onClick={() => switchPortal("khpa")}
+          label="協會"
+          labelWide="高雄市匹克球協會"
+          logo={<KhpaLogo size={32} className="shrink-0 ring-2 ring-primary/15" />}
+        />
+        <PortalTab
+          active={portal === "xs"}
+          onClick={() => switchPortal("xs")}
+          label="星鑽 XS"
+          labelWide="星鑽 XS 匹克球"
+          logo={<ClubLogo size={32} className="shrink-0 ring-2 ring-white/80" />}
+        />
       </div>
 
-      <div className="glass-card-solid p-6">
-        <div className="mb-6 flex gap-2">
-          <StepBadge active={step === "credentials"} label="1. 帳密" />
-          <StepBadge active={step === "verify"} label="2. OTP 驗證" />
-        </div>
+      <div className="login-portal-hero mb-4 text-center">
+        {portal === "khpa" ? (
+          <>
+            <KhpaLogo
+              size={72}
+              className="mx-auto mb-3 ring-4 ring-primary/15 sm:hidden"
+              priority
+            />
+            <h1 className="text-lg font-bold leading-snug text-foreground sm:text-xl">
+              高雄市匹克球協會
+            </h1>
+            <p className="mt-1 text-sm text-muted">協會對戰管理平台</p>
+          </>
+        ) : (
+          <>
+            <ClubLogo
+              size={72}
+              className="mx-auto mb-3 ring-4 ring-white/90 sm:hidden"
+              priority
+            />
+            <h1 className="text-lg font-bold leading-snug text-foreground sm:text-xl">
+              星鑽 XS 匹克球
+            </h1>
+            <p className="mt-1 text-sm text-muted">專業 DUPR 賽事管理系統</p>
+          </>
+        )}
+      </div>
 
-        {step === "credentials" ? (
-          <form onSubmit={(e) => void handleCredentials(e)} className="space-y-4">
+      <div className="glass-card-solid p-4 sm:p-6">
+        {portal === "xs" && (
+          <div
+            className="mb-4 grid grid-cols-2 gap-1 rounded-lg bg-surface-muted/80 p-1"
+            role="tablist"
+            aria-label="星鑽 XS 登入身分"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={xsMode === "admin"}
+              onClick={() => switchXsMode("admin")}
+              className={cn(
+                "btn-touch rounded-md px-2 py-2 text-xs font-semibold transition-colors sm:text-sm",
+                xsMode === "admin"
+                  ? "glass-nav-active"
+                  : "text-muted hover:bg-surface hover:text-foreground",
+              )}
+            >
+              管理員
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={xsMode === "staff"}
+              onClick={() => switchXsMode("staff")}
+              className={cn(
+                "btn-touch rounded-md px-2 py-2 text-xs font-semibold transition-colors sm:text-sm",
+                xsMode === "staff"
+                  ? "glass-nav-active"
+                  : "text-muted hover:bg-surface hover:text-foreground",
+              )}
+            >
+              一般使用者
+            </button>
+          </div>
+        )}
+
+        {portal === "xs" && xsMode === "admin" && step === "verify" && (
+          <div className="mb-4 flex gap-2">
+            <StepBadge active={false} label="1. 帳密" />
+            <StepBadge active label="2. OTP 驗證" />
+          </div>
+        )}
+
+        {portal === "khpa" ? (
+          <form onSubmit={(e) => void handleKhpaSubmit(e)} className="space-y-4">
+            <Field
+              icon={<UserRound className="h-4 w-4" />}
+              label="帳號"
+              value={username}
+              onChange={setUsername}
+              placeholder="KHPA"
+              autoComplete="username"
+              disabled={loading}
+            />
+            <Field
+              icon={<KeyRound className="h-4 w-4" />}
+              label="密碼"
+              type="password"
+              value={password}
+              onChange={setPassword}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              disabled={loading}
+            />
+            <ImageCaptchaField
+              key={captchaKey}
+              token={captchaToken}
+              answer={captchaAnswer}
+              onTokenChange={setCaptchaToken}
+              onAnswerChange={setCaptchaAnswer}
+              disabled={loading}
+            />
+            {error && <ErrorBox message={error} />}
+            <Button
+              type="submit"
+              loading={loading}
+              disabled={!captchaToken || !captchaAnswer.trim()}
+              className="h-11 w-full"
+            >
+              登入協會平台
+            </Button>
+          </form>
+        ) : portal === "xs" && xsMode === "staff" ? (
+          <form onSubmit={(e) => void handleXsStaffSubmit(e)} className="space-y-4">
+            <Field
+              icon={<UserRound className="h-4 w-4" />}
+              label="帳號"
+              value={username}
+              onChange={setUsername}
+              placeholder="user"
+              autoComplete="username"
+              disabled={loading}
+            />
+            <Field
+              icon={<KeyRound className="h-4 w-4" />}
+              label="密碼"
+              type="password"
+              value={password}
+              onChange={setPassword}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              disabled={loading}
+            />
+            <ImageCaptchaField
+              key={captchaKey}
+              token={captchaToken}
+              answer={captchaAnswer}
+              onTokenChange={setCaptchaToken}
+              onAnswerChange={setCaptchaAnswer}
+              disabled={loading}
+            />
+            {error && <ErrorBox message={error} />}
+            <Button
+              type="submit"
+              loading={loading}
+              disabled={!captchaToken || !captchaAnswer.trim()}
+              className="h-11 w-full"
+            >
+              登入星鑽 XS
+            </Button>
+          </form>
+        ) : step === "credentials" ? (
+          <form onSubmit={(e) => void handleXsCredentials(e)} className="space-y-4">
+            <div className="mb-2 flex gap-2">
+              <StepBadge active label="1. 帳密" />
+              <StepBadge active={false} label="2. OTP 驗證" />
+            </div>
             <Field
               icon={<UserRound className="h-4 w-4" />}
               label="帳號"
@@ -234,8 +520,7 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
                 Google 驗證器 OTP
               </div>
               <p className="text-muted">
-                請開啟手機上的 Google Authenticator（或其他驗證器 App），輸入
-                6 位數驗證碼。
+                請開啟手機上的 Google Authenticator，輸入 6 位數驗證碼。
               </p>
             </div>
             <Field
@@ -264,7 +549,7 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
               disabled={otp.length < 6}
               className="h-11 w-full"
             >
-              {loading ? "驗證中…" : "登入系統"}
+              {loading ? "驗證中…" : "登入星鑽 XS"}
             </Button>
             <Button
               type="button"
@@ -282,6 +567,41 @@ export function LoginForm({ trustedDeviceDays = 7 }: Props) {
         )}
       </div>
     </div>
+  );
+}
+
+function PortalTab({
+  active,
+  onClick,
+  label,
+  labelWide,
+  logo,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  labelWide: string;
+  logo: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={cn(
+        "btn-touch flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-lg px-2 py-2.5 transition-colors",
+        active
+          ? "glass-nav-active shadow-sm"
+          : "text-muted hover:bg-surface hover:text-foreground",
+      )}
+    >
+      {logo}
+      <span className="min-w-0 truncate text-sm font-semibold sm:hidden">{label}</span>
+      <span className="hidden min-w-0 truncate text-sm font-semibold sm:inline">
+        {labelWide}
+      </span>
+    </button>
   );
 }
 

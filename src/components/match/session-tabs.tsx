@@ -83,7 +83,7 @@ export function SessionTabs({
             >
               <p className="truncate text-sm font-semibold">{session.name}</p>
               <p className="mt-1 text-xs text-muted">
-                {SCORE_TYPE_LABEL[session.score_type ?? "sideout"]} ·{" "}
+                {SCORE_TYPE_LABEL[session.score_type ?? "rally"]} ·{" "}
                 {session.player_count} 人 · {session.match_count} 場 · 完成{" "}
                 {session.completed_count}
               </p>

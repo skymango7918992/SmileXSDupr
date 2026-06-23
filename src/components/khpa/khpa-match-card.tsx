@@ -78,8 +78,8 @@ export function KhpaMatchCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
-        <div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
+        <div className="min-w-0">
           <span className="khpa-team-tag khpa-team-tag--1 mb-2">隊伍 1</span>
           <TeamBlock
             players={team1}
@@ -88,17 +88,18 @@ export function KhpaMatchCard({
             highlight={team1Wins}
           />
         </div>
-        <p className="font-data text-center text-2xl font-bold tabular-nums">
+        <p className="font-data text-center text-xl font-bold tabular-nums sm:text-2xl">
           <span className={cn(team1Wins && "text-primary")}>{s1}</span>
           <span className="mx-1 text-muted">:</span>
           <span className={cn(team2Wins && "text-primary")}>{s2}</span>
         </p>
-        <div className={cn("text-right")}>
+        <div className="min-w-0 sm:text-right">
           <span className="khpa-team-tag khpa-team-tag--2 mb-2">隊伍 2</span>
           <TeamBlock
             players={team2}
             playerWins={playerWins}
-            align="right"
+            align="left"
+            alignDesktop="right"
             highlight={team2Wins}
           />
         </div>
@@ -126,19 +127,24 @@ function TeamBlock({
   players,
   playerWins,
   align,
+  alignDesktop,
   highlight,
 }: {
   players: ReturnType<typeof getTeamPlayers>;
   playerWins: Record<string, number>;
   align: "left" | "right";
+  alignDesktop?: "left" | "right";
   highlight?: boolean;
 }) {
+  const desktop = alignDesktop ?? align;
   return (
     <div
       className={cn(
         "flex flex-col gap-2",
         align === "right" && "items-end text-right",
         highlight && "text-success",
+        desktop === "right" && "sm:items-end sm:text-right",
+        desktop === "left" && "sm:items-start sm:text-left",
       )}
     >
       {players.map((player) =>
@@ -147,7 +153,8 @@ function TeamBlock({
             key={player.id}
             className={cn(
               "flex items-center gap-2",
-              align === "right" && "flex-row-reverse",
+              (align === "right" || desktop === "right") &&
+                "sm:flex-row-reverse sm:text-right",
             )}
           >
             <KhpaBadgeAvatar
@@ -155,7 +162,7 @@ function TeamBlock({
               name={player.display_name}
               size="md"
             />
-            <div className={align === "right" ? "text-right" : ""}>
+            <div className={cn(desktop === "right" && "sm:text-right")}>
               <p className="text-sm font-medium leading-tight">
                 {player.display_name}
               </p>

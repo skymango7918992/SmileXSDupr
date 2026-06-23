@@ -51,6 +51,15 @@ export function getKhpaEnv() {
   };
 }
 
+/** 星鑽 XS 一般使用者共用帳號（圖形驗證碼登入，無 MFA） */
+export function getStaffEnv() {
+  return {
+    username: process.env.STAFF_USERNAME?.trim() || "user",
+    email: process.env.STAFF_EMAIL?.trim() || "user@xingzuan-xs.local",
+    password: process.env.STAFF_PASSWORD?.trim(),
+  };
+}
+
 /** 僅伺服器腳本使用（create-admin） */
 export function getServiceRoleKey(): string | undefined {
   return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();

@@ -60,9 +60,9 @@ export function ManualMatchDialog({
     "glass-input h-10 w-full rounded-[10px] px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
       <div className="glass-overlay absolute inset-0" aria-hidden />
-      <Card className="glass-modal relative w-full max-w-lg">
+      <Card className="glass-modal relative max-h-[92dvh] w-full max-w-lg overflow-y-auto overscroll-contain p-4 sm:p-6 [-webkit-overflow-scrolling:touch]">
         <CardTitle className="mb-4">手動新增對戰</CardTitle>
 
         <div className="grid gap-4 sm:grid-cols-2">

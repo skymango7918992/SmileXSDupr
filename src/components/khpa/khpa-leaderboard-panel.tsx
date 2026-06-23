@@ -108,17 +108,17 @@ export function KhpaLeaderboardPanel({
         </Button>
       </div>
 
-      <KhpaLeaderboardTop3
-        entries={top3}
-        year={year}
-        error={error}
-        compact={compact}
-        onViewAll={onViewAll}
-      />
-
-      {showFull && (
-        <div className="mt-4">
-          <KhpaLeaderboardFull entries={top10} year={year} />
+      {!showFull ? (
+        <KhpaLeaderboardTop3
+          entries={top3}
+          year={year}
+          error={error}
+          compact={compact}
+          onViewAll={onViewAll}
+        />
+      ) : (
+        <div className="mt-1">
+          <KhpaLeaderboardFull entries={top10} year={year} error={error} />
         </div>
       )}
     </div>

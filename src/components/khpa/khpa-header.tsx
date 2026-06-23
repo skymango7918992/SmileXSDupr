@@ -18,7 +18,7 @@ export function KhpaHeader({ venues, isAdmin }: Props) {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    window.location.href = "/khpa/login";
+    window.location.href = "/login";
   };
 
   return (
@@ -50,7 +50,7 @@ export function KhpaHeader({ venues, isAdmin }: Props) {
               href="/"
               className="hidden text-[11px] text-muted hover:text-foreground sm:inline"
             >
-              XS
+              星鑽 XS
             </Link>
           )}
           <Button

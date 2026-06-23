@@ -104,7 +104,7 @@ export async function createKhpaVenue(input: {
     throw new Error(error.message);
   }
 
-  revalidatePath("/khpa");
+  revalidatePath("/");
   revalidatePath("/settings");
   return data as KhpaVenue;
 }
@@ -128,6 +128,6 @@ export async function updateKhpaVenue(
 
   const { error } = await supabase.from("khpa_venues").update(patch).eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/khpa");
+  revalidatePath("/");
   revalidatePath("/settings");
 }

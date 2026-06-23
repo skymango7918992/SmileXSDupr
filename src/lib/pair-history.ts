@@ -21,6 +21,25 @@ export function recordTeammates(
   history.set(key, (history.get(key) ?? 0) + 1);
 }
 
+/** 完整對戰 key（主客隊互換視為同一場） */
+export function matchupKey(
+  team1: [string, string],
+  team2: [string, string],
+): string {
+  const t1 = pairKey(team1[0], team1[1]);
+  const t2 = pairKey(team2[0], team2[1]);
+  return [t1, t2].sort().join(" vs ");
+}
+
+export function buildMatchupSet(
+  pairings: Array<{
+    team1: [string, string];
+    team2: [string, string];
+  }>,
+): Set<string> {
+  return new Set(pairings.map((p) => matchupKey(p.team1, p.team2)));
+}
+
 type MatchPlayerRow = {
   match_id: string;
   player_id: string;

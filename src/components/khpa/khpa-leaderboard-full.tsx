@@ -8,14 +8,17 @@ import { cn } from "@/lib/utils";
 type Props = {
   entries: KhpaLeaderboardEntry[];
   year: number;
+  error?: string | null;
 };
 
-export function KhpaLeaderboardFull({ entries, year }: Props) {
+export function KhpaLeaderboardFull({ entries, year, error }: Props) {
   return (
     <div className="space-y-6">
       <Card>
         <CardTitle className="mb-4">{year} 協會獲勝榜 TOP 10</CardTitle>
-        {entries.length === 0 ? (
+        {error ? (
+          <p className="text-sm text-danger">{error}</p>
+        ) : entries.length === 0 ? (
           <p className="text-sm text-muted">{year} 年尚無完成對戰紀錄。</p>
         ) : (
           <ol className="space-y-2">

@@ -1,5 +1,7 @@
 import {
+  buildMatchupSet,
   getTeammateCount,
+  matchupKey,
   recordTeammates,
   type TeammateHistory,
 } from "@/lib/pair-history";
@@ -17,6 +19,7 @@ export type SessionRosterEntry = {
 
 /** 搭檔重複懲罰權重：數值越大越避免重複同隊 */
 const TEAMMATE_PENALTY = 100;
+const MAX_PAIRING_ATTEMPTS = 300;
 
 function shuffle<T>(array: T[]): T[] {
   const arr = [...array];
@@ -39,7 +42,8 @@ export function getEligibleForRound(
 function splitScore(
   players: [string, string, string, string],
   history: TeammateHistory,
-): { team1: [string, string]; team2: [string, string] } {
+  blockedMatchups: Set<string>,
+): { team1: [string, string]; team2: [string, string] } | null {
   const [a, b, c, d] = players;
   const options: Array<{
     team1: [string, string];
@@ -50,10 +54,13 @@ function splitScore(
     { team1: [a, d], team2: [b, c] },
   ];
 
-  let best = options[0];
+  let best: (typeof options)[number] | null = null;
   let bestScore = Number.POSITIVE_INFINITY;
 
   for (const option of options) {
+    if (blockedMatchups.has(matchupKey(option.team1, option.team2))) {
+      continue;
+    }
     const score =
       getTeammateCount(history, option.team1[0], option.team1[1]) *
         TEAMMATE_PENALTY +
@@ -71,15 +78,35 @@ function splitScore(
 function pickFourPlayers(
   eligibleIds: string[],
   sessionPlayCount: Map<string, number>,
+  randomize = false,
 ): [string, string, string, string] {
   const sorted = [...eligibleIds].sort((a, b) => {
     const diff =
       (sessionPlayCount.get(a) ?? 0) - (sessionPlayCount.get(b) ?? 0);
     if (diff !== 0) return diff;
-    return Math.random() - 0.5;
+    return randomize ? Math.random() - 0.5 : 0;
   });
 
+  if (randomize) {
+    const pool = sorted.slice(0, Math.min(12, sorted.length));
+    return shuffle(pool).slice(0, 4) as [string, string, string, string];
+  }
+
   return sorted.slice(0, 4) as [string, string, string, string];
+}
+
+function findUniquePairing(
+  eligibleIds: string[],
+  sessionPlayCount: Map<string, number>,
+  history: TeammateHistory,
+  blockedMatchups: Set<string>,
+): { team1: [string, string]; team2: [string, string] } | null {
+  for (let attempt = 0; attempt < MAX_PAIRING_ATTEMPTS; attempt++) {
+    const four = pickFourPlayers(eligibleIds, sessionPlayCount, attempt > 0);
+    const split = splitScore(four, history, blockedMatchups);
+    if (split) return split;
+  }
+  return null;
 }
 
 function countPlaysFromPairings(
@@ -100,6 +127,7 @@ export function generateMatchPairings(
   startRound: number,
   history: TeammateHistory = new Map(),
   priorPlayCount: Map<string, number> = new Map(),
+  existingPairings: MatchPairing[] = [],
 ): MatchPairing[] {
   if (courtCount < 1) {
     throw new Error("場數至少為 1");
@@ -107,6 +135,7 @@ export function generateMatchPairings(
 
   const workingHistory: TeammateHistory = new Map(history);
   const sessionPlayCount = new Map(priorPlayCount);
+  const blockedMatchups = buildMatchupSet(existingPairings);
   const matches: MatchPairing[] = [];
 
   for (let i = 0; i < courtCount; i++) {
@@ -119,12 +148,24 @@ export function generateMatchPairings(
       );
     }
 
-    const four = pickFourPlayers(eligible, sessionPlayCount);
-    const { team1, team2 } = splitScore(four, workingHistory);
+    const split = findUniquePairing(
+      eligible,
+      sessionPlayCount,
+      workingHistory,
+      blockedMatchups,
+    );
 
+    if (!split) {
+      throw new Error(
+        `無法排第 ${roundNumber} 場：本組已無不重複的 2v2 對戰組合`,
+      );
+    }
+
+    const { team1, team2 } = split;
     matches.push({ round_number: roundNumber, team1, team2 });
+    blockedMatchups.add(matchupKey(team1, team2));
 
-    for (const playerId of four) {
+    for (const playerId of [...team1, ...team2]) {
       sessionPlayCount.set(
         playerId,
         (sessionPlayCount.get(playerId) ?? 0) + 1,
@@ -143,4 +184,11 @@ export function buildPlayCountFromCompleted(
   completedPairings: MatchPairing[],
 ): Map<string, number> {
   return countPlaysFromPairings(completedPairings);
+}
+
+/** 從所有場次（含待進行）建立上場次數 */
+export function buildPlayCountFromPairings(
+  pairings: MatchPairing[],
+): Map<string, number> {
+  return countPlaysFromPairings(pairings);
 }

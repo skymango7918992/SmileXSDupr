@@ -5,20 +5,30 @@ import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Settings } from "lucide-react";
 import { ClubLogo } from "@/components/brand/club-logo";
 import { createClient } from "@/lib/supabase/client";
+import type { AppRole } from "@/lib/auth/roles";
 import { cn } from "@/lib/utils";
+import { khpaHomePath } from "@/lib/khpa/paths";
 import { Button } from "@/components/ui/button";
 
-const navItems = [
+const allNavItems = [
   { href: "/", label: "對戰中心", exact: true },
-  { href: "/play-map", label: "打球軌跡" },
-  { href: "/checkin", label: "報到收款" },
+  { href: "/play-map", label: "打球軌跡", staffHidden: true },
+  { href: "/checkin", label: "報到收款", staffHidden: true },
   { href: "/leaderboard", label: "獲勝榜" },
   { href: "/players", label: "球員管理" },
-];
+] as const;
 
-export function AppHeader() {
+type Props = {
+  role?: AppRole | null;
+};
+
+export function AppHeader({ role = null }: Props) {
   const pathname = usePathname();
   const router = useRouter();
+  const isStaff = role === "staff";
+  const navItems = isStaff
+    ? allNavItems.filter((item) => !("staffHidden" in item && item.staffHidden))
+    : allNavItems;
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -48,18 +58,22 @@ export function AppHeader() {
             <span aria-hidden>●</span>
             已登入
           </span>
-          <Link href="/khpa" className="hidden sm:inline">
-            <Button variant="ghost" size="sm">
-              <span aria-hidden className="mr-1">🏓</span>
-              協會
-            </Button>
-          </Link>
-          <Link href="/settings">
-            <Button variant="ghost" size="sm">
-              <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline">設定</span>
-            </Button>
-          </Link>
+          {!isStaff && (
+            <Link href={khpaHomePath()} className="hidden sm:inline">
+              <Button variant="ghost" size="sm">
+                <span aria-hidden className="mr-1">🏓</span>
+                協會
+              </Button>
+            </Link>
+          )}
+          {!isStaff && (
+            <Link href="/settings">
+              <Button variant="ghost" size="sm">
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">設定</span>
+              </Button>
+            </Link>
+          )}
           <Button variant="ghost" size="sm" onClick={() => void handleLogout()}>
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">登出</span>

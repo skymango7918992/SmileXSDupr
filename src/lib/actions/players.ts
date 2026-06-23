@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireXsAdmin } from "@/lib/auth/require-xs-admin";
+import { isStaffRole } from "@/lib/auth/roles";
 import { removePlayerRecord } from "@/lib/actions/player-merge";
 import { createClient } from "@/lib/supabase/server";
 import type { Player } from "@/types/database";
@@ -28,6 +30,7 @@ export async function createPlayer(formData: {
   dupr_id: string;
   dupr_rating?: number | null;
 }): Promise<Player> {
+  await requireXsAdmin();
   const supabase = await createClient();
   const duprName = formData.name.trim();
   const displayName = formData.display_name?.trim() || duprName;
@@ -63,6 +66,7 @@ export async function updatePlayer(
     dupr_rating?: number | null;
   },
 ): Promise<void> {
+  await requireXsAdmin();
   const supabase = await createClient();
   const payload: Record<string, unknown> = { ...formData };
   if (formData.dupr_id) {
@@ -82,6 +86,7 @@ export async function updatePlayer(
 }
 
 export async function deletePlayer(id: string): Promise<DeletePlayerResult> {
+  await requireXsAdmin();
   const supabase = await createClient();
 
   const { data: player, error: loadError } = await supabase

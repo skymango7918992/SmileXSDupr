@@ -14,6 +14,7 @@ import {
   getKhpaMatchesForDate,
 } from "@/lib/actions/khpa/sessions";
 import { exportKhpaMatchesToDuprCsv } from "@/lib/khpa/export-csv";
+import { khpaHomePath } from "@/lib/khpa/paths";
 import type { KhpaLeaderboardEntry } from "@/types/khpa";
 import type { KhpaMatchWithPlayers, KhpaPlayer, KhpaVenue } from "@/types/khpa";
 import type { ScoreType } from "@/types/database";
@@ -71,9 +72,14 @@ export function KhpaMatchCenter({
 
   const syncVenueUrl = useCallback(
     (venue: KhpaVenue) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("venue", venue.slug);
-      router.replace(`/khpa?${params.toString()}`, { scroll: false });
+      const tab = searchParams.get("tab");
+      router.replace(
+        khpaHomePath({
+          venue: venue.slug,
+          tab: tab ?? undefined,
+        }),
+        { scroll: false },
+      );
     },
     [router, searchParams],
   );
@@ -180,7 +186,7 @@ export function KhpaMatchCenter({
         </div>
       </div>
 
-      <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 -mx-1 flex gap-2 rounded-2xl border border-border bg-surface/95 p-2 shadow-lg backdrop-blur-sm">
+      <div className="sticky bottom-3 z-10 flex gap-2 rounded-2xl border border-border bg-surface/95 p-2 shadow-lg backdrop-blur-sm sm:bottom-4">
         <Button
           onClick={() => setShowManual(true)}
           className="btn-touch h-12 flex-1 text-base"

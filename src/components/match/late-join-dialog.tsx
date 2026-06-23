@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
@@ -54,9 +54,9 @@ export function LateJoinDialog({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
       <div className="glass-overlay absolute inset-0" aria-hidden />
-      <Card className="glass-modal relative w-full max-w-md">
+      <Card className="glass-modal relative max-h-[92dvh] w-full max-w-md overflow-y-auto overscroll-contain p-4 sm:p-6 [-webkit-overflow-scrolling:touch]">
         <CardTitle className="mb-1 flex items-center gap-2">
           <UserPlus className="h-5 w-5 text-primary" />
           晚到加入

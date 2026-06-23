@@ -1,18 +1,22 @@
-import { SportPageDecor } from "@/components/brand/sport-page-decor";
-import { AppHeader } from "@/components/layout/app-header";
+import { Suspense } from "react";
+import { PortalShell } from "@/components/layout/portal-shell";
+import { getRoleFromEmail } from "@/lib/auth/roles";
+import { createClient } from "@/lib/supabase/server";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const role = getRoleFromEmail(user?.email) ?? null;
+
   return (
-    <div className="page-canvas flex min-h-screen flex-col">
-      <SportPageDecor />
-      <AppHeader />
-      <main className="relative z-[1] mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6">
-        {children}
-      </main>
-    </div>
+    <Suspense fallback={<div className="p-6 text-sm text-muted">載入中…</div>}>
+      <PortalShell role={role}>{children}</PortalShell>
+    </Suspense>
   );
 }

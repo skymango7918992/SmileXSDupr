@@ -230,7 +230,6 @@ body {
   z-index: 1;
 }
 
-/* ── Surface / Card ── */
 .glass-card,
 .ds-card {
   position: relative;
@@ -549,8 +548,36 @@ body {
 /* ── Login Page ── */
 .login-page {
   position: relative;
-  min-height: 100vh;
+  min-height: 100dvh;
   isolation: isolate;
+  overflow-x: clip;
+}
+
+.login-page-shell {
+  box-sizing: border-box;
+}
+
+.login-portal-tabs {
+  width: 100%;
+}
+
+.login-portal-hero h1 {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.login-page input,
+.login-page select,
+.login-page textarea {
+  font-size: 16px;
+}
+
+@media (min-width: 640px) {
+  .login-page input,
+  .login-page select,
+  .login-page textarea {
+    font-size: 0.875rem;
+  }
 }
 
 .login-page__photos {
@@ -600,10 +627,18 @@ body {
   position: relative;
   z-index: 2;
   display: grid;
-  min-height: 100vh;
+  min-height: 100dvh;
   max-width: 72rem;
   margin: 0 auto;
-  padding: 2.5rem 1rem;
+  padding: max(1rem, env(safe-area-inset-top)) 0.75rem max(1.5rem, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .login-page__inner {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -653,9 +688,20 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 @media (max-width: 1023px) {
+  .login-page__inner {
+    align-content: start;
+    padding-top: max(1.25rem, env(safe-area-inset-top));
+  }
+
+  .login-page__form {
+    align-items: flex-start;
+    padding-top: 0.5rem;
+  }
   .login-page__photo--a {
     clip-path: none;
     opacity: 0.75;
@@ -1582,6 +1628,48 @@ body {
 }
 
 /* ── KHPA 賽事系統（沿用原 glass 風格 + 專業賽事感） ── */
+.khpa-pro {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+.khpa-pro .khpa-sticky-shell {
+  padding-top: env(safe-area-inset-top);
+}
+
+.khpa-pro .khpa-tab-bar {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.khpa-pro input,
+.khpa-pro select,
+.khpa-pro textarea {
+  font-size: 16px;
+}
+
+@media (min-width: 640px) {
+  .khpa-pro input,
+  .khpa-pro select,
+  .khpa-pro textarea {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .khpa-pro .page-canvas,
+  .page-canvas.khpa-pro {
+    background-attachment: scroll;
+  }
+
+  .khpa-pro .glass-card,
+  .khpa-pro .glass-card-solid,
+  .khpa-pro .ds-card {
+    max-width: 100%;
+  }
+}
+
 .khpa-pro .khpa-section-label {
   font-size: 0.65rem;
   font-weight: 700;

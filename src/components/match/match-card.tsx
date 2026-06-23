@@ -23,6 +23,7 @@ type Props = {
     team2Score: number,
   ) => Promise<void>;
   onDelete: (matchId: string) => Promise<void>;
+  canDelete?: boolean;
   disabled?: boolean;
 };
 
@@ -72,6 +73,7 @@ export function MatchCard({
   allMatches,
   onSaveScore,
   onDelete,
+  canDelete = true,
   disabled,
 }: Props) {
   const [editing, setEditing] = useState(
@@ -230,9 +232,9 @@ export function MatchCard({
         <Button
           size="sm"
           variant="danger"
-          disabled={disabled || saving}
+          disabled={disabled || saving || !canDelete}
           onClick={() => void handleDelete()}
-          className="btn-touch"
+          className={cn("btn-touch", !canDelete && "hidden")}
         >
           <Trash2 className="h-4 w-4" />
           刪除

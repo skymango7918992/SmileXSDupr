@@ -29,7 +29,7 @@ export function KhpaVenueTabs({
   }
 
   return (
-    <div className="-mx-1 overflow-x-auto pb-1">
+    <div className="overflow-x-auto pb-1">
       <div
         className="flex min-w-min gap-2 px-1"
         role="tablist"
@@ -47,9 +47,9 @@ export function KhpaVenueTabs({
               disabled={disabled}
               onClick={() => onChange(venue)}
               className={cn(
-                "btn-touch shrink-0 rounded-xl px-4 py-3 text-left transition-colors",
+                "btn-touch shrink-0 rounded-xl px-3 py-2.5 text-left transition-colors sm:min-w-[8.5rem] sm:px-4 sm:py-3",
                 active
-                  ? "glass-nav-active min-w-[8.5rem]"
+                  ? "glass-nav-active"
                   : "border border-border bg-surface hover:bg-surface-muted",
                 disabled && "opacity-60",
               )}

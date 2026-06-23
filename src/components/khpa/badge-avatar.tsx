@@ -10,10 +10,10 @@ type Props = {
 };
 
 const sizeMap = {
-  sm: { box: "h-14 w-14", px: 52 },
-  md: { box: "h-[4.5rem] w-[4.5rem]", px: 68 },
-  lg: { box: "h-20 w-20", px: 80 },
-  xl: { box: "h-24 w-24 sm:h-28 sm:w-28", px: 100 },
+  sm: { box: "h-12 w-12", px: 46 },
+  md: { box: "h-14 w-14 sm:h-16 sm:w-16", px: 56 },
+  lg: { box: "h-16 w-16 sm:h-20 sm:w-20", px: 72 },
+  xl: { box: "h-20 w-20 sm:h-24 sm:w-24", px: 88 },
 };
 
 export function KhpaBadgeAvatar({

@@ -13,6 +13,7 @@ type Props = {
     team2Score: number,
   ) => Promise<void>;
   onDelete: (matchId: string) => Promise<void>;
+  canDelete?: boolean;
   loading?: boolean;
 };
 
@@ -21,6 +22,7 @@ export function MatchTable({
   sessionName,
   onSaveScore,
   onDelete,
+  canDelete = true,
   loading,
 }: Props) {
   return (
@@ -43,6 +45,7 @@ export function MatchTable({
               allMatches={matches}
               onSaveScore={onSaveScore}
               onDelete={onDelete}
+              canDelete={canDelete}
               disabled={loading}
             />
           ))}

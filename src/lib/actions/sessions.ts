@@ -1,14 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getCurrentUserEmail, requireXsAdmin } from "@/lib/auth/require-xs-admin";
+import { isStaffRole } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
-import { buildTeammateHistory } from "@/lib/pair-history";
 import {
-  buildPlayCountFromCompleted,
+  buildPlayCountFromPairings,
   generateMatchPairings,
   type MatchPairing,
   type SessionRosterEntry,
 } from "@/lib/scheduler";
+import { buildTeammateHistory, matchupKey } from "@/lib/pair-history";
 import type {
   MatchDay,
   MatchWithPlayers,
@@ -48,8 +50,7 @@ async function getSessionTeammateHistory(
   const { data: sessionMatches } = await supabase
     .from("matches")
     .select("id")
-    .eq("schedule_session_id", sessionId)
-    .eq("status", "completed");
+    .eq("schedule_session_id", sessionId);
 
   const matchIds = (sessionMatches ?? []).map((m) => m.id);
   if (matchIds.length === 0) {
@@ -165,7 +166,7 @@ async function ensureDefaultSession(matchDay: MatchDay): Promise<void> {
       match_day_id: matchDay.id,
       name: "賽程 1",
       sort_order: 0,
-      score_type: "sideout",
+      score_type: "rally",
     })
     .select()
     .single();
@@ -276,7 +277,7 @@ export async function createSession(
   const nextOrder =
     existing && existing.length > 0 ? existing[0].sort_order + 1 : 0;
   const sessionName = options?.name?.trim() || `賽程 ${nextOrder + 1}`;
-  const scoreType = options?.scoreType ?? "sideout";
+  const scoreType = options?.scoreType ?? "rally";
 
   const { data, error } = await supabase
     .from("schedule_sessions")
@@ -295,6 +296,7 @@ export async function createSession(
 }
 
 export async function deleteSession(sessionId: string): Promise<void> {
+  await requireXsAdmin();
   const supabase = await createClient();
   const { error } = await supabase
     .from("schedule_sessions")
@@ -411,25 +413,21 @@ async function getMaxCompletedRound(sessionId: string): Promise<number> {
   return data && data.length > 0 ? data[0].round_number : 0;
 }
 
-async function getCompletedPairings(
-  sessionId: string,
-): Promise<MatchPairing[]> {
+async function getSessionPairings(sessionId: string): Promise<MatchPairing[]> {
   const matches = await getMatchesForSession(sessionId);
-  return matches
-    .filter((m) => m.status === "completed")
-    .map((m) => {
-      const t1 = m.match_players
-        .filter((mp) => mp.team === 1)
-        .sort((a, b) => a.position - b.position);
-      const t2 = m.match_players
-        .filter((mp) => mp.team === 2)
-        .sort((a, b) => a.position - b.position);
-      return {
-        round_number: m.round_number,
-        team1: [t1[0].player_id, t1[1].player_id] as [string, string],
-        team2: [t2[0].player_id, t2[1].player_id] as [string, string],
-      };
-    });
+  return matches.map((m) => {
+    const t1 = m.match_players
+      .filter((mp) => mp.team === 1)
+      .sort((a, b) => a.position - b.position);
+    const t2 = m.match_players
+      .filter((mp) => mp.team === 2)
+      .sort((a, b) => a.position - b.position);
+    return {
+      round_number: m.round_number,
+      team1: [t1[0].player_id, t1[1].player_id] as [string, string],
+      team2: [t2[0].player_id, t2[1].player_id] as [string, string],
+    };
+  });
 }
 
 export async function generateMatchesForSession(
@@ -453,8 +451,8 @@ export async function generateMatchesForSession(
   const startRound = await getNextRoundNumber(sessionId);
   const playerIds = roster.map((r) => r.player_id);
   const history = await getSessionTeammateHistory(sessionId, playerIds);
-  const completedPairings = await getCompletedPairings(sessionId);
-  const priorPlayCount = buildPlayCountFromCompleted(completedPairings);
+  const existingPairings = await getSessionPairings(sessionId);
+  const priorPlayCount = buildPlayCountFromPairings(existingPairings);
 
   const pairings = generateMatchPairings(
     roster,
@@ -462,6 +460,7 @@ export async function generateMatchesForSession(
     startRound,
     history,
     priorPlayCount,
+    existingPairings,
   );
 
   await insertPairings(sessionId, session.match_day_id, pairings);
@@ -546,6 +545,11 @@ export async function updateMatchScore(
 }
 
 export async function deleteMatch(matchId: string): Promise<void> {
+  const email = await getCurrentUserEmail();
+  if (isStaffRole(email)) {
+    throw new Error("一般使用者無法刪除單場，請使用「清空未打」");
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.from("matches").delete().eq("id", matchId);
   if (error) throw new Error(error.message);
@@ -576,6 +580,15 @@ export async function createManualMatch(
     .eq("id", sessionId)
     .single();
   if (sessionError) throw new Error(sessionError.message);
+
+  const existingPairings = await getSessionPairings(sessionId);
+  const key = matchupKey(team1PlayerIds, team2PlayerIds);
+  const duplicate = existingPairings.some(
+    (p) => matchupKey(p.team1, p.team2) === key,
+  );
+  if (duplicate) {
+    throw new Error("此 2v2 對戰組合本組已存在，請換人配對");
+  }
 
   const roundNumber = await getNextRoundNumber(sessionId);
 
