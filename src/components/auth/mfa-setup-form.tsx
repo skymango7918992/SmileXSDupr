@@ -12,9 +12,15 @@ import { Input } from "@/components/ui/input";
 
 type Props = {
   trustedDeviceDays?: number;
+  redirectTo?: string;
+  title?: string;
 };
 
-export function MfaSetupForm({ trustedDeviceDays = 7 }: Props) {
+export function MfaSetupForm({
+  trustedDeviceDays = 7,
+  redirectTo = "/",
+  title = "綁定 OTP 驗證器",
+}: Props) {
   const router = useRouter();
   const [factorId, setFactorId] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -72,7 +78,7 @@ export function MfaSetupForm({ trustedDeviceDays = 7 }: Props) {
         return;
       }
 
-      router.replace("/");
+      router.replace(redirectTo);
       router.refresh();
 
       if (trustDevice) {
@@ -91,7 +97,7 @@ export function MfaSetupForm({ trustedDeviceDays = 7 }: Props) {
   return (
     <div className="w-full max-w-lg">
       <div className="mb-6 text-center">
-        <h1 className="text-xl font-semibold text-foreground">綁定 OTP 驗證器</h1>
+        <h1 className="text-xl font-semibold text-foreground">{title}</h1>
         <p className="mt-1 text-sm text-muted">
           首次登入需綁定 Google Authenticator；可選擇信任此裝置以略過後續 OTP
         </p>

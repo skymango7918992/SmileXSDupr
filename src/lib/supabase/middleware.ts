@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getRoleFromEmail } from "@/lib/auth/roles";
 import { getSupabaseEnv, hasSupabaseEnv } from "@/lib/env";
 import {
   getTrustedDeviceCookie,
@@ -15,13 +16,11 @@ function isServerActionOrRsc(request: NextRequest): boolean {
 }
 
 export async function updateSession(request: NextRequest) {
-  // .env 未設定時不攔截，讓頁面顯示設定指引
   if (!hasSupabaseEnv()) {
     return NextResponse.next({ request });
   }
 
   const skipAuthRedirect = isServerActionOrRsc(request);
-
   const { supabaseUrl, supabaseAnonKey } = getSupabaseEnv();
   let supabaseResponse = NextResponse.next({ request });
 
@@ -47,21 +46,47 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isAuthRoute = pathname.startsWith("/login");
+  const isKhpaRoute = pathname.startsWith("/khpa");
+  const isKhpaAuthRoute = pathname.startsWith("/khpa/login");
+  const isXsAuthRoute = pathname.startsWith("/login");
+  const isAuthRoute = isKhpaAuthRoute || isXsAuthRoute;
+
+  const loginPath = isKhpaRoute ? "/khpa/login" : "/login";
 
   if (!user) {
     if (!isAuthRoute && !skipAuthRedirect) {
       const url = request.nextUrl.clone();
-      url.pathname = "/login";
+      url.pathname = loginPath;
       return NextResponse.redirect(url);
     }
     return supabaseResponse;
   }
 
+  const role = getRoleFromEmail(user.email);
+
   if (skipAuthRedirect) {
     return supabaseResponse;
   }
 
+  // KHPA 帳號僅能使用協會平台
+  if (role === "khpa" && !isKhpaRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/khpa";
+    return NextResponse.redirect(url);
+  }
+
+  // 協會平台：僅帳密 + Captcha，不強制 Google Authenticator
+  if (isKhpaRoute) {
+    if (isKhpaAuthRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/khpa";
+      url.searchParams.delete("step");
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  // 以下為星鑽 XS 後台：維持 MFA
   const { data: factors } = await supabase.auth.mfa.listFactors();
   const hasTotp = (factors?.totp?.length ?? 0) > 0;
   const isSetupRoute = pathname.startsWith("/login/setup");
@@ -112,6 +137,7 @@ export async function updateSession(request: NextRequest) {
   if (isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
+    url.searchParams.delete("step");
     return NextResponse.redirect(url);
   }
 

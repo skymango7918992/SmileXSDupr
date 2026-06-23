@@ -2,6 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import { useAppUi } from "@/components/providers/app-ui-provider";
+import { SCORE_TYPE_LABEL } from "@/lib/dupr-score-type";
 import type { ScheduleSessionWithStats } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -82,6 +83,7 @@ export function SessionTabs({
             >
               <p className="truncate text-sm font-semibold">{session.name}</p>
               <p className="mt-1 text-xs text-muted">
+                {SCORE_TYPE_LABEL[session.score_type ?? "sideout"]} ·{" "}
                 {session.player_count} 人 · {session.match_count} 場 · 完成{" "}
                 {session.completed_count}
               </p>

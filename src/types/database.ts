@@ -1,3 +1,5 @@
+export type ScoreType = "sideout" | "rally";
+
 export type PlayerSource = "manual" | "club";
 
 export type Player = {
@@ -29,6 +31,7 @@ export type ScheduleSession = {
   name: string;
   sort_order: number;
   status: "draft" | "active" | "closed";
+  score_type: ScoreType;
   created_at: string;
   updated_at: string;
 };

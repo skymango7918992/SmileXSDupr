@@ -14,6 +14,7 @@ import type {
   MatchWithPlayers,
   ScheduleSession,
   ScheduleSessionWithStats,
+  ScoreType,
   SessionPlayer,
 } from "@/types/database";
 
@@ -164,6 +165,7 @@ async function ensureDefaultSession(matchDay: MatchDay): Promise<void> {
       match_day_id: matchDay.id,
       name: "賽程 1",
       sort_order: 0,
+      score_type: "sideout",
     })
     .select()
     .single();
@@ -217,6 +219,10 @@ export async function getSessionsForDate(
   return buildSessionStats(sessions);
 }
 
+function normalizeScoreType(value: unknown): ScoreType {
+  return value === "rally" ? "rally" : "sideout";
+}
+
 async function buildSessionStats(
   sessions: ScheduleSession[],
 ): Promise<ScheduleSessionWithStats[]> {
@@ -238,6 +244,9 @@ async function buildSessionStats(
     const matches = matchRows ?? [];
     result.push({
       ...session,
+      score_type: normalizeScoreType(
+        (session as ScheduleSession & { score_type?: unknown }).score_type,
+      ),
       player_count: playerCount ?? 0,
       match_count: matches.length,
       completed_count: matches.filter((m) => m.status === "completed").length,
@@ -249,7 +258,10 @@ async function buildSessionStats(
 
 export async function createSession(
   matchDate: string,
-  name?: string,
+  options?: {
+    name?: string;
+    scoreType?: ScoreType;
+  },
 ): Promise<ScheduleSession> {
   const matchDay = await getOrCreateMatchDay(matchDate);
   const supabase = await createClient();
@@ -263,7 +275,8 @@ export async function createSession(
 
   const nextOrder =
     existing && existing.length > 0 ? existing[0].sort_order + 1 : 0;
-  const sessionName = name?.trim() || `賽程 ${nextOrder + 1}`;
+  const sessionName = options?.name?.trim() || `賽程 ${nextOrder + 1}`;
+  const scoreType = options?.scoreType ?? "sideout";
 
   const { data, error } = await supabase
     .from("schedule_sessions")
@@ -271,6 +284,7 @@ export async function createSession(
       match_day_id: matchDay.id,
       name: sessionName,
       sort_order: nextOrder,
+      score_type: scoreType,
     })
     .select()
     .single();

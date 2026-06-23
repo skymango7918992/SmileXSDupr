@@ -26,16 +26,19 @@ import {
 } from "@/lib/actions/sessions";
 import { useAppUi } from "@/components/providers/app-ui-provider";
 import { exportMatchesToDuprCsv } from "@/lib/export-dupr-csv";
+import { SCORE_TYPE_LABEL } from "@/lib/dupr-score-type";
 import type {
   AppSettings,
   MatchWithPlayers,
   Player,
   ScheduleSessionWithStats,
+  ScoreType,
 } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { PageHero } from "@/components/brand/page-hero";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CreateSessionDialog } from "@/components/match/create-session-dialog";
 import { LateJoinDialog } from "@/components/match/late-join-dialog";
 import { ManualMatchDialog } from "@/components/match/manual-match-dialog";
 import { MatchGenerator } from "@/components/match/match-generator";
@@ -73,6 +76,7 @@ export function MatchCenter({
   const [showHistory, setShowHistory] = useState(false);
   const [showManual, setShowManual] = useState(false);
   const [showLateJoin, setShowLateJoin] = useState(false);
+  const [showCreateSession, setShowCreateSession] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const { error: toastError, success, info } = useAppUi();
@@ -145,12 +149,22 @@ export function MatchCenter({
     });
   };
 
-  const handleCreateSession = () => {
+  const handleCreateSession = (input: {
+    name: string;
+    scoreType: ScoreType;
+  }) => {
     setError(null);
     startTransition(async () => {
       try {
-        const session = await createSession(matchDate);
+        const session = await createSession(matchDate, {
+          name: input.name || undefined,
+          scoreType: input.scoreType,
+        });
+        setShowCreateSession(false);
         await loadDateData(matchDate, session.id);
+        success(
+          `已建立賽程（${SCORE_TYPE_LABEL[session.score_type ?? input.scoreType]}）`,
+        );
       } catch (e) {
         setError(e instanceof Error ? e.message : "建立賽程失敗");
       }
@@ -272,7 +286,10 @@ export function MatchCenter({
       const { exported, skipped } = exportMatchesToDuprCsv(
         matchDate,
         matches,
-        label,
+        {
+          sessionName: label,
+          scoreType: activeSession?.score_type ?? "sideout",
+        },
       );
       if (exported === 0) {
         info("沒有已完成的場次可匯出");
@@ -382,7 +399,7 @@ export function MatchCenter({
             sessions={sessions}
             activeId={activeSessionId}
             onSelect={handleSessionSelect}
-            onCreate={handleCreateSession}
+            onCreate={() => setShowCreateSession(true)}
             onDelete={handleDeleteSession}
             loading={isPending}
           />
@@ -444,6 +461,15 @@ export function MatchCenter({
           selectedPlayerIds={selectedIds}
           onSubmit={handleManualSubmit}
           onClose={() => setShowManual(false)}
+        />
+      )}
+
+      {showCreateSession && (
+        <CreateSessionDialog
+          defaultName={`賽程 ${sessions.length + 1}`}
+          onSubmit={handleCreateSession}
+          onClose={() => setShowCreateSession(false)}
+          loading={isPending}
         />
       )}
 

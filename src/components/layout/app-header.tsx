@@ -48,6 +48,12 @@ export function AppHeader() {
             <span aria-hidden>●</span>
             已登入
           </span>
+          <Link href="/khpa" className="hidden sm:inline">
+            <Button variant="ghost" size="sm">
+              <span aria-hidden className="mr-1">🏓</span>
+              協會
+            </Button>
+          </Link>
           <Link href="/settings">
             <Button variant="ghost" size="sm">
               <Settings className="h-4 w-4" />

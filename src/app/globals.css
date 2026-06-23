@@ -1580,3 +1580,71 @@ body {
     height: 150px;
   }
 }
+
+/* ── KHPA 賽事系統（沿用原 glass 風格 + 專業賽事感） ── */
+.khpa-pro .khpa-section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.khpa-pro .khpa-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+  animation: khpa-pulse 2s ease-in-out infinite;
+}
+
+@keyframes khpa-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(0.92); }
+}
+
+.khpa-pro .khpa-scoreboard {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 0.75rem;
+}
+
+.khpa-pro .khpa-match-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.khpa-pro .khpa-match-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-primary) 4%, transparent) 0%,
+    transparent 35%
+  );
+  border-radius: inherit;
+}
+
+.khpa-pro .khpa-team-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.khpa-pro .khpa-team-tag--1 {
+  background: color-mix(in srgb, var(--color-primary-soft) 80%, white);
+  color: var(--color-primary);
+}
+
+.khpa-pro .khpa-team-tag--2 {
+  background: color-mix(in srgb, #facc15 25%, white);
+  color: #a16207;
+}

@@ -1,7 +1,7 @@
-import type { MatchWithPlayers, Player, ScoreType } from "@/types/database";
+import type { ScoreType } from "@/types/database";
+import type { KhpaMatchWithPlayers } from "@/types/khpa";
 import { toDuprScoreType } from "@/lib/dupr-score-type";
 
-/** DUPR 2025+ 單場匯入格式（single-match-import） */
 const CSV_HEADERS = [
   "matchType",
   "event",
@@ -33,23 +33,22 @@ const CSV_HEADERS = [
 ] as const;
 
 function getTeamPlayers(
-  match: MatchWithPlayers,
+  match: KhpaMatchWithPlayers,
   team: 1 | 2,
-): (Player | undefined)[] {
-  return match.match_players
+) {
+  return match.khpa_match_players
     .filter((mp) => mp.team === team)
     .sort((a, b) => a.position - b.position)
     .map((mp) => mp.player);
 }
 
-/** SmileXS-Dupr YYYYMMDD-場次（3 位數） */
-export function buildDuprEventName(
+export function buildKhpaDuprEventName(
   matchDate: string,
   roundNumber: number,
 ): string {
   const ymd = matchDate.replace(/-/g, "");
   const round = String(roundNumber).padStart(3, "0");
-  return `SmileXS-Dupr ${ymd}-${round}`;
+  return `KHPA ${ymd}-${round}`;
 }
 
 function escapeCsvField(value: string): string {
@@ -61,26 +60,27 @@ function escapeCsvField(value: string): string {
 
 function matchToCsvRow(
   matchDate: string,
-  match: MatchWithPlayers,
+  match: KhpaMatchWithPlayers,
   scoreType: ScoreType,
+  venueName?: string,
 ): string[] {
   const teamA = getTeamPlayers(match, 1);
   const teamB = getTeamPlayers(match, 2);
 
   return [
     "D",
-    buildDuprEventName(matchDate, match.round_number),
+    buildKhpaDuprEventName(matchDate, match.round_number),
     matchDate,
-    "",
+    teamA[0]?.display_name ?? "",
     teamA[0]?.dupr_id ?? "",
     "",
-    "",
+    teamA[1]?.display_name ?? "",
     teamA[1]?.dupr_id ?? "",
     "",
-    "",
+    teamB[0]?.display_name ?? "",
     teamB[0]?.dupr_id ?? "",
     "",
-    "",
+    teamB[1]?.display_name ?? "",
     teamB[1]?.dupr_id ?? "",
     "",
     match.team1_score != null ? String(match.team1_score) : "",
@@ -93,21 +93,23 @@ function matchToCsvRow(
     "",
     "",
     "",
-    "",
+    venueName ?? "",
     toDuprScoreType(scoreType),
   ];
 }
 
-export function exportMatchesToDuprCsv(
+export function exportKhpaMatchesToDuprCsv(
   matchDate: string,
-  matches: MatchWithPlayers[],
+  matches: KhpaMatchWithPlayers[],
   options?: {
     sessionName?: string;
     scoreType?: ScoreType;
+    venueName?: string;
   },
 ): { exported: number; skipped: number } {
   const scoreType = options?.scoreType ?? "sideout";
   const sessionName = options?.sessionName;
+  const venueName = options?.venueName;
   const completed = matches.filter((m) => m.status === "completed");
   const skipped = matches.length - completed.length;
 
@@ -118,7 +120,14 @@ export function exportMatchesToDuprCsv(
   const rows = completed
     .sort((a, b) => a.round_number - b.round_number)
     .map((match) =>
-      matchToCsvRow(matchDate, match, scoreType).map(escapeCsvField).join(","),
+      matchToCsvRow(
+        matchDate,
+        match,
+        match.score_type ?? options?.scoreType ?? "sideout",
+        venueName,
+      )
+        .map(escapeCsvField)
+        .join(","),
     );
 
   const csv = [CSV_HEADERS.join(","), ...rows].join("\r\n");
@@ -132,7 +141,7 @@ export function exportMatchesToDuprCsv(
   const suffix = sessionName
     ? `_${sessionName.replace(/[^\w\u4e00-\u9fff-]+/g, "")}`
     : "";
-  link.download = `SmileXSDupr_${matchDate}${suffix}.csv`;
+  link.download = `KHPA_${matchDate}${suffix}.csv`;
   link.click();
   URL.revokeObjectURL(url);
 

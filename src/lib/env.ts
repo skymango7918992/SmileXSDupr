@@ -42,6 +42,15 @@ export function getAdminEnv() {
   };
 }
 
+/** KHPA 協會共用帳號 */
+export function getKhpaEnv() {
+  return {
+    username: process.env.KHPA_USERNAME?.trim() || "KHPA",
+    email: process.env.KHPA_EMAIL?.trim() || "khpa@khpa.local",
+    password: process.env.KHPA_PASSWORD?.trim(),
+  };
+}
+
 /** 僅伺服器腳本使用（create-admin） */
 export function getServiceRoleKey(): string | undefined {
   return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
