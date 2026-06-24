@@ -11,9 +11,11 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+import type { PlayerCultivationStats } from "@/lib/cultivation-tiers";
+
 type Props = {
   players: KhpaPlayer[];
-  playerWins?: Record<string, number>;
+  playerStats?: Record<string, PlayerCultivationStats>;
   onSubmit: (input: {
     team1: [string, string];
     team2: [string, string];
@@ -33,7 +35,7 @@ const SCORE_TYPE_SHORT: Record<ScoreType, string> = {
 
 export function KhpaManualMatchDialog({
   players,
-  playerWins,
+  playerStats,
   onSubmit,
   onClose,
 }: Props) {
@@ -115,7 +117,7 @@ export function KhpaManualMatchDialog({
                   label="球員 A"
                   value={team1p1}
                   players={players}
-                  playerWins={playerWins}
+                  playerStats={playerStats}
                   excludeIds={selectedIds.filter((id) => id !== team1p1)}
                   onChange={setTeam1p1}
                 />
@@ -123,7 +125,7 @@ export function KhpaManualMatchDialog({
                   label="球員 B"
                   value={team1p2}
                   players={players}
-                  playerWins={playerWins}
+                  playerStats={playerStats}
                   excludeIds={selectedIds.filter((id) => id !== team1p2)}
                   onChange={setTeam1p2}
                 />
@@ -139,7 +141,7 @@ export function KhpaManualMatchDialog({
                   label="球員 A"
                   value={team2p1}
                   players={players}
-                  playerWins={playerWins}
+                  playerStats={playerStats}
                   excludeIds={selectedIds.filter((id) => id !== team2p1)}
                   onChange={setTeam2p1}
                 />
@@ -147,7 +149,7 @@ export function KhpaManualMatchDialog({
                   label="球員 B"
                   value={team2p2}
                   players={players}
-                  playerWins={playerWins}
+                  playerStats={playerStats}
                   excludeIds={selectedIds.filter((id) => id !== team2p2)}
                   onChange={setTeam2p2}
                 />

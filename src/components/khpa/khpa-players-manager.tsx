@@ -45,8 +45,11 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
   const [isPending, startTransition] = useTransition();
   const { success, error: toastError, confirm } = useAppUi();
 
-  const winsMap = Object.fromEntries(
-    leaderboard.map((e) => [e.playerId, e.wins]),
+  const playerStats = Object.fromEntries(
+    leaderboard.map((e) => [
+      e.playerId,
+      { wins: e.wins, winRate: e.winRate },
+    ]),
   );
 
   const filtered = useMemo(() => {
@@ -343,7 +346,8 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
                 )}
               >
                 <KhpaBadgeAvatar
-                  wins={winsMap[player.id] ?? 0}
+                  wins={playerStats[player.id]?.wins ?? 0}
+                  winRate={playerStats[player.id]?.winRate}
                   name={player.display_name}
                   size="md"
                 />
@@ -359,7 +363,10 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium">{player.display_name}</p>
-                        <KhpaBadgePill wins={winsMap[player.id] ?? 0} />
+                        <KhpaBadgePill
+                          wins={playerStats[player.id]?.wins ?? 0}
+                          winRate={playerStats[player.id]?.winRate}
+                        />
                         <SourceBadge source={player.source ?? "manual"} />
                         {!player.active && (
                           <span className="rounded-full bg-muted/20 px-2 py-0.5 text-[10px] text-muted">
@@ -374,7 +381,7 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
                         {player.dupr_id}
                         {player.dupr_rating != null && ` · 評分 ${player.dupr_rating}`}
                         {" · 今年 "}
-                        {winsMap[player.id] ?? 0} 勝
+                        {playerStats[player.id]?.wins ?? 0} 勝
                       </p>
                     </div>
                     <div className="flex shrink-0 flex-col gap-1 sm:flex-row">

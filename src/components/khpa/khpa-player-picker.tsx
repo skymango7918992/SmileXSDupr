@@ -8,12 +8,14 @@ import type { KhpaPlayer } from "@/types/khpa";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
+import type { PlayerCultivationStats } from "@/lib/cultivation-tiers";
+
 type Props = {
   label: string;
   value: string;
   players: KhpaPlayer[];
   excludeIds: string[];
-  playerWins?: Record<string, number>;
+  playerStats?: Record<string, PlayerCultivationStats>;
   onChange: (playerId: string) => void;
   disabled?: boolean;
 };
@@ -23,7 +25,7 @@ export function KhpaPlayerPicker({
   value,
   players,
   excludeIds,
-  playerWins,
+  playerStats,
   onChange,
   disabled,
 }: Props) {
@@ -78,7 +80,8 @@ export function KhpaPlayerPicker({
           {selected ? (
             <>
               <KhpaBadgeAvatar
-                wins={playerWins?.[selected.id] ?? 0}
+                wins={playerStats?.[selected.id]?.wins ?? 0}
+                winRate={playerStats?.[selected.id]?.winRate}
                 name={selected.display_name}
                 size="sm"
               />
@@ -157,7 +160,8 @@ export function KhpaPlayerPicker({
                         )}
                       >
                         <KhpaBadgeAvatar
-                          wins={playerWins?.[player.id] ?? 0}
+                          wins={playerStats?.[player.id]?.wins ?? 0}
+                          winRate={playerStats?.[player.id]?.winRate}
                           name={player.display_name}
                           size="sm"
                         />

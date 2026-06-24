@@ -4,15 +4,18 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useAppUi } from "@/components/providers/app-ui-provider";
 import { KhpaBadgeAvatar } from "@/components/khpa/badge-avatar";
+import { formatDuprRating } from "@/lib/player-display";
 import { SCORE_TYPE_LABEL } from "@/lib/dupr-score-type";
 import type { KhpaMatchWithPlayers } from "@/types/khpa";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+import type { PlayerCultivationStats } from "@/lib/cultivation-tiers";
+
 type Props = {
   match: KhpaMatchWithPlayers;
   displayIndex: number;
-  playerWins: Record<string, number>;
+  playerStats: Record<string, PlayerCultivationStats>;
   canDelete: boolean;
   onDelete?: (matchId: string) => Promise<void>;
   disabled?: boolean;
@@ -28,7 +31,7 @@ function getTeamPlayers(match: KhpaMatchWithPlayers, team: 1 | 2) {
 export function KhpaMatchCard({
   match,
   displayIndex,
-  playerWins,
+  playerStats,
   canDelete,
   onDelete,
   disabled,
@@ -94,7 +97,7 @@ export function KhpaMatchCard({
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-2 px-3 py-2.5 sm:gap-x-3 sm:py-3">
         <CompactTeam
           players={team1}
-          playerWins={playerWins}
+          playerStats={playerStats}
           side="left"
           highlight={team1Wins}
         />
@@ -115,7 +118,7 @@ export function KhpaMatchCard({
 
         <CompactTeam
           players={team2}
-          playerWins={playerWins}
+          playerStats={playerStats}
           side="right"
           highlight={team2Wins}
         />
@@ -126,12 +129,12 @@ export function KhpaMatchCard({
 
 function CompactTeam({
   players,
-  playerWins,
+  playerStats,
   side,
   highlight,
 }: {
   players: ReturnType<typeof getTeamPlayers>;
-  playerWins: Record<string, number>;
+  playerStats: Record<string, PlayerCultivationStats>;
   side: "left" | "right";
   highlight?: boolean;
 }) {
@@ -154,18 +157,29 @@ function CompactTeam({
             title={player.dupr_id ? `${player.display_name} · ${player.dupr_id}` : player.display_name}
           >
             <KhpaBadgeAvatar
-              wins={playerWins[player.id] ?? 0}
+              wins={playerStats[player.id]?.wins ?? 0}
+              winRate={playerStats[player.id]?.winRate}
               name={player.display_name}
               size="sm"
             />
-            <span
+            <div
               className={cn(
-                "truncate text-xs font-semibold leading-tight sm:text-sm",
-                highlight ? "text-inherit" : "text-secondary-foreground",
+                "min-w-0",
+                side === "right" && "text-right",
               )}
             >
-              {player.display_name}
-            </span>
+              <p
+                className={cn(
+                  "truncate text-xs font-semibold leading-tight sm:text-sm",
+                  highlight ? "text-inherit" : "text-secondary-foreground",
+                )}
+              >
+                {player.display_name}
+              </p>
+              <p className="text-[10px] font-medium leading-tight text-primary sm:text-xs">
+                DUPR {formatDuprRating(player.dupr_rating)}
+              </p>
+            </div>
           </div>
         ) : null,
       )}

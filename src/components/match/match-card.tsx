@@ -8,7 +8,7 @@ import {
   MATCH_STATUS_LABEL,
   type MatchDisplayStatus,
 } from "@/lib/match-status";
-import { playerDisplayName } from "@/lib/player-display";
+import { playerDisplayName, formatDuprRating } from "@/lib/player-display";
 import type { MatchWithPlayers, Player } from "@/types/database";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -55,9 +55,14 @@ function TeamNames({
     <div className={cn("space-y-1", align === "right" && "text-right")}>
       {players.map((player, idx) =>
         player ? (
-          <p key={player.id} className="text-base font-medium text-foreground">
-            {playerDisplayName(player)}
-          </p>
+          <div key={player.id} className="space-y-0.5">
+            <p className="text-base font-medium text-foreground">
+              {playerDisplayName(player)}
+            </p>
+            <p className="text-xs font-medium text-primary">
+              DUPR {formatDuprRating(player.dupr_rating)}
+            </p>
+          </div>
         ) : (
           <p key={idx} className="text-base text-muted">
             —

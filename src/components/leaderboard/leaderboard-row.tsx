@@ -1,8 +1,7 @@
-﻿import { CuteAvatar } from "@/components/brand/cute-avatar";
-import { formatDuprRating } from "@/lib/player-display";
+﻿import { formatDuprRating } from "@/lib/player-display";
 import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "@/types/leaderboard";
-import { BadgeMedal } from "./badge-medal";
+import { CultivationBadge, CultivationPill } from "@/components/cultivation/cultivation-badge";
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
@@ -52,26 +51,29 @@ export function LeaderboardRow({ entry, compact }: Props) {
 
       <div className="relative shrink-0">
         {isTop3 && <RankBadge rank={entry.rank} />}
-        <CuteAvatar
+        <CultivationBadge
+          wins={entry.wins}
+          winRate={entry.winRate}
           name={entry.name}
-          variant="chibi"
-          size={compact ? "md" : "lg"}
+          size={compact ? "sm" : "md"}
         />
       </div>
 
-      <BadgeMedal wins={entry.wins} size={compact ? "sm" : "md"} />
-
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-foreground">{entry.name}</p>
+        <div className="mt-0.5 flex flex-wrap items-center gap-2">
+          <CultivationPill wins={entry.wins} winRate={entry.winRate} />
+          <span className="text-xs text-muted">
+            {entry.wins} 勝 {entry.losses} 敗 · 勝率 {entry.winRate}%
+          </span>
+        </div>
       </div>
 
       <div className="text-right">
         <p className="font-data text-lg font-semibold tabular-nums text-foreground">
           {formatDuprRating(entry.duprRating)}
         </p>
-        <p className="text-xs text-muted">
-          {entry.wins} 勝 · {entry.winRate}%
-        </p>
+        <p className="text-xs text-muted">DUPR</p>
       </div>
     </div>
   );

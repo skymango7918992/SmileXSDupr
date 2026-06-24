@@ -1,7 +1,6 @@
-import { KhpaBadgeAvatar, KhpaBadgePill } from "@/components/khpa/badge-avatar";
-import { KhpaMedal } from "@/components/khpa/khpa-medal";
+import { CultivationBadge, CultivationPill } from "@/components/cultivation/cultivation-badge";
+import { CultivationLegend } from "@/components/cultivation/cultivation-legend";
 import { formatDuprRating } from "@/lib/player-display";
-import { KHPA_BADGE_TIERS, KHPA_DEFAULT_BADGE } from "@/lib/khpa/badges";
 import type { KhpaLeaderboardEntry } from "@/types/khpa";
 import { Card, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -42,13 +41,18 @@ export function KhpaLeaderboardFull({ entries, year, error }: Props) {
                 >
                   {entry.rank}
                 </span>
-                <KhpaBadgeAvatar wins={entry.wins} name={entry.name} size="md" />
+                <CultivationBadge
+                  wins={entry.wins}
+                  winRate={entry.winRate}
+                  name={entry.name}
+                  size="md"
+                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{entry.name}</p>
                   <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                    <KhpaBadgePill wins={entry.wins} />
+                    <CultivationPill wins={entry.wins} winRate={entry.winRate} />
                     <span className="text-xs text-muted">
-                      {entry.wins}勝 {entry.losses}敗
+                      {entry.wins}勝 {entry.losses}敗 · 勝率 {entry.winRate}%
                     </span>
                   </div>
                 </div>
@@ -64,25 +68,7 @@ export function KhpaLeaderboardFull({ entries, year, error }: Props) {
         )}
       </Card>
 
-      <Card>
-        <CardTitle className="mb-3">勳章等級說明</CardTitle>
-        <ul className="grid gap-2 sm:grid-cols-2">
-          {[KHPA_DEFAULT_BADGE, ...KHPA_BADGE_TIERS].map((tier) => (
-            <li
-              key={tier.level}
-              className="flex items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2"
-            >
-              <KhpaMedal badge={tier} size={36} />
-              <div>
-                <p className={cn("text-sm font-semibold", tier.pillText)}>
-                  Lv.{tier.level} {tier.name}
-                </p>
-                <p className="text-xs text-muted">{tier.description}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      <CultivationLegend />
     </div>
   );
 }

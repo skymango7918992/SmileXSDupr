@@ -58,8 +58,14 @@ export function KhpaMatchCenter({
 
   const matches = matchesByVenue[activeVenue.id] ?? [];
 
-  const playerWins = useMemo(
-    () => Object.fromEntries(leaderboardEntries.map((e) => [e.playerId, e.wins])),
+  const playerStats = useMemo(
+    () =>
+      Object.fromEntries(
+        leaderboardEntries.map((e) => [
+          e.playerId,
+          { wins: e.wins, winRate: e.winRate },
+        ]),
+      ),
     [leaderboardEntries],
   );
 
@@ -223,7 +229,7 @@ export function KhpaMatchCenter({
                 key={match.id}
                 match={match}
                 displayIndex={matches.length - index}
-                playerWins={playerWins}
+                playerStats={playerStats}
                 canDelete={canDelete}
                 onDelete={canDelete ? handleDelete : undefined}
                 disabled={isPending}
@@ -256,7 +262,7 @@ export function KhpaMatchCenter({
       {showManual && (
         <KhpaManualMatchDialog
           players={players}
-          playerWins={playerWins}
+          playerStats={playerStats}
           onSubmit={handleAddMatch}
           onClose={() => setShowManual(false)}
         />

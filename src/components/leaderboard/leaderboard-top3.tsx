@@ -95,7 +95,7 @@ function PodiumSlot({
           DUPR {formatDuprRating(entry.duprRating)}
         </p>
         <div className="mt-1.5">
-          <BadgeMedal wins={entry.wins} size="sm" />
+          <BadgeMedal wins={entry.wins} winRate={entry.winRate} size="sm" />
         </div>
         <p className="mt-1.5 text-lg font-semibold tabular-nums text-foreground">
           {formatDuprRating(entry.duprRating)}

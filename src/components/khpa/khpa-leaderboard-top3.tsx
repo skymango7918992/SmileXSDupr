@@ -63,12 +63,14 @@ export function KhpaLeaderboardTop3({
                   <>
                     <KhpaBadgeAvatar
                       wins={entry.wins}
+                      winRate={entry.winRate}
                       name={entry.name}
                       size={compact ? "sm" : "md"}
                       className="sm:hidden"
                     />
                     <KhpaBadgeAvatar
                       wins={entry.wins}
+                      winRate={entry.winRate}
                       name={entry.name}
                       size={compact ? "md" : "lg"}
                       className="hidden sm:flex"
@@ -80,7 +82,9 @@ export function KhpaLeaderboardTop3({
                       DUPR {formatDuprRating(entry.duprRating)}
                     </p>
                     <p className="text-[10px] text-muted">{entry.wins} 勝</p>
-                    {!compact && <KhpaBadgePill wins={entry.wins} />}
+                    {!compact && (
+                      <KhpaBadgePill wins={entry.wins} winRate={entry.winRate} />
+                    )}
                   </>
                 ) : (
                   <div className="flex h-16 w-full items-center justify-center rounded-xl border border-dashed border-border text-xl opacity-40">
