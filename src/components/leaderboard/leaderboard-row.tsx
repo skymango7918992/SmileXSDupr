@@ -63,9 +63,6 @@ export function LeaderboardRow({ entry, compact }: Props) {
 
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-foreground">{entry.name}</p>
-        <p className="truncate text-xs font-medium text-primary">
-          DUPR {formatDuprRating(entry.duprRating)}
-        </p>
       </div>
 
       <div className="text-right">

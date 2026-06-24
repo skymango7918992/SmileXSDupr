@@ -47,9 +47,6 @@ export function KhpaLeaderboardFull({ entries, year, error }: Props) {
                   <p className="truncate font-medium">{entry.name}</p>
                   <div className="mt-0.5 flex flex-wrap items-center gap-2">
                     <KhpaBadgePill wins={entry.wins} />
-                    <span className="text-xs font-medium text-primary">
-                      DUPR {formatDuprRating(entry.duprRating)}
-                    </span>
                     <span className="text-xs text-muted">
                       {entry.wins}勝 {entry.losses}敗
                     </span>
