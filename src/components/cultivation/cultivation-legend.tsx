@@ -6,6 +6,27 @@ import {
 import { CultivationAvatar } from "@/components/cultivation/cultivation-avatar";
 import { cn } from "@/lib/utils";
 
+function TierAvatars({ level, size }: { level: number; size: number }) {
+  if (level === 0) {
+    return <CultivationAvatar tier={ALL_CULTIVATION_TIERS[0]} size={size} />;
+  }
+
+  const tier = ALL_CULTIVATION_TIERS.find((t) => t.level === level)!;
+
+  return (
+    <div className="flex shrink-0 items-end justify-center gap-3 sm:gap-4">
+      <div className="flex flex-col items-center gap-1">
+        <CultivationAvatar tier={tier} gender="male" size={size} />
+        <span className="text-[10px] font-medium text-muted">男生</span>
+      </div>
+      <div className="flex flex-col items-center gap-1">
+        <CultivationAvatar tier={tier} gender="female" size={size} />
+        <span className="text-[10px] font-medium text-muted">女生</span>
+      </div>
+    </div>
+  );
+}
+
 export function CultivationLegend() {
   return (
     <section className="glass-card p-4 sm:p-6">
@@ -13,7 +34,7 @@ export function CultivationLegend() {
         修行境界一覽
       </h3>
       <p className="mb-4 text-sm text-muted">
-        星鑽 XS 與協會共用境界；左為境界圖、右為晉升條件與詩白
+        星鑽 XS 與協會共用境界；左為男生／女生境界圖，右為晉升條件與詩白。球員未設定性別或仍為凡人時，顯示預設頭像。
       </p>
       <ul className="grid gap-4">
         {ALL_CULTIVATION_TIERS.map((tier) => (
@@ -21,11 +42,7 @@ export function CultivationLegend() {
             key={tier.level}
             className="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface px-3 py-4 sm:flex-row sm:items-start sm:gap-4"
           >
-            <CultivationAvatar
-              tier={tier}
-              size={tier.level === 0 ? 64 : 88}
-              className="shrink-0"
-            />
+            <TierAvatars level={tier.level} size={tier.level === 0 ? 64 : 72} />
             <div className="min-w-0 flex-1 text-center sm:text-left">
               {tier.level === 0 ? (
                 <p className={cn("text-sm font-semibold", tier.pillText)}>

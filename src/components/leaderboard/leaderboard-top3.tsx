@@ -4,7 +4,10 @@ import { CuteAvatar } from "@/components/brand/cute-avatar";
 import { formatDuprRating } from "@/lib/player-display";
 import type { LeaderboardEntry } from "@/types/leaderboard";
 import { cn } from "@/lib/utils";
-import { BadgeMedal } from "./badge-medal";
+import {
+  CultivationBadge,
+  CultivationPill,
+} from "@/components/cultivation/cultivation-badge";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -20,7 +23,7 @@ const PODIUM = [
     bar: "h-20 sm:h-24",
     order: "order-1",
     barBg: "bg-primary-soft",
-    avatarSize: "lg" as const,
+    badgeSize: "md" as const,
   },
   {
     rank: 1,
@@ -29,7 +32,7 @@ const PODIUM = [
     bar: "h-28 sm:h-32",
     order: "order-2",
     barBg: "bg-primary/45",
-    avatarSize: "xl" as const,
+    badgeSize: "lg" as const,
   },
   {
     rank: 3,
@@ -38,7 +41,7 @@ const PODIUM = [
     bar: "h-16 sm:h-20",
     order: "order-3",
     barBg: "bg-primary/30",
-    avatarSize: "lg" as const,
+    badgeSize: "md" as const,
   },
 ] as const;
 
@@ -81,11 +84,13 @@ function PodiumSlot({
       >
         <span className="text-xl leading-none sm:text-2xl">{slot.medal}</span>
         <div className="relative -mt-1 mb-1">
-          <CuteAvatar
+          <CultivationBadge
+            wins={entry.wins}
+            winRate={entry.winRate}
+            gender={entry.avatarGender}
             name={entry.name}
-            variant="chibi"
-            size={slot.avatarSize}
-            className={slot.rank === 1 ? "ring-2 ring-warning/40 ring-offset-1" : undefined}
+            size={slot.badgeSize}
+            className={slot.rank === 1 ? "ring-2 ring-warning/40 ring-offset-1 rounded-full" : undefined}
           />
         </div>
         <p className="line-clamp-1 text-sm font-semibold text-foreground">
@@ -95,17 +100,15 @@ function PodiumSlot({
           DUPR {formatDuprRating(entry.duprRating)}
         </p>
         <div className="mt-1.5">
-          <BadgeMedal
+          <CultivationPill
             wins={entry.wins}
             winRate={entry.winRate}
             gender={entry.avatarGender}
-            size="sm"
           />
         </div>
-        <p className="mt-1.5 text-lg font-semibold tabular-nums text-foreground">
-          {formatDuprRating(entry.duprRating)}
+        <p className="mt-1.5 text-[10px] text-muted">
+          {entry.wins} 勝 · 勝率 {entry.winRate}%
         </p>
-        <p className="text-[10px] text-muted">{entry.wins} 勝 · {entry.winRate}%</p>
       </div>
       <div
         className={cn(

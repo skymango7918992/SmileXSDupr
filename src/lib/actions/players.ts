@@ -118,14 +118,8 @@ export async function deletePlayer(id: string): Promise<DeletePlayerResult> {
     throw new Error(loadError?.message ?? "找不到球員");
   }
 
-  const { data: allPlayers } = await supabase.from("players").select("*");
-  const action = await removePlayerRecord(
-    supabase,
-    player as Player,
-    (allPlayers ?? []) as Player[],
-  );
+  const action = await removePlayerRecord(supabase, player as Player);
 
-  revalidatePath("/");
   revalidatePath("/players");
   return { action };
 }

@@ -23,7 +23,11 @@ import { playerDisplayName } from "@/lib/player-display";
 import type { Player, PlayerSource } from "@/types/database";
 import type { DuprConfigMode, DuprEnvStatus } from "@/types/dupr";
 import { cn } from "@/lib/utils";
-import { CuteAvatar } from "@/components/brand/cute-avatar";
+import type { PlayerCultivationStats } from "@/lib/cultivation-tiers";
+import {
+  CultivationBadge,
+  CultivationPill,
+} from "@/components/cultivation/cultivation-badge";
 import { AvatarGenderToggle } from "@/components/cultivation/avatar-gender-toggle";
 import {
   formatAvatarGenderLabel,
@@ -39,6 +43,7 @@ const PAGE_SIZE = 10;
 
 type Props = {
   initialPlayers: Player[];
+  playerStats?: Record<string, PlayerCultivationStats>;
   readOnly?: boolean;
 };
 
@@ -90,6 +95,7 @@ type PlayerRowProps = {
   onToggleActive: () => void;
   onDelete: () => void;
   readOnly?: boolean;
+  playerStats?: Record<string, PlayerCultivationStats>;
 };
 
 function PlayerRowActions({
@@ -201,6 +207,7 @@ function PlayerCard({
   onToggleActive,
   onDelete,
   readOnly,
+  playerStats,
 }: PlayerRowProps) {
   const isClub = player.source === "club";
 
@@ -303,7 +310,13 @@ function PlayerCard({
       ) : (
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-1 gap-3">
-            <CuteAvatar name={playerDisplayName(player)} variant="chibi" size="md" />
+            <CultivationBadge
+              wins={playerStats?.[player.id]?.wins ?? 0}
+              winRate={playerStats?.[player.id]?.winRate}
+              gender={player.avatar_gender}
+              name={playerDisplayName(player)}
+              size="md"
+            />
             <div className="min-w-0 flex-1">
             <p className="truncate text-base font-semibold text-foreground">
               {playerDisplayName(player)}
@@ -321,6 +334,11 @@ function PlayerCard({
               {player.dupr_id}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
+              <CultivationPill
+                wins={playerStats?.[player.id]?.wins ?? 0}
+                winRate={playerStats?.[player.id]?.winRate}
+                gender={player.avatar_gender}
+              />
               <span
                 className={
                   player.active
@@ -376,6 +394,7 @@ function PlayerTableRow({
   onToggleActive,
   onDelete,
   readOnly,
+  playerStats,
 }: PlayerRowProps) {
   const isClub = player.source === "club";
 
@@ -427,7 +446,13 @@ function PlayerTableRow({
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <CuteAvatar name={playerDisplayName(player)} variant="chibi" size="sm" />
+            <CultivationBadge
+              wins={playerStats?.[player.id]?.wins ?? 0}
+              winRate={playerStats?.[player.id]?.winRate}
+              gender={player.avatar_gender}
+              name={playerDisplayName(player)}
+              size="sm"
+            />
             <span className="text-sm font-medium text-foreground">
               {playerDisplayName(player)}
             </span>
@@ -542,7 +567,11 @@ function DuprEnvDiagnostics({ status }: { status: DuprEnvStatus | null }) {
   );
 }
 
-export function PlayerManagement({ initialPlayers, readOnly = false }: Props) {
+export function PlayerManagement({
+  initialPlayers,
+  playerStats = {},
+  readOnly = false,
+}: Props) {
   const [players, setPlayers] = useState(initialPlayers);
   const [duprConfigMode, setDuprConfigMode] = useState<DuprConfigMode | null>(
     null,
@@ -764,6 +793,7 @@ export function PlayerManagement({ initialPlayers, readOnly = false }: Props) {
     onToggleActive: () => toggleActive(player),
     onDelete: () => handleDelete(player),
     readOnly,
+    playerStats,
   });
 
   const clubCount = players.filter((p) => p.source === "club").length;
