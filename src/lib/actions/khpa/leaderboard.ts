@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { normalizePlayerAvatarGender } from "@/lib/cultivation-tiers";
 import type { KhpaLeaderboardEntry } from "@/types/khpa";
 import type { KhpaPlayer } from "@/types/khpa";
 
@@ -89,6 +90,7 @@ function toEntries(stats: Map<string, PlayerStats>): KhpaLeaderboardEntry[] {
     name: row.player.display_name,
     duprId: row.player.dupr_id,
     duprRating: row.player.dupr_rating ?? null,
+    avatarGender: normalizePlayerAvatarGender(row.player.avatar_gender),
     wins: row.wins,
     losses: row.losses,
     matches: row.matches,

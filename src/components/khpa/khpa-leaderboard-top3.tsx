@@ -64,6 +64,7 @@ export function KhpaLeaderboardTop3({
                     <KhpaBadgeAvatar
                       wins={entry.wins}
                       winRate={entry.winRate}
+                      gender={entry.avatarGender}
                       name={entry.name}
                       size={compact ? "sm" : "md"}
                       className="sm:hidden"
@@ -71,6 +72,7 @@ export function KhpaLeaderboardTop3({
                     <KhpaBadgeAvatar
                       wins={entry.wins}
                       winRate={entry.winRate}
+                      gender={entry.avatarGender}
                       name={entry.name}
                       size={compact ? "md" : "lg"}
                       className="hidden sm:flex"
@@ -83,7 +85,11 @@ export function KhpaLeaderboardTop3({
                     </p>
                     <p className="text-[10px] text-muted">{entry.wins} 勝</p>
                     {!compact && (
-                      <KhpaBadgePill wins={entry.wins} winRate={entry.winRate} />
+                      <KhpaBadgePill
+                        wins={entry.wins}
+                        winRate={entry.winRate}
+                        gender={entry.avatarGender}
+                      />
                     )}
                   </>
                 ) : (

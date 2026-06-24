@@ -4,6 +4,28 @@ export type PlayerCultivationStats = {
   winRate: number;
 };
 
+/** 境界頭像性別（對應 public/cultivation 與 female/ 子目錄） */
+export type PlayerAvatarGender = "male" | "female";
+
+/** 未設定性別或 Lv.0 凡人時使用的預設圖 */
+export const CULTIVATION_MORTAL_IMAGE_SRC = "/cultivation/mortal_default.png";
+
+export function normalizePlayerAvatarGender(
+  value: string | null | undefined,
+): PlayerAvatarGender | null {
+  if (value === "male") return "male";
+  if (value === "female") return "female";
+  return null;
+}
+
+export function formatAvatarGenderLabel(
+  gender: PlayerAvatarGender | null | undefined,
+): string {
+  if (gender === "male") return "男生";
+  if (gender === "female") return "女生";
+  return "預設";
+}
+
 export type CultivationTier = {
   level: number;
   name: string;
@@ -212,9 +234,20 @@ export function formatWinsRequirement(tier: CultivationTier): string {
 }
 
 /** 境界圖（頭像與勳章共用） */
-export function getCultivationImageSrc(level: number): string | null {
+export function getCultivationImageSrc(
+  level: number,
+  gender?: PlayerAvatarGender | null,
+): string {
+  if (level === 0 || !gender) {
+    return CULTIVATION_MORTAL_IMAGE_SRC;
+  }
   const tier = getCultivationTierByLevel(level);
-  if (!tier?.imageFile) return null;
+  if (!tier?.imageFile) {
+    return CULTIVATION_MORTAL_IMAGE_SRC;
+  }
+  if (gender === "female") {
+    return `/cultivation/female/${tier.imageFile}`;
+  }
   return `/cultivation/${tier.imageFile}`;
 }
 

@@ -5,6 +5,10 @@ import { requireXsAdmin } from "@/lib/auth/require-xs-admin";
 import { isStaffRole } from "@/lib/auth/roles";
 import { removePlayerRecord } from "@/lib/actions/player-merge";
 import { createClient } from "@/lib/supabase/server";
+import {
+  normalizePlayerAvatarGender,
+  type PlayerAvatarGender,
+} from "@/lib/cultivation-tiers";
 import type { Player } from "@/types/database";
 
 export type DeletePlayerResult = {
@@ -21,7 +25,12 @@ export async function getPlayers(activeOnly = false): Promise<Player[]> {
 
   const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []).map((row) => ({
+    ...(row as Player),
+    avatar_gender: normalizePlayerAvatarGender(
+      (row as Player).avatar_gender,
+    ),
+  }));
 }
 
 export async function createPlayer(formData: {
@@ -29,6 +38,7 @@ export async function createPlayer(formData: {
   display_name?: string;
   dupr_id: string;
   dupr_rating?: number | null;
+  avatar_gender?: PlayerAvatarGender | null;
 }): Promise<Player> {
   await requireXsAdmin();
   const supabase = await createClient();
@@ -36,16 +46,21 @@ export async function createPlayer(formData: {
   const displayName = formData.display_name?.trim() || duprName;
   const customized = displayName !== duprName;
 
-  const { data, error } = await supabase
-    .from("players")
-    .insert({
+  const insert: Record<string, unknown> = {
       name: duprName,
       display_name: displayName,
       display_name_customized: customized,
       dupr_id: formData.dupr_id.trim().toUpperCase(),
       dupr_rating: formData.dupr_rating ?? null,
       source: "manual",
-    })
+    };
+  if (formData.avatar_gender) {
+    insert.avatar_gender = formData.avatar_gender;
+  }
+
+  const { data, error } = await supabase
+    .from("players")
+    .insert(insert)
     .select()
     .single();
 
@@ -64,6 +79,7 @@ export async function updatePlayer(
     dupr_id?: string;
     active?: boolean;
     dupr_rating?: number | null;
+    avatar_gender?: PlayerAvatarGender | null;
   },
 ): Promise<void> {
   await requireXsAdmin();
@@ -77,6 +93,9 @@ export async function updatePlayer(
   }
   if (formData.display_name !== undefined) {
     payload.display_name = formData.display_name.trim();
+  }
+  if (formData.avatar_gender !== undefined) {
+    payload.avatar_gender = normalizePlayerAvatarGender(formData.avatar_gender);
   }
 
   const { error } = await supabase.from("players").update(payload).eq("id", id);

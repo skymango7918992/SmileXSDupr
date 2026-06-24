@@ -20,6 +20,7 @@ export type KhpaPlayer = {
   source: "club" | "manual";
   display_name_customized: boolean;
   active: boolean;
+  avatar_gender: import("@/lib/cultivation-tiers").PlayerAvatarGender | null;
   created_at: string;
   updated_at: string;
 };
@@ -78,6 +79,7 @@ export type KhpaLeaderboardEntry = {
   name: string;
   duprId: string;
   duprRating: number | null;
+  avatarGender: import("@/lib/cultivation-tiers").PlayerAvatarGender | null;
   wins: number;
   losses: number;
   matches: number;

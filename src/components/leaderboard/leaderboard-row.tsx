@@ -54,6 +54,7 @@ export function LeaderboardRow({ entry, compact }: Props) {
         <CultivationBadge
           wins={entry.wins}
           winRate={entry.winRate}
+          gender={entry.avatarGender}
           name={entry.name}
           size={compact ? "sm" : "md"}
         />
@@ -62,7 +63,11 @@ export function LeaderboardRow({ entry, compact }: Props) {
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-foreground">{entry.name}</p>
         <div className="mt-0.5 flex flex-wrap items-center gap-2">
-          <CultivationPill wins={entry.wins} winRate={entry.winRate} />
+          <CultivationPill
+            wins={entry.wins}
+            winRate={entry.winRate}
+            gender={entry.avatarGender}
+          />
           <span className="text-xs text-muted">
             {entry.wins} 勝 {entry.losses} 敗 · 勝率 {entry.winRate}%
           </span>

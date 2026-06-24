@@ -2,12 +2,14 @@ import { CultivationAvatar } from "@/components/cultivation/cultivation-avatar";
 import {
   getCultivationTier,
   type CultivationTier,
+  type PlayerAvatarGender,
 } from "@/lib/cultivation-tiers";
 import { cn } from "@/lib/utils";
 
 type Props = {
   wins: number;
   winRate?: number;
+  gender?: PlayerAvatarGender | null;
   name?: string;
   size?: "sm" | "md" | "lg" | "xl";
   showLabel?: boolean;
@@ -24,6 +26,7 @@ const sizeMap = {
 export function CultivationBadge({
   wins,
   winRate,
+  gender = null,
   name,
   size = "md",
   showLabel = false,
@@ -43,7 +46,12 @@ export function CultivationBadge({
             : `${tier.name}，${wins} 勝`
         }
       >
-        <CultivationAvatar tier={tier} size={s.px} className="h-full w-full" />
+        <CultivationAvatar
+          tier={tier}
+          gender={gender}
+          size={s.px}
+          className="h-full w-full"
+        />
       </div>
       {showLabel && (
         <span
@@ -62,9 +70,11 @@ export function CultivationBadge({
 export function CultivationPill({
   wins,
   winRate,
+  gender = null,
 }: {
   wins: number;
   winRate?: number;
+  gender?: PlayerAvatarGender | null;
 }) {
   const tier = getCultivationTier(wins, winRate);
 
@@ -76,7 +86,7 @@ export function CultivationPill({
         tier.pillText,
       )}
     >
-      <CultivationAvatar tier={tier} size={26} className="!shadow-none" />
+      <CultivationAvatar tier={tier} gender={gender} size={26} className="!shadow-none" />
       {tier.name}
     </span>
   );
@@ -90,7 +100,12 @@ export function CultivationLabel({ tier }: { tier: CultivationTier }) {
         tier.pillText,
       )}
     >
-      <CultivationAvatar tier={tier} size={26} className="!shadow-none" />
+      <CultivationAvatar
+        tier={tier}
+        gender={null}
+        size={26}
+        className="!shadow-none"
+      />
       {tier.name}
     </span>
   );

@@ -159,6 +159,7 @@ function CompactTeam({
             <KhpaBadgeAvatar
               wins={playerStats[player.id]?.wins ?? 0}
               winRate={playerStats[player.id]?.winRate}
+              gender={player.avatar_gender}
               name={player.display_name}
               size="sm"
             />

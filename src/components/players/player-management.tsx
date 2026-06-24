@@ -24,6 +24,11 @@ import type { Player, PlayerSource } from "@/types/database";
 import type { DuprConfigMode, DuprEnvStatus } from "@/types/dupr";
 import { cn } from "@/lib/utils";
 import { CuteAvatar } from "@/components/brand/cute-avatar";
+import { AvatarGenderToggle } from "@/components/cultivation/avatar-gender-toggle";
+import {
+  formatAvatarGenderLabel,
+  type PlayerAvatarGender,
+} from "@/lib/cultivation-tiers";
 import { PageHero } from "@/components/brand/page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -55,7 +60,22 @@ type RowDraft = {
   displayName: string;
   dupr_id: string;
   rating: string;
+  avatarGender: PlayerAvatarGender | null;
 };
+
+function mergeRowDraft(
+  rowDraft: RowDraft | null,
+  patch: Partial<RowDraft>,
+): RowDraft {
+  return {
+    name: rowDraft?.name ?? "",
+    displayName: rowDraft?.displayName ?? "",
+    dupr_id: rowDraft?.dupr_id ?? "",
+    rating: rowDraft?.rating ?? "",
+    avatarGender: rowDraft?.avatarGender ?? null,
+    ...patch,
+  };
+}
 
 type PlayerRowProps = {
   player: Player;
@@ -205,12 +225,9 @@ function PlayerCard({
               <Input
                 value={rowDraft?.name ?? ""}
                 onChange={(e) =>
-                  onDraftChange({
-                    name: e.target.value,
-                    displayName: rowDraft?.displayName ?? "",
-                    dupr_id: rowDraft?.dupr_id ?? "",
-                    rating: rowDraft?.rating ?? "",
-                  })
+                  onDraftChange(
+                    mergeRowDraft(rowDraft, { name: e.target.value }),
+                  )
                 }
                 className="min-h-11 text-base"
               />
@@ -223,17 +240,20 @@ function PlayerCard({
             <Input
               value={rowDraft?.displayName ?? ""}
               onChange={(e) =>
-                onDraftChange({
-                  name: rowDraft?.name ?? "",
-                  displayName: e.target.value,
-                  dupr_id: rowDraft?.dupr_id ?? "",
-                  rating: rowDraft?.rating ?? "",
-                })
+                onDraftChange(
+                  mergeRowDraft(rowDraft, { displayName: e.target.value }),
+                )
               }
               className="min-h-11 text-base"
               placeholder="對戰中心顯示用，可填中文"
             />
           </div>
+          <AvatarGenderToggle
+            value={rowDraft?.avatarGender ?? null}
+            onChange={(avatarGender) =>
+              onDraftChange(mergeRowDraft(rowDraft, { avatarGender }))
+            }
+          />
           <div>
             <label className="mb-1 block text-xs font-medium text-muted">
               DUPR ID
@@ -246,12 +266,11 @@ function PlayerCard({
               <Input
                 value={rowDraft?.dupr_id ?? ""}
                 onChange={(e) =>
-                  onDraftChange({
-                    name: rowDraft?.name ?? "",
-                    displayName: rowDraft?.displayName ?? "",
-                    dupr_id: e.target.value.toUpperCase(),
-                    rating: rowDraft?.rating ?? "",
-                  })
+                  onDraftChange(
+                    mergeRowDraft(rowDraft, {
+                      dupr_id: e.target.value.toUpperCase(),
+                    }),
+                  )
                 }
                 className="min-h-11 font-mono text-base"
               />
@@ -271,12 +290,9 @@ function PlayerCard({
                 step="0.01"
                 value={rowDraft?.rating ?? ""}
                 onChange={(e) =>
-                  onDraftChange({
-                    name: rowDraft?.name ?? "",
-                    displayName: rowDraft?.displayName ?? "",
-                    dupr_id: rowDraft?.dupr_id ?? "",
-                    rating: e.target.value,
-                  })
+                  onDraftChange(
+                    mergeRowDraft(rowDraft, { rating: e.target.value }),
+                  )
                 }
                 className="min-h-11 text-base"
                 placeholder="選填"
@@ -291,6 +307,9 @@ function PlayerCard({
             <div className="min-w-0 flex-1">
             <p className="truncate text-base font-semibold text-foreground">
               {playerDisplayName(player)}
+            </p>
+            <p className="text-[10px] text-muted">
+              境界頭像 · {formatAvatarGenderLabel(player.avatar_gender)}
             </p>
             {player.display_name?.trim() &&
               player.display_name.trim() !== player.name && (
@@ -375,12 +394,9 @@ function PlayerTableRow({
             <Input
               value={rowDraft?.name ?? ""}
               onChange={(e) =>
-                onDraftChange({
-                  name: e.target.value,
-                  displayName: rowDraft?.displayName ?? "",
-                  dupr_id: rowDraft?.dupr_id ?? "",
-                  rating: rowDraft?.rating ?? "",
-                })
+                onDraftChange(
+                  mergeRowDraft(rowDraft, { name: e.target.value }),
+                )
               }
               className="h-9"
             />
@@ -391,24 +407,32 @@ function PlayerTableRow({
       </td>
       <td className="px-3 py-2">
         {isEditing ? (
-          <Input
-            value={rowDraft?.displayName ?? ""}
-            onChange={(e) =>
-              onDraftChange({
-                name: rowDraft?.name ?? "",
-                displayName: e.target.value,
-                dupr_id: rowDraft?.dupr_id ?? "",
-                rating: rowDraft?.rating ?? "",
-              })
-            }
-            className="h-9"
-            placeholder="對戰中心顯示"
-          />
+          <div className="space-y-2">
+            <Input
+              value={rowDraft?.displayName ?? ""}
+              onChange={(e) =>
+                onDraftChange(
+                  mergeRowDraft(rowDraft, { displayName: e.target.value }),
+                )
+              }
+              className="h-9"
+              placeholder="對戰中心顯示"
+            />
+            <AvatarGenderToggle
+              value={rowDraft?.avatarGender ?? null}
+              onChange={(avatarGender) =>
+                onDraftChange(mergeRowDraft(rowDraft, { avatarGender }))
+              }
+            />
+          </div>
         ) : (
           <div className="flex items-center gap-2">
             <CuteAvatar name={playerDisplayName(player)} variant="chibi" size="sm" />
             <span className="text-sm font-medium text-foreground">
               {playerDisplayName(player)}
+            </span>
+            <span className="text-[10px] text-muted">
+              {formatAvatarGenderLabel(player.avatar_gender)}
             </span>
           </div>
         )}
@@ -423,12 +447,11 @@ function PlayerTableRow({
             <Input
               value={rowDraft?.dupr_id ?? ""}
               onChange={(e) =>
-                onDraftChange({
-                  name: rowDraft?.name ?? "",
-                  displayName: rowDraft?.displayName ?? "",
-                  dupr_id: e.target.value.toUpperCase(),
-                  rating: rowDraft?.rating ?? "",
-                })
+                onDraftChange(
+                  mergeRowDraft(rowDraft, {
+                    dupr_id: e.target.value.toUpperCase(),
+                  }),
+                )
               }
               className="h-9 font-mono text-sm"
             />
@@ -449,12 +472,9 @@ function PlayerTableRow({
               step="0.01"
               value={rowDraft?.rating ?? ""}
               onChange={(e) =>
-                onDraftChange({
-                  name: rowDraft?.name ?? "",
-                  displayName: rowDraft?.displayName ?? "",
-                  dupr_id: rowDraft?.dupr_id ?? "",
-                  rating: e.target.value,
-                })
+                onDraftChange(
+                  mergeRowDraft(rowDraft, { rating: e.target.value }),
+                )
               }
               className="h-9 w-24"
               placeholder="—"
@@ -536,6 +556,8 @@ export function PlayerManagement({ initialPlayers, readOnly = false }: Props) {
   const [newDisplayName, setNewDisplayName] = useState("");
   const [newDuprId, setNewDuprId] = useState("");
   const [newRating, setNewRating] = useState("");
+  const [newAvatarGender, setNewAvatarGender] =
+    useState<PlayerAvatarGender | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [rowDraft, setRowDraft] = useState<RowDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -612,11 +634,13 @@ export function PlayerManagement({ initialPlayers, readOnly = false }: Props) {
           display_name: newDisplayName.trim() || newName,
           dupr_id: newDuprId,
           dupr_rating: newRating ? Number(newRating) : null,
+          ...(newAvatarGender ? { avatar_gender: newAvatarGender } : {}),
         });
         setNewName("");
         setNewDisplayName("");
         setNewDuprId("");
         setNewRating("");
+        setNewAvatarGender(null);
         await refreshFromServer();
       } catch (e) {
         setError(e instanceof Error ? e.message : "新增失敗");
@@ -631,6 +655,7 @@ export function PlayerManagement({ initialPlayers, readOnly = false }: Props) {
       displayName: player.display_name?.trim() || player.name,
       dupr_id: player.dupr_id,
       rating: player.dupr_rating?.toString() ?? "",
+      avatarGender: player.avatar_gender ?? null,
     });
     setError(null);
   };
@@ -661,6 +686,7 @@ export function PlayerManagement({ initialPlayers, readOnly = false }: Props) {
           await updatePlayer(player.id, {
             display_name: displayName,
             display_name_customized: customized,
+            avatar_gender: rowDraft.avatarGender,
           });
         } else {
           await updatePlayer(player.id, {
@@ -669,6 +695,7 @@ export function PlayerManagement({ initialPlayers, readOnly = false }: Props) {
             display_name_customized: customized,
             dupr_id: rowDraft.dupr_id,
             dupr_rating: rowDraft.rating ? Number(rowDraft.rating) : null,
+            avatar_gender: rowDraft.avatarGender,
           });
         }
         cancelRowEdit();
@@ -845,6 +872,10 @@ DUPR_API_TOKEN=eyJ...`}
             value={newRating}
             onChange={(e) => setNewRating(e.target.value)}
             className="min-h-11 text-base"
+          />
+          <AvatarGenderToggle
+            value={newAvatarGender}
+            onChange={setNewAvatarGender}
           />
         </div>
         <div className="mt-4">

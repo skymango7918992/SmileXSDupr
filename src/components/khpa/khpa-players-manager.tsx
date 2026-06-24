@@ -11,6 +11,11 @@ import {
 import { syncKhpaDuprClubMembers } from "@/lib/actions/khpa/dupr-sync";
 import { getDuprEnvStatusAction } from "@/lib/actions/dupr-config";
 import { KhpaBadgeAvatar, KhpaBadgePill } from "@/components/khpa/badge-avatar";
+import { AvatarGenderToggle } from "@/components/cultivation/avatar-gender-toggle";
+import {
+  formatAvatarGenderLabel,
+  type PlayerAvatarGender,
+} from "@/lib/cultivation-tiers";
 import { KhpaPagination } from "@/components/khpa/khpa-pagination";
 import { useAppUi } from "@/components/providers/app-ui-provider";
 import type { KhpaLeaderboardEntry, KhpaPlayer } from "@/types/khpa";
@@ -37,6 +42,8 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
   const [newDisplayName, setNewDisplayName] = useState("");
   const [newDuprId, setNewDuprId] = useState("");
   const [newRating, setNewRating] = useState("");
+  const [newAvatarGender, setNewAvatarGender] =
+    useState<PlayerAvatarGender | null>(null);
   const [active, setActive] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [duprConfigMode, setDuprConfigMode] = useState<DuprConfigMode | null>(null);
@@ -115,6 +122,7 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
           dupr_id: newDuprId,
           active,
           dupr_rating: newRating ? Number(newRating) : null,
+          ...(newAvatarGender ? { avatar_gender: newAvatarGender } : {}),
         });
         setList((prev) =>
           [...prev, player].sort((a, b) => {
@@ -126,6 +134,7 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
         setNewDisplayName("");
         setNewDuprId("");
         setNewRating("");
+        setNewAvatarGender(null);
         setActive(true);
         setShowAdd(false);
         setPage(1);
@@ -144,6 +153,7 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
       duprId: string;
       isActive: boolean;
       rating: string;
+      avatarGender: PlayerAvatarGender | null;
     },
   ) => {
     startTransition(async () => {
@@ -155,6 +165,7 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
             display_name_customized:
               input.displayName.trim() !== player.name,
             active: input.isActive,
+            avatar_gender: input.avatarGender,
           });
         } else {
           await updateKhpaPlayer(player.id, {
@@ -163,6 +174,7 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
             dupr_id: input.duprId,
             active: input.isActive,
             dupr_rating: input.rating ? Number(input.rating) : null,
+            avatar_gender: input.avatarGender,
           });
         }
         await refreshList();
@@ -291,6 +303,10 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
               onChange={(e) => setNewRating(e.target.value)}
               className="h-11"
             />
+            <AvatarGenderToggle
+              value={newAvatarGender}
+              onChange={setNewAvatarGender}
+            />
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -348,6 +364,7 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
                 <KhpaBadgeAvatar
                   wins={playerStats[player.id]?.wins ?? 0}
                   winRate={playerStats[player.id]?.winRate}
+                  gender={player.avatar_gender}
                   name={player.display_name}
                   size="md"
                 />
@@ -366,6 +383,7 @@ export function KhpaPlayersManager({ players, leaderboard, canDelete }: Props) {
                         <KhpaBadgePill
                           wins={playerStats[player.id]?.wins ?? 0}
                           winRate={playerStats[player.id]?.winRate}
+                          gender={player.avatar_gender}
                         />
                         <SourceBadge source={player.source ?? "manual"} />
                         {!player.active && (
@@ -453,6 +471,7 @@ function EditRow({
     duprId: string;
     isActive: boolean;
     rating: string;
+    avatarGender: PlayerAvatarGender | null;
   }) => void;
   onCancel: () => void;
 }) {
@@ -462,6 +481,9 @@ function EditRow({
   const [duprId, setDuprId] = useState(player.dupr_id);
   const [rating, setRating] = useState(player.dupr_rating?.toString() ?? "");
   const [isActive, setIsActive] = useState(player.active);
+  const [avatarGender, setAvatarGender] = useState<PlayerAvatarGender | null>(
+    player.avatar_gender ?? null,
+  );
 
   return (
     <div className="flex flex-1 flex-col gap-2">
@@ -505,6 +527,7 @@ function EditRow({
           className="h-10"
         />
       )}
+      <AvatarGenderToggle value={avatarGender} onChange={setAvatarGender} />
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
@@ -519,7 +542,7 @@ function EditRow({
           size="sm"
           loading={loading}
           onClick={() =>
-            onSave({ name, displayName, duprId, isActive, rating })
+            onSave({ name, displayName, duprId, isActive, rating, avatarGender })
           }
           disabled={!displayName.trim() || (!isClub && (!name.trim() || !duprId.trim()))}
         >

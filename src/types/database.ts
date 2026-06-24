@@ -13,6 +13,8 @@ export type Player = {
   active: boolean;
   dupr_rating: number | null;
   source: PlayerSource;
+  /** 境界頭像性別 */
+  avatar_gender: import("@/lib/cultivation-tiers").PlayerAvatarGender | null;
   created_at: string;
   updated_at: string;
 };

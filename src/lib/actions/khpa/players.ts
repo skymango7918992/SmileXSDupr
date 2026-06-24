@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { canDeleteMatches } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
+import {
+  normalizePlayerAvatarGender,
+  type PlayerAvatarGender,
+} from "@/lib/cultivation-tiers";
 import type { KhpaPlayer } from "@/types/khpa";
 
 function revalidateKhpaPlayers() {
@@ -22,6 +26,7 @@ function normalizePlayer(row: KhpaPlayer): KhpaPlayer {
     source: row.source ?? "manual",
     display_name_customized: row.display_name_customized ?? false,
     dupr_rating: row.dupr_rating ?? null,
+    avatar_gender: normalizePlayerAvatarGender(row.avatar_gender),
   };
 }
 
@@ -51,6 +56,7 @@ export async function createKhpaPlayer(formData: {
   dupr_id: string;
   active?: boolean;
   dupr_rating?: number | null;
+  avatar_gender?: PlayerAvatarGender | null;
 }): Promise<KhpaPlayer> {
   const supabase = await createClient();
   const displayName = formData.display_name.trim();
@@ -66,6 +72,9 @@ export async function createKhpaPlayer(formData: {
       display_name_customized: (displayName || name) !== name,
       dupr_id: duprId,
       dupr_rating: formData.dupr_rating ?? null,
+      ...(formData.avatar_gender
+        ? { avatar_gender: formData.avatar_gender }
+        : {}),
       source: "manual",
       active: formData.active !== false,
     })
@@ -86,6 +95,7 @@ export async function updateKhpaPlayer(
     active?: boolean;
     dupr_rating?: number | null;
     display_name_customized?: boolean;
+    avatar_gender?: PlayerAvatarGender | null;
   },
 ): Promise<void> {
   const supabase = await createClient();
@@ -104,6 +114,9 @@ export async function updateKhpaPlayer(
   const patch: Record<string, unknown> = {};
 
   if (formData.active != null) patch.active = formData.active;
+  if (formData.avatar_gender !== undefined) {
+    patch.avatar_gender = normalizePlayerAvatarGender(formData.avatar_gender);
+  }
 
   if (isClub) {
     if (formData.display_name != null) {

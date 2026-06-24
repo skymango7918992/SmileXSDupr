@@ -5,6 +5,7 @@ import { CultivationBadge } from "@/components/cultivation/cultivation-badge";
 type Props = {
   wins: number;
   winRate?: number;
+  gender?: import("@/lib/cultivation-tiers").PlayerAvatarGender | null;
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
   className?: string;
@@ -13,6 +14,7 @@ type Props = {
 export function BadgeMedal({
   wins,
   winRate,
+  gender,
   size = "md",
   showLabel = false,
   className,
@@ -21,6 +23,7 @@ export function BadgeMedal({
     <CultivationBadge
       wins={wins}
       winRate={winRate}
+      gender={gender}
       size={size}
       showLabel={showLabel}
       className={className}

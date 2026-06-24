@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { normalizePlayerAvatarGender } from "@/lib/cultivation-tiers";
 import type { LeaderboardEntry } from "@/types/leaderboard";
 import type { Player } from "@/types/database";
 
@@ -92,6 +93,7 @@ function toEntries(stats: Map<string, PlayerStats>): LeaderboardEntry[] {
     name: row.player.display_name?.trim() || row.player.name,
     duprId: row.player.dupr_id,
     duprRating: row.player.dupr_rating ?? null,
+    avatarGender: normalizePlayerAvatarGender(row.player.avatar_gender),
     wins: row.wins,
     losses: row.losses,
     matches: row.matches,
@@ -163,7 +165,9 @@ export async function getLeaderboard(
 
   const { data: players, error: playerError } = await supabase
     .from("players")
-    .select("id, name, dupr_id, active, dupr_rating, created_at, updated_at")
+    .select(
+      "id, name, display_name, dupr_id, active, dupr_rating, avatar_gender, created_at, updated_at",
+    )
     .in("id", playerIds);
 
   if (playerError) throw new Error(playerError.message);
