@@ -1,6 +1,5 @@
-import Image from "next/image";
 import type { CultivationTier } from "@/lib/cultivation-tiers";
-import { getCultivationAvatarSrc } from "@/lib/cultivation-tiers";
+import { getCultivationImageSrc } from "@/lib/cultivation-tiers";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -43,13 +42,13 @@ function MortalFallback({ size }: { size: number }) {
   );
 }
 
+/** 靜態 public 圖：用原生 img，避免 Cloudflare 上 next/image 優化失敗 */
 export function CultivationAvatar({
   tier,
   size = 48,
-  compact,
   className,
 }: Props) {
-  const src = getCultivationAvatarSrc(tier.level);
+  const src = getCultivationImageSrc(tier.level);
 
   if (!src) {
     return (
@@ -73,14 +72,15 @@ export function CultivationAvatar({
       )}
       style={{ width: size, height: size }}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={src}
         alt={`${tier.name}修行頭像`}
         width={size}
         height={size}
         className="h-full w-full object-contain"
-        sizes={`${size}px`}
-        priority={!compact && tier.level <= 3}
+        loading="lazy"
+        decoding="async"
       />
     </div>
   );

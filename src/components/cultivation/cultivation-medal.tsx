@@ -1,6 +1,5 @@
-import Image from "next/image";
 import type { CultivationTier } from "@/lib/cultivation-tiers";
-import { getCultivationMedalSrc } from "@/lib/cultivation-tiers";
+import { getCultivationImageSrc } from "@/lib/cultivation-tiers";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -20,9 +19,9 @@ function MortalMedal({ size }: { size: number }) {
   );
 }
 
-/** 境界勳章（圓形徽章圖，適合 pill、境界說明） */
+/** 與 CultivationAvatar 共用同一張境界圖 */
 export function CultivationMedal({ tier, size = 48, className }: Props) {
-  const src = getCultivationMedalSrc(tier.level);
+  const src = getCultivationImageSrc(tier.level);
 
   if (!src) {
     return (
@@ -40,13 +39,15 @@ export function CultivationMedal({ tier, size = 48, className }: Props) {
       )}
       style={{ width: size, height: size }}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={src}
         alt={`${tier.name}勳章`}
         width={size}
         height={size}
         className="h-full w-full object-contain"
-        sizes={`${size}px`}
+        loading="lazy"
+        decoding="async"
       />
     </div>
   );
