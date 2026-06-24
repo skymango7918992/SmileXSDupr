@@ -78,7 +78,7 @@ export function CultivationAvatar({
         alt={`${tier.name}修行頭像`}
         width={size}
         height={size}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-contain"
         sizes={`${size}px`}
         priority={!compact && tier.level <= 3}
       />

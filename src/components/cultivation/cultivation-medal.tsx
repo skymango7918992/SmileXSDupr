@@ -45,7 +45,7 @@ export function CultivationMedal({ tier, size = 48, className }: Props) {
         alt={`${tier.name}勳章`}
         width={size}
         height={size}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-contain"
         sizes={`${size}px`}
       />
     </div>

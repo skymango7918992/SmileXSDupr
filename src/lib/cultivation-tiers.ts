@@ -12,6 +12,10 @@ export type CultivationTier = {
   /** 0 表示不限勝率 */
   minWinRate: number;
   tagline: string;
+  /** public/cultivation/ 下的頭像檔名 */
+  avatarFile: string;
+  /** public/cultivation/ 下的勳章檔名 */
+  badgeFile: string;
   bg: string;
   ring: string;
   accent: string;
@@ -23,14 +27,16 @@ export type CultivationTier = {
 export const CULTIVATION_DEFAULT: CultivationTier = {
   level: 0,
   name: "凡人",
-  subtitle: "尚未入道",
+  subtitle: "還在撿球",
   minWins: 0,
   minWinRate: 0,
   tagline: "球道漫漫，修行尚未開始。",
+  avatarFile: "level_00_fanren_avatar.png",
+  badgeFile: "level_00_fanren_badge.png",
   bg: "bg-slate-100",
-  ring: "ring-slate-200",
-  accent: "#94a3b8",
-  glow: "#cbd5e1",
+  ring: "ring-teal-200/60",
+  accent: "#5eead4",
+  glow: "#ccfbf1",
   pillBg: "bg-slate-100",
   pillText: "text-slate-600",
 };
@@ -43,6 +49,8 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
     minWins: 1,
     minWinRate: 0,
     tagline: "初入球道，球還沒聽話，但你的腳已經開始亂跑。",
+    avatarFile: "level_01_lianqi_avatar.png",
+    badgeFile: "level_01_lianqi_badge.png",
     bg: "bg-emerald-100",
     ring: "ring-emerald-300/50",
     accent: "#34d399",
@@ -57,12 +65,14 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
     minWins: 10,
     minWinRate: 40,
     tagline: "你終於知道廚房不能亂衝，恭喜少跌一半坑。",
-    bg: "bg-amber-100",
-    ring: "ring-amber-300/50",
-    accent: "#d97706",
-    glow: "#fbbf24",
-    pillBg: "bg-amber-100",
-    pillText: "text-amber-900",
+    avatarFile: "level_02_zhuji_avatar.png",
+    badgeFile: "level_02_zhuji_badge.png",
+    bg: "bg-sky-100",
+    ring: "ring-sky-300/50",
+    accent: "#0284c7",
+    glow: "#7dd3fc",
+    pillBg: "bg-sky-100",
+    pillText: "text-sky-900",
   },
   {
     level: 3,
@@ -71,6 +81,8 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
     minWins: 30,
     minWinRate: 45,
     tagline: "你開始會 Dink 了，對手也開始懷疑人生了。",
+    avatarFile: "level_03_jindan_avatar.png",
+    badgeFile: "level_03_jindan_badge.png",
     bg: "bg-yellow-100",
     ring: "ring-yellow-400/50",
     accent: "#eab308",
@@ -85,6 +97,8 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
     minWins: 60,
     minWinRate: 45,
     tagline: "你不只是會打球，你已經會讓隊友少罵你了。",
+    avatarFile: "level_04_yuanying_avatar.png",
+    badgeFile: "level_04_yuanying_badge.png",
     bg: "bg-cyan-100",
     ring: "ring-cyan-300/50",
     accent: "#06b6d4",
@@ -99,12 +113,14 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
     minWins: 120,
     minWinRate: 45,
     tagline: "你一站上廚房線，對面就開始想換隊友。",
-    bg: "bg-violet-100",
-    ring: "ring-violet-300/50",
-    accent: "#8b5cf6",
-    glow: "#c4b5fd",
-    pillBg: "bg-violet-100",
-    pillText: "text-violet-900",
+    avatarFile: "level_05_huashen_avatar.png",
+    badgeFile: "level_05_huashen_badge.png",
+    bg: "bg-emerald-100",
+    ring: "ring-emerald-400/50",
+    accent: "#10b981",
+    glow: "#6ee7b7",
+    pillBg: "bg-emerald-100",
+    pillText: "text-emerald-900",
   },
   {
     level: 6,
@@ -113,6 +129,8 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
     minWins: 200,
     minWinRate: 45,
     tagline: "你的球看起來很慢，但對手就是接不到。",
+    avatarFile: "level_06_lianxu_avatar.png",
+    badgeFile: "level_06_lianxu_badge.png",
     bg: "bg-indigo-100",
     ring: "ring-indigo-300/50",
     accent: "#6366f1",
@@ -123,14 +141,16 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
   {
     level: 7,
     name: "合體期",
-    subtitle: "協會名將",
+    subtitle: "球場名將",
     minWins: 300,
     minWinRate: 45,
     tagline: "技術、跑位、隊友默契終於合體，不再各打各的。",
+    avatarFile: "level_07_heti_avatar.png",
+    badgeFile: "level_07_heti_badge.png",
     bg: "bg-teal-100",
     ring: "ring-teal-300/50",
     accent: "#14b8a6",
-    glow: "#5eead4",
+    glow: "#fcd34d",
     pillBg: "bg-teal-100",
     pillText: "text-teal-900",
   },
@@ -141,12 +161,14 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
     minWins: 420,
     minWinRate: 45,
     tagline: "你現在連失誤都很有宗師感，大家只敢說是戰術。",
-    bg: "bg-orange-100",
-    ring: "ring-orange-300/50",
-    accent: "#f97316",
-    glow: "#fdba74",
-    pillBg: "bg-orange-100",
-    pillText: "text-orange-900",
+    avatarFile: "level_08_dacheng_avatar.png",
+    badgeFile: "level_08_dacheng_badge.png",
+    bg: "bg-amber-100",
+    ring: "ring-amber-300/50",
+    accent: "#f59e0b",
+    glow: "#fde68a",
+    pillBg: "bg-amber-100",
+    pillText: "text-amber-950",
   },
   {
     level: 9,
@@ -155,12 +177,14 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
     minWins: 600,
     minWinRate: 45,
     tagline: "你每打一場都像渡劫，贏了是修仙，輸了是修心。",
-    bg: "bg-purple-100",
-    ring: "ring-purple-300/50",
-    accent: "#a855f7",
-    glow: "#d8b4fe",
-    pillBg: "bg-purple-100",
-    pillText: "text-purple-900",
+    avatarFile: "level_09_dujie_avatar.png",
+    badgeFile: "level_09_dujie_badge.png",
+    bg: "bg-slate-800",
+    ring: "ring-violet-400/40",
+    accent: "#a78bfa",
+    glow: "#fbbf24",
+    pillBg: "bg-slate-800",
+    pillText: "text-violet-200",
   },
   {
     level: 10,
@@ -169,14 +193,26 @@ export const CULTIVATION_TIERS: CultivationTier[] = [
     minWins: 1000,
     minWinRate: 45,
     tagline: "你不是來比賽的，你是來讓大家截圖膜拜的。",
-    bg: "bg-gradient-to-br from-amber-200 to-red-200",
+    avatarFile: "level_10_dadi_avatar.png",
+    badgeFile: "level_10_dadi_badge.png",
+    bg: "bg-gradient-to-br from-amber-200 to-emerald-200",
     ring: "ring-amber-400/60",
-    accent: "#dc2626",
+    accent: "#ca8a04",
     glow: "#fbbf24",
-    pillBg: "bg-gradient-to-r from-amber-200 to-red-200",
-    pillText: "text-red-950",
+    pillBg: "bg-gradient-to-r from-amber-200 to-emerald-200",
+    pillText: "text-emerald-950",
   },
 ];
+
+/** Lv.0 凡人 + Lv.1–10 */
+export const ALL_CULTIVATION_TIERS: CultivationTier[] = [
+  CULTIVATION_DEFAULT,
+  ...CULTIVATION_TIERS,
+];
+
+export function getCultivationTierByLevel(level: number): CultivationTier | null {
+  return ALL_CULTIVATION_TIERS.find((t) => t.level === level) ?? null;
+}
 
 export function formatWinRateRequirement(tier: CultivationTier): string {
   if (tier.minWinRate <= 0) return "勝率不限";
@@ -184,23 +220,20 @@ export function formatWinRateRequirement(tier: CultivationTier): string {
 }
 
 export function formatWinsRequirement(tier: CultivationTier): string {
+  if (tier.level === 0) return "0 勝";
   return `${tier.minWins} 勝以上`;
 }
 
-/** 修行頭像靜態圖（public/cultivation/level-N.png） */
+/** 修行頭像（public/cultivation/{avatarFile}） */
 export function getCultivationAvatarSrc(level: number): string | null {
-  if (level >= 1 && level <= 10) {
-    return `/cultivation/level-${level}.png`;
-  }
-  return null;
+  const tier = getCultivationTierByLevel(level);
+  return tier ? `/cultivation/${tier.avatarFile}` : null;
 }
 
-/** 修行勳章靜態圖（public/cultivation/medal-N.png） */
+/** 修行勳章（public/cultivation/{badgeFile}） */
 export function getCultivationMedalSrc(level: number): string | null {
-  if (level >= 1 && level <= 10) {
-    return `/cultivation/medal-${level}.png`;
-  }
-  return null;
+  const tier = getCultivationTierByLevel(level);
+  return tier ? `/cultivation/${tier.badgeFile}` : null;
 }
 
 /** 依勝場與勝率（%）判定境界；未提供勝率時僅套用「勝率不限」的門檻 */

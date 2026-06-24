@@ -1,6 +1,5 @@
 import {
-  CULTIVATION_DEFAULT,
-  CULTIVATION_TIERS,
+  ALL_CULTIVATION_TIERS,
   formatWinRateRequirement,
   formatWinsRequirement,
 } from "@/lib/cultivation-tiers";
@@ -17,7 +16,7 @@ export function CultivationLegend() {
         星鑽 XS 與協會共用境界；左為境界勳章、右為晉升條件與詩白
       </p>
       <ul className="grid gap-4">
-        {[CULTIVATION_DEFAULT, ...CULTIVATION_TIERS].map((tier) => (
+        {ALL_CULTIVATION_TIERS.map((tier) => (
           <li
             key={tier.level}
             className="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface px-3 py-4 sm:flex-row sm:items-start sm:gap-4"
