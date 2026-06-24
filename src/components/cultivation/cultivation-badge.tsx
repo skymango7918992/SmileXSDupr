@@ -1,5 +1,5 @@
 import { CultivationAvatar } from "@/components/cultivation/cultivation-avatar";
-import { CultivationMedal } from "@/components/cultivation/cultivation-medal";
+import { CultivationAvatar } from "@/components/cultivation/cultivation-avatar";
 import {
   getCultivationTier,
   type CultivationTier,
@@ -77,7 +77,7 @@ export function CultivationPill({
         tier.pillText,
       )}
     >
-      <CultivationMedal tier={tier} size={26} className="!shadow-none" />
+      <CultivationAvatar tier={tier} size={26} compact className="!shadow-none" />
       {tier.name}
     </span>
   );
@@ -91,7 +91,7 @@ export function CultivationLabel({ tier }: { tier: CultivationTier }) {
         tier.pillText,
       )}
     >
-      <CultivationMedal tier={tier} size={26} className="!shadow-none" />
+      <CultivationAvatar tier={tier} size={26} compact className="!shadow-none" />
       {tier.name}
     </span>
   );

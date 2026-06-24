@@ -3,7 +3,7 @@ import {
   formatWinRateRequirement,
   formatWinsRequirement,
 } from "@/lib/cultivation-tiers";
-import { CultivationMedal } from "@/components/cultivation/cultivation-medal";
+import { CultivationAvatar } from "@/components/cultivation/cultivation-avatar";
 import { cn } from "@/lib/utils";
 
 export function CultivationLegend() {
@@ -13,7 +13,7 @@ export function CultivationLegend() {
         修行境界一覽
       </h3>
       <p className="mb-4 text-sm text-muted">
-        星鑽 XS 與協會共用境界；左為境界勳章、右為晉升條件與詩白
+        星鑽 XS 與協會共用境界；左為境界圖、右為晉升條件與詩白
       </p>
       <ul className="grid gap-4">
         {ALL_CULTIVATION_TIERS.map((tier) => (
@@ -21,7 +21,7 @@ export function CultivationLegend() {
             key={tier.level}
             className="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface px-3 py-4 sm:flex-row sm:items-start sm:gap-4"
           >
-            <CultivationMedal
+            <CultivationAvatar
               tier={tier}
               size={tier.level === 0 ? 64 : 88}
               className="shrink-0"
