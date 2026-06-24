@@ -757,7 +757,7 @@ export function PlayerManagement({ initialPlayers, readOnly = false }: Props) {
           <div className="min-w-0 flex-1">
             <CardTitle>DUPR Club 同步</CardTitle>
             <p className="mt-1 text-sm text-muted">
-              Club 4668804565 · 目前 Club {clubCount} 人 · 手動 {manualCount}{" "}
+              Club {duprEnvStatus?.xsClubId ?? duprEnvStatus?.clubId ?? "—"} · 目前 Club {clubCount} 人 · 手動 {manualCount}{" "}
               人
             </p>
             {duprConfigMode === null ? (
@@ -791,7 +791,7 @@ DUPR_API_TOKEN=eyJ...`}
                 {duprConfigMode === "credentials"
                   ? " DUPR 帳密登入"
                   : " API Token"}
-                · Club {duprEnvStatus?.clubId ?? "4668804565"} · 相同 DUPR
+                · Club {duprEnvStatus?.xsClubId ?? duprEnvStatus?.clubId ?? "—"} · 相同 DUPR
                 ID（含 O/0 打錯）會合併為 Club
               </p>
             )}

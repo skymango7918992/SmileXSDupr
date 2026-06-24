@@ -1,4 +1,5 @@
 ﻿import { CuteAvatar } from "@/components/brand/cute-avatar";
+import { formatDuprRating } from "@/lib/player-display";
 import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "@/types/leaderboard";
 import { BadgeMedal } from "./badge-medal";
@@ -62,19 +63,18 @@ export function LeaderboardRow({ entry, compact }: Props) {
 
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-foreground">{entry.name}</p>
-        <p className="truncate text-xs text-muted">{entry.duprId}</p>
+        <p className="truncate text-xs font-medium text-primary">
+          DUPR {formatDuprRating(entry.duprRating)}
+        </p>
       </div>
 
       <div className="text-right">
-        <p className="text-lg font-semibold tabular-nums text-foreground">
-          {entry.wins}
-          <span className="ml-0.5 text-xs font-medium text-muted">勝</span>
+        <p className="font-data text-lg font-semibold tabular-nums text-foreground">
+          {formatDuprRating(entry.duprRating)}
         </p>
-        {!compact && (
-          <p className="text-xs text-muted">
-            {entry.winRate}% · {entry.matches} 場
-          </p>
-        )}
+        <p className="text-xs text-muted">
+          {entry.wins} 勝 · {entry.winRate}%
+        </p>
       </div>
     </div>
   );

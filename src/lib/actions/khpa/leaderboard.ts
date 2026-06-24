@@ -88,6 +88,7 @@ function toEntries(stats: Map<string, PlayerStats>): KhpaLeaderboardEntry[] {
     playerId: row.player.id,
     name: row.player.display_name,
     duprId: row.player.dupr_id,
+    duprRating: row.player.dupr_rating ?? null,
     wins: row.wins,
     losses: row.losses,
     matches: row.matches,

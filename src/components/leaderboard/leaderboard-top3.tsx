@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import { ChevronRight, Trophy } from "lucide-react";
 import { CuteAvatar } from "@/components/brand/cute-avatar";
+import { formatDuprRating } from "@/lib/player-display";
 import type { LeaderboardEntry } from "@/types/leaderboard";
 import { cn } from "@/lib/utils";
 import { BadgeMedal } from "./badge-medal";
@@ -90,15 +91,16 @@ function PodiumSlot({
         <p className="line-clamp-1 text-sm font-semibold text-foreground">
           {entry.name}
         </p>
-        <p className="text-[10px] text-muted">{entry.duprId}</p>
+        <p className="text-[10px] font-medium text-primary">
+          DUPR {formatDuprRating(entry.duprRating)}
+        </p>
         <div className="mt-1.5">
           <BadgeMedal wins={entry.wins} size="sm" />
         </div>
         <p className="mt-1.5 text-lg font-semibold tabular-nums text-foreground">
-          {entry.wins}
-          <span className="ml-0.5 text-xs font-medium text-muted">勝</span>
+          {formatDuprRating(entry.duprRating)}
         </p>
-        <p className="text-[10px] text-muted">{entry.winRate}% 勝率</p>
+        <p className="text-[10px] text-muted">{entry.wins} 勝 · {entry.winRate}%</p>
       </div>
       <div
         className={cn(

@@ -1,5 +1,6 @@
 import { KhpaBadgeAvatar, KhpaBadgePill } from "@/components/khpa/badge-avatar";
 import { KhpaMedal } from "@/components/khpa/khpa-medal";
+import { formatDuprRating } from "@/lib/player-display";
 import { KHPA_BADGE_TIERS, KHPA_DEFAULT_BADGE } from "@/lib/khpa/badges";
 import type { KhpaLeaderboardEntry } from "@/types/khpa";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -46,14 +47,20 @@ export function KhpaLeaderboardFull({ entries, year, error }: Props) {
                   <p className="truncate font-medium">{entry.name}</p>
                   <div className="mt-0.5 flex flex-wrap items-center gap-2">
                     <KhpaBadgePill wins={entry.wins} />
+                    <span className="text-xs font-medium text-primary">
+                      DUPR {formatDuprRating(entry.duprRating)}
+                    </span>
                     <span className="text-xs text-muted">
-                      {entry.wins}勝 {entry.losses}敗 · 勝率 {entry.winRate}%
+                      {entry.wins}勝 {entry.losses}敗
                     </span>
                   </div>
                 </div>
-                <p className="font-data text-xl font-bold text-primary">
-                  {entry.wins}
-                </p>
+                <div className="text-right">
+                  <p className="font-data text-xl font-bold text-primary">
+                    {formatDuprRating(entry.duprRating)}
+                  </p>
+                  <p className="text-[10px] text-muted">DUPR</p>
+                </div>
               </li>
             ))}
           </ol>

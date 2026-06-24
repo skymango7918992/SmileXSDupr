@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
 import { useAppUi } from "@/components/providers/app-ui-provider";
-import { playerDisplayName } from "@/lib/player-display";
+import { playerDisplayName, formatDuprRating } from "@/lib/player-display";
 import type { Player } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -79,7 +79,7 @@ export function LateJoinDialog({
               <option value="">請選擇</option>
               {available.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {playerDisplayName(p)} ({p.dupr_id})
+                  {playerDisplayName(p)} · DUPR {formatDuprRating(p.dupr_rating)}
                 </option>
               ))}
             </select>

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { KhpaBadgeAvatar } from "@/components/khpa/badge-avatar";
+import { formatDuprRating } from "@/lib/player-display";
 import type { KhpaPlayer } from "@/types/khpa";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -83,7 +84,9 @@ export function KhpaPlayerPicker({
               />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{selected.display_name}</p>
-                <p className="truncate text-xs text-muted">{selected.dupr_id}</p>
+                <p className="truncate text-xs font-medium text-primary">
+                  DUPR {formatDuprRating(selected.dupr_rating)}
+                </p>
               </div>
             </>
           ) : (
@@ -160,7 +163,9 @@ export function KhpaPlayerPicker({
                         />
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">{player.display_name}</p>
-                          <p className="truncate text-xs text-muted">{player.dupr_id}</p>
+                          <p className="truncate text-xs font-medium text-primary">
+                            DUPR {formatDuprRating(player.dupr_rating)}
+                          </p>
                         </div>
                         {isSelected && <Check className="h-5 w-5 shrink-0 text-primary" />}
                       </button>

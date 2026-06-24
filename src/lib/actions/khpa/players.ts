@@ -15,6 +15,16 @@ function validateDuprId(duprId: string): string {
   return trimmed;
 }
 
+function normalizePlayer(row: KhpaPlayer): KhpaPlayer {
+  return {
+    ...row,
+    name: row.name?.trim() || row.display_name,
+    source: row.source ?? "manual",
+    display_name_customized: row.display_name_customized ?? false,
+    dupr_rating: row.dupr_rating ?? null,
+  };
+}
+
 export async function getKhpaPlayers(activeOnly = true): Promise<KhpaPlayer[]> {
   const supabase = await createClient();
   let query = supabase
@@ -27,7 +37,7 @@ export async function getKhpaPlayers(activeOnly = true): Promise<KhpaPlayer[]> {
 
   const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return (data ?? []) as KhpaPlayer[];
+  return ((data ?? []) as KhpaPlayer[]).map(normalizePlayer);
 }
 
 /** 球員管理頁：含停用球員 */
@@ -36,20 +46,27 @@ export async function getKhpaAllPlayers(): Promise<KhpaPlayer[]> {
 }
 
 export async function createKhpaPlayer(formData: {
+  name?: string;
   display_name: string;
   dupr_id: string;
   active?: boolean;
+  dupr_rating?: number | null;
 }): Promise<KhpaPlayer> {
   const supabase = await createClient();
-  const name = formData.display_name.trim();
+  const displayName = formData.display_name.trim();
+  const name = formData.name?.trim() || displayName;
   if (!name) throw new Error("請輸入球員姓名");
   const duprId = validateDuprId(formData.dupr_id);
 
   const { data, error } = await supabase
     .from("khpa_players")
     .insert({
-      display_name: name,
+      name,
+      display_name: displayName || name,
+      display_name_customized: (displayName || name) !== name,
       dupr_id: duprId,
+      dupr_rating: formData.dupr_rating ?? null,
+      source: "manual",
       active: formData.active !== false,
     })
     .select()
@@ -57,27 +74,64 @@ export async function createKhpaPlayer(formData: {
 
   if (error) throw new Error(error.message);
   revalidateKhpaPlayers();
-  return data as KhpaPlayer;
+  return normalizePlayer(data as KhpaPlayer);
 }
 
 export async function updateKhpaPlayer(
   id: string,
-  formData: { display_name: string; dupr_id: string; active: boolean },
+  formData: {
+    display_name?: string;
+    name?: string;
+    dupr_id?: string;
+    active?: boolean;
+    dupr_rating?: number | null;
+    display_name_customized?: boolean;
+  },
 ): Promise<void> {
   const supabase = await createClient();
-  const name = formData.display_name.trim();
-  if (!name) throw new Error("請輸入球員姓名");
-  const duprId = validateDuprId(formData.dupr_id);
 
-  const { error } = await supabase
+  const { data: current, error: loadError } = await supabase
     .from("khpa_players")
-    .update({
-      display_name: name,
-      dupr_id: duprId,
-      active: formData.active,
-    })
-    .eq("id", id);
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
 
+  if (loadError) throw new Error(loadError.message);
+  if (!current) throw new Error("找不到球員");
+
+  const player = normalizePlayer(current as KhpaPlayer);
+  const isClub = player.source === "club";
+  const patch: Record<string, unknown> = {};
+
+  if (formData.active != null) patch.active = formData.active;
+
+  if (isClub) {
+    if (formData.display_name != null) {
+      const displayName = formData.display_name.trim();
+      if (!displayName) throw new Error("請輸入顯示名稱");
+      patch.display_name = displayName;
+      patch.display_name_customized =
+        formData.display_name_customized ??
+        displayName !== player.name;
+    }
+  } else {
+    const name = (formData.name ?? formData.display_name)?.trim();
+    if (name != null) {
+      if (!name) throw new Error("請輸入球員姓名");
+      patch.name = name;
+      patch.display_name = formData.display_name?.trim() || name;
+      patch.display_name_customized =
+        patch.display_name !== patch.name;
+    }
+    if (formData.dupr_id != null) {
+      patch.dupr_id = validateDuprId(formData.dupr_id);
+    }
+    if (formData.dupr_rating !== undefined) {
+      patch.dupr_rating = formData.dupr_rating;
+    }
+  }
+
+  const { error } = await supabase.from("khpa_players").update(patch).eq("id", id);
   if (error) throw new Error(error.message);
   revalidateKhpaPlayers();
 }

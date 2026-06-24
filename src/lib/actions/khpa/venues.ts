@@ -113,6 +113,7 @@ export async function updateKhpaVenue(
   id: string,
   input: {
     name?: string;
+    slug?: string;
     court_count?: number;
     active?: boolean;
     sort_order?: number;
@@ -121,12 +122,43 @@ export async function updateKhpaVenue(
   await requireAdmin();
   const supabase = await createClient();
   const patch: Record<string, unknown> = {};
-  if (input.name != null) patch.name = input.name.trim();
+  if (input.name != null) {
+    const name = input.name.trim();
+    if (!name) throw new Error("請輸入場地名稱");
+    patch.name = name;
+  }
+  if (input.slug != null) {
+    const slug = input.slug.trim().toLowerCase();
+    if (slug.length < 2) throw new Error("代碼至少 2 個字元");
+    patch.slug = slug;
+  }
   if (input.court_count != null) patch.court_count = input.court_count;
   if (input.active != null) patch.active = input.active;
   if (input.sort_order != null) patch.sort_order = input.sort_order;
 
   const { error } = await supabase.from("khpa_venues").update(patch).eq("id", id);
+  if (error) {
+    if (error.code === "23505") throw new Error("此代碼（slug）已存在，請換一個");
+    throw new Error(error.message);
+  }
+  revalidatePath("/");
+  revalidatePath("/settings");
+}
+
+export async function deleteKhpaVenue(id: string): Promise<void> {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const { count, error: countError } = await supabase
+    .from("khpa_venues")
+    .select("id", { count: "exact", head: true });
+
+  if (countError) throw new Error(countError.message);
+  if ((count ?? 0) <= 1) {
+    throw new Error("至少需保留一個活動場地");
+  }
+
+  const { error } = await supabase.from("khpa_venues").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/settings");

@@ -81,5 +81,7 @@ export type AppSettings = {
   team_name: string;
   default_court_count: number;
   trusted_device_days: number;
+  xs_dupr_club_id: string;
+  khpa_dupr_club_id: string;
   updated_at: string;
 };

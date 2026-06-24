@@ -2,6 +2,7 @@ export type LeaderboardEntry = {
   playerId: string;
   name: string;
   duprId: string;
+  duprRating: number | null;
   wins: number;
   losses: number;
   matches: number;

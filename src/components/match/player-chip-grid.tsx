@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { Check, Search } from "lucide-react";
-import { playerDisplayName } from "@/lib/player-display";
+import { playerDisplayName, formatDuprRating, playerPickerSubtitle } from "@/lib/player-display";
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -126,8 +126,8 @@ export function PlayerChipGrid({
                   <span className="line-clamp-2 text-[11px] font-semibold leading-tight text-foreground">
                     {playerDisplayName(player)}
                   </span>
-                  <span className="mt-1 block truncate text-[10px] text-muted">
-                    {player.dupr_id}
+                  <span className="mt-1 block truncate text-[10px] font-medium text-primary">
+                    {playerPickerSubtitle(player)}
                   </span>
                 </button>
               );

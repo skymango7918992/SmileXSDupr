@@ -1,36 +1,41 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireXsAdmin } from "@/lib/auth/require-xs-admin";
-import { fetchAllClubMembers } from "@/lib/dupr/client";
-import { getXsDuprClubId } from "@/lib/dupr/club-ids";
-import {
-  deduplicatePlayersByDuprId,
-  removePlayerRecord,
-} from "@/lib/actions/player-merge";
+import { getRoleFromEmail } from "@/lib/auth/roles";
+import { fetchAllClubMembers, type DuprClubMember } from "@/lib/dupr/client";
+import { getKhpaDuprClubId } from "@/lib/dupr/club-ids";
 import { areDuprIdsEquivalent, normalizeDuprId } from "@/lib/dupr-id";
 import { createClient } from "@/lib/supabase/server";
-import type { Player } from "@/types/database";
+import type { KhpaPlayer } from "@/types/khpa";
 
-export type DuprSyncResult = {
+export type KhpaDuprSyncResult = {
   clubTotal: number;
   added: number;
   updated: number;
   converted: number;
-  merged: number;
-  removed: number;
   deactivated: number;
 };
 
-function clubPlayerPayload(member: {
-  fullName: string;
-  doublesRating: number | null;
-}, current?: Player) {
+async function requireKhpaSyncAccess() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const role = getRoleFromEmail(user?.email);
+  if (role !== "admin" && role !== "khpa") {
+    throw new Error("僅協會或系統管理員可同步 DUPR 名單");
+  }
+}
+
+function clubPlayerPayload(
+  member: DuprClubMember,
+  current?: KhpaPlayer,
+): Partial<KhpaPlayer> {
   const customized = current?.display_name_customized ?? false;
   return {
     name: member.fullName,
     dupr_rating: member.doublesRating,
-    source: "club" as const,
+    source: "club",
     active: true,
     ...(customized
       ? {}
@@ -38,29 +43,24 @@ function clubPlayerPayload(member: {
   };
 }
 
-export async function syncDuprClubMembers(): Promise<DuprSyncResult> {
-  await requireXsAdmin();
-  const clubId = await getXsDuprClubId();
-  const members = await fetchAllClubMembers(clubId);
+export async function applyKhpaClubMembersSync(
+  members: DuprClubMember[],
+): Promise<KhpaDuprSyncResult> {
   const clubIds = new Set(members.map((m) => m.duprId));
-
   const supabase = await createClient();
+
   const { data: existingRaw, error: loadError } = await supabase
-    .from("players")
+    .from("khpa_players")
     .select("*");
 
   if (loadError) throw new Error(loadError.message);
 
-  const { players: existing, merged } = await deduplicatePlayersByDuprId(
-    supabase,
-    (existingRaw ?? []) as Player[],
-  );
-
+  const existing = (existingRaw ?? []) as KhpaPlayer[];
   const byDuprId = new Map(
-    existing.map((p) => [normalizeDuprId(p.dupr_id), p as Player]),
+    existing.map((p) => [normalizeDuprId(p.dupr_id), p]),
   );
 
-  const findExisting = (duprId: string): Player | undefined => {
+  const findExisting = (duprId: string): KhpaPlayer | undefined => {
     const exact = byDuprId.get(normalizeDuprId(duprId));
     if (exact) return exact;
     return existing.find((p) => areDuprIdsEquivalent(p.dupr_id, duprId));
@@ -74,7 +74,7 @@ export async function syncDuprClubMembers(): Promise<DuprSyncResult> {
     const current = findExisting(member.duprId);
 
     if (!current) {
-      const { error } = await supabase.from("players").insert({
+      const { error } = await supabase.from("khpa_players").insert({
         name: member.fullName,
         display_name: member.fullName,
         display_name_customized: false,
@@ -88,9 +88,9 @@ export async function syncDuprClubMembers(): Promise<DuprSyncResult> {
       continue;
     }
 
-    const wasManual = current.source !== "club";
+    const wasManual = (current.source ?? "manual") !== "club";
     const { error } = await supabase
-      .from("players")
+      .from("khpa_players")
       .update({
         ...clubPlayerPayload(member, current),
         dupr_id: member.duprId,
@@ -99,42 +99,40 @@ export async function syncDuprClubMembers(): Promise<DuprSyncResult> {
 
     if (error) throw new Error(error.message);
 
-    byDuprId.set(normalizeDuprId(member.duprId), {
-      ...current,
-      dupr_id: member.duprId,
-      source: "club",
-    });
-
     if (wasManual) converted += 1;
     else updated += 1;
   }
 
-  let removed = 0;
   let deactivated = 0;
-
-  const { data: afterSync } = await supabase.from("players").select("*");
-  for (const player of (afterSync ?? []) as Player[]) {
-    if (player.source !== "club") continue;
+  const { data: afterSync } = await supabase.from("khpa_players").select("*");
+  for (const player of (afterSync ?? []) as KhpaPlayer[]) {
+    if ((player.source ?? "manual") !== "club") continue;
     const stillInClub = [...clubIds].some((id) =>
       areDuprIdsEquivalent(id, player.dupr_id),
     );
     if (stillInClub) continue;
 
-    const result = await removePlayerRecord(supabase, player, afterSync as Player[]);
-    if (result === "deleted" || result === "merged") removed += 1;
-    else deactivated += 1;
+    const { error } = await supabase
+      .from("khpa_players")
+      .update({ active: false })
+      .eq("id", player.id);
+    if (error) throw new Error(error.message);
+    deactivated += 1;
   }
 
-  revalidatePath("/players");
   revalidatePath("/");
-
   return {
     clubTotal: members.length,
     added,
     updated,
     converted,
-    merged,
-    removed,
     deactivated,
   };
+}
+
+export async function syncKhpaDuprClubMembers(): Promise<KhpaDuprSyncResult> {
+  await requireKhpaSyncAccess();
+  const clubId = await getKhpaDuprClubId();
+  const members = await fetchAllClubMembers(clubId);
+  return applyKhpaClubMembersSync(members);
 }

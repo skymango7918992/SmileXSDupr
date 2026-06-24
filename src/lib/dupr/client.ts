@@ -60,15 +60,22 @@ function normalizeMember(raw: RawMember): DuprClubMember | null {
   return { duprId, fullName, doublesRating: rating };
 }
 
-export async function fetchAllClubMembers(): Promise<DuprClubMember[]> {
-  const { apiBase, clubId, apiVersion } = await getDuprConfig();
+export async function fetchAllClubMembers(
+  clubId: string,
+): Promise<DuprClubMember[]> {
+  const trimmed = clubId.trim();
+  if (!trimmed) {
+    throw new Error("請先在「設定」頁填入 DUPR Club ID");
+  }
+
+  const { apiBase, apiVersion } = await getDuprConfig();
   const apiToken = await resolveDuprAccessToken();
   const members: DuprClubMember[] = [];
   const limit = 25; // DUPR API 單次上限 25
   let offset = 0;
 
   for (let page = 0; page < 200; page++) {
-    const url = `${apiBase}/club/${clubId}/members/${apiVersion}/all`;
+    const url = `${apiBase}/club/${trimmed}/members/${apiVersion}/all`;
     const res = await fetch(url, {
       method: "POST",
       headers: {

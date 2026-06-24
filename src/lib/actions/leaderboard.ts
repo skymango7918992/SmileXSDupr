@@ -91,6 +91,7 @@ function toEntries(stats: Map<string, PlayerStats>): LeaderboardEntry[] {
     playerId: row.player.id,
     name: row.player.display_name?.trim() || row.player.name,
     duprId: row.player.dupr_id,
+    duprRating: row.player.dupr_rating ?? null,
     wins: row.wins,
     losses: row.losses,
     matches: row.matches,

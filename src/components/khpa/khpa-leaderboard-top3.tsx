@@ -1,5 +1,6 @@
 import { Trophy } from "lucide-react";
 import { KhpaBadgeAvatar, KhpaBadgePill } from "@/components/khpa/badge-avatar";
+import { formatDuprRating } from "@/lib/player-display";
 import type { KhpaLeaderboardEntry } from "@/types/khpa";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -76,8 +77,9 @@ export function KhpaLeaderboardTop3({
                       {entry.name}
                     </p>
                     <p className="font-data text-base font-bold text-primary sm:text-lg">
-                      {entry.wins} 勝
+                      DUPR {formatDuprRating(entry.duprRating)}
                     </p>
+                    <p className="text-[10px] text-muted">{entry.wins} 勝</p>
                     {!compact && <KhpaBadgePill wins={entry.wins} />}
                   </>
                 ) : (

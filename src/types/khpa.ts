@@ -14,7 +14,11 @@ export type KhpaVenue = {
 export type KhpaPlayer = {
   id: string;
   display_name: string;
+  name: string;
   dupr_id: string;
+  dupr_rating: number | null;
+  source: "club" | "manual";
+  display_name_customized: boolean;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -73,6 +77,7 @@ export type KhpaLeaderboardEntry = {
   playerId: string;
   name: string;
   duprId: string;
+  duprRating: number | null;
   wins: number;
   losses: number;
   matches: number;

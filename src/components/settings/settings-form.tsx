@@ -23,6 +23,12 @@ export function SettingsForm({ initialSettings }: Props) {
   const [trustedDeviceDays, setTrustedDeviceDays] = useState(
     initialSettings?.trusted_device_days ?? 7,
   );
+  const [xsDuprClubId, setXsDuprClubId] = useState(
+    initialSettings?.xs_dupr_club_id ?? "4668804565",
+  );
+  const [khpaDuprClubId, setKhpaDuprClubId] = useState(
+    initialSettings?.khpa_dupr_club_id ?? "",
+  );
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -37,6 +43,8 @@ export function SettingsForm({ initialSettings }: Props) {
           team_name: teamName,
           default_court_count: courtCount,
           trusted_device_days: trustedDeviceDays,
+          xs_dupr_club_id: xsDuprClubId,
+          khpa_dupr_club_id: khpaDuprClubId,
         });
         setMessage("設定已儲存");
         success("設定已儲存");
@@ -84,6 +92,40 @@ export function SettingsForm({ initialSettings }: Props) {
           <p className="mt-1 text-xs text-muted">
             登入 OTP 後勾選「信任此裝置」的有效期限（預設 7 天）。僅影響新註冊的信任裝置。
           </p>
+        </div>
+
+        <div className="border-t border-divider pt-4">
+          <p className="mb-3 text-sm font-semibold text-foreground">DUPR Club ID</p>
+          <div className="space-y-3">
+            <div>
+              <label className="mb-1 block text-xs text-muted">
+                星鑽 XS Club ID
+              </label>
+              <Input
+                value={xsDuprClubId}
+                onChange={(e) => setXsDuprClubId(e.target.value)}
+                placeholder="4668804565"
+                inputMode="numeric"
+              />
+              <p className="mt-1 text-xs text-muted">
+                星鑽 XS 球員管理「更新 Club 名單」使用此 ID。
+              </p>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-muted">
+                協會 Club ID
+              </label>
+              <Input
+                value={khpaDuprClubId}
+                onChange={(e) => setKhpaDuprClubId(e.target.value)}
+                placeholder="協會申請完成後填入"
+                inputMode="numeric"
+              />
+              <p className="mt-1 text-xs text-muted">
+                高雄匹克球協會球員頁同步使用；尚未申請可留空。
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

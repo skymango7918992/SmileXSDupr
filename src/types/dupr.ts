@@ -5,5 +5,8 @@ export type DuprEnvStatus = {
   hasToken: boolean;
   hasEmail: boolean;
   hasPassword: boolean;
+  /** @deprecated 使用 xsClubId */
   clubId: string;
+  xsClubId: string;
+  khpaClubId: string;
 };
