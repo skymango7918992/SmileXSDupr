@@ -9,7 +9,6 @@ import {
   type PickleballTechnique,
 } from "@/lib/pickleball-techniques";
 import type { TechniqueProgress } from "@/types/technique-practice";
-import { cn } from "@/lib/utils";
 
 type Props = {
   progressList: TechniqueProgress[];
@@ -35,8 +34,8 @@ export function TechniquesOverview({ progressList, onSelect }: Props) {
   return (
     <div className="space-y-5">
       <div>
-        <h3 className="text-base font-semibold text-foreground">我的閉關功法</h3>
-        <p className="text-xs text-muted">
+        <h3 className="cj-section-title text-base">我的閉關功法</h3>
+        <p className="text-xs cj-muted">
           16 項匹克球擊球功法 · 熟練度 0～100 · 基礎／入門／小成／入微／大成／圓滿
         </p>
       </div>
@@ -45,9 +44,7 @@ export function TechniquesOverview({ progressList, onSelect }: Props) {
 
       {categories.map((category) => (
         <section key={category}>
-          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-primary/80">
-            {category}
-          </p>
+          <p className="cj-category-label">{category}</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {grouped[category]!.map((progress) => {
               const technique = getTechniqueById(progress.technique_id);
@@ -87,33 +84,30 @@ function TechniqueCard({
     <button
       type="button"
       onClick={onClick}
-      className={cn(
-        "technique-jade-card btn-touch w-full rounded-xl border border-emerald-500/20",
-        "bg-gradient-to-br from-slate-900/90 via-slate-800/95 to-emerald-950/80 p-3 text-left text-white",
-        "transition-shadow hover:shadow-md hover:ring-1 hover:ring-amber-400/30",
-      )}
+      className="cj-jade-card btn-touch w-full"
     >
       <div className="mb-1 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-amber-100">
-            {technique.name}
-          </p>
-          <p className="truncate text-[10px] text-slate-400">{technique.shot}</p>
+          <p className="truncate text-sm font-bold cj-gold">{technique.name}</p>
+          <p className="truncate text-[10px] cj-muted">{technique.shot}</p>
         </div>
-        <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-200">
+        <span className="shrink-0 rounded-full border border-amber-400/30 bg-amber-400/15 px-2 py-0.5 text-[10px] font-semibold cj-gold">
           {levelMeta.name}
         </span>
       </div>
 
-      <p className="mb-2 text-[11px] text-emerald-200/90">稱號：{levelTitle}</p>
+      <p className="mb-2 text-[11px] cj-emerald">稱號：{levelTitle}</p>
 
-      <div className="mb-1 h-1.5 overflow-hidden rounded-full bg-slate-700">
+      <div
+        className="mb-1 h-1.5 overflow-hidden rounded-full"
+        style={{ background: "var(--cj-track)" }}
+      >
         <div
           className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-amber-400"
           style={{ width: `${score}%` }}
         />
       </div>
-      <div className="flex items-baseline justify-between text-[10px] text-slate-400">
+      <div className="flex items-baseline justify-between text-[10px] cj-muted">
         <span>{score} / 100</span>
         {target.nextLevel != null && target.pointsToNext != null && (
           <span>
@@ -121,19 +115,18 @@ function TechniqueCard({
             {getProficiencyLevelMeta(target.nextLevel).name}
           </span>
         )}
-        {target.nextLevel == null && <span className="text-amber-300">圓滿</span>}
+        {target.nextLevel == null && <span className="cj-gold">圓滿</span>}
       </div>
 
       {progress.last_practiced_at && (
-        <p className="mt-1.5 text-[10px] text-slate-500">
+        <p className="mt-1.5 text-[10px] cj-faint">
           上次閉關：{progress.last_practiced_at.slice(0, 10)}
         </p>
       )}
 
-      <p className="mt-2 line-clamp-2 text-[10px] italic leading-snug text-slate-400">
+      <p className="mt-2 line-clamp-2 text-[10px] italic leading-snug cj-faint">
         {technique.quote}
       </p>
     </button>
   );
 }
-

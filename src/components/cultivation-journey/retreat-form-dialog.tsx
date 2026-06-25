@@ -104,24 +104,24 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
-      <div className="glass-overlay absolute inset-0" aria-hidden onClick={onClose} />
-      <Card className="glass-modal relative flex max-h-[min(96dvh,100%)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl sm:max-h-[min(90dvh,720px)] sm:rounded-2xl">
-        <div className="shrink-0 border-b border-divider px-4 py-3">
+    <div className="cultivation-journey fixed inset-0 z-50 flex flex-col justify-end border-0 bg-transparent p-0 shadow-none sm:items-center sm:justify-center">
+      <div className="cj-modal-overlay absolute inset-0" aria-hidden onClick={onClose} />
+      <Card className="cj-modal relative flex max-h-[min(96dvh,100%)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl sm:max-h-[min(90dvh,720px)] sm:rounded-2xl">
+        <div className="cj-modal-header shrink-0 px-4 py-3">
           <CardTitle className="text-base">新增閉關修煉紀錄</CardTitle>
-          <p className="text-xs text-muted">選 1～3 項功法 · 不進 DUPR 上傳</p>
+          <p className="text-xs cj-modal-muted">選 1～3 項功法 · 不進 DUPR 上傳</p>
         </div>
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3">
           <Field label="閉關日期">
-            <Input type="date" value={practiceDate} onChange={(e) => setPracticeDate(e.target.value)} className="h-11" />
+            <Input type="date" value={practiceDate} onChange={(e) => setPracticeDate(e.target.value)} className="cj-input h-11" />
           </Field>
 
           <Field label="練球地點">
             <select
               value={locationId}
               onChange={(e) => setLocationId(e.target.value)}
-              className="h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+              className="cj-input"
             >
               {locations.map((loc) => (
                 <option key={loc.id} value={loc.id}>
@@ -134,18 +134,18 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
                 value={customLocation}
                 onChange={(e) => setCustomLocation(e.target.value)}
                 placeholder="輸入地點名稱"
-                className="mt-2 h-11"
+                className="cj-input mt-2 h-11"
               />
             )}
           </Field>
 
           <Field label="練習時間（分鐘）">
-            <Input type="number" min={1} value={duration} onChange={(e) => setDuration(e.target.value)} className="h-11" />
-            <p className="mt-1 text-[11px] text-muted">&lt;30 +2 · 30～59 +5 · 60+ +8（每功法）</p>
+            <Input type="number" min={1} value={duration} onChange={(e) => setDuration(e.target.value)} className="cj-input h-11" />
+            <p className="mt-1 text-[11px] cj-modal-muted">&lt;30 +2 · 30～59 +5 · 60+ +8（每功法）</p>
           </Field>
 
           <Field label="今日閉關功法（1～3 項）">
-            <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
+            <div className="cj-technique-list">
               {PICKLEBALL_TECHNIQUES.map((t) => {
                 const on = techniqueIds.includes(t.id);
                 return (
@@ -153,21 +153,23 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
                     key={t.id}
                     type="button"
                     onClick={() => toggleTechnique(t.id)}
-                    className={cn(
-                      "flex w-full items-start gap-2 rounded-lg px-2 py-2 text-left text-xs transition-colors",
-                      on ? "bg-primary/10 text-primary ring-1 ring-primary/25" : "hover:bg-surface-muted",
-                    )}
+                    className={cn("cj-technique-option", on && "is-selected")}
                   >
-                    <span className={cn("mt-0.5 h-4 w-4 shrink-0 rounded border", on ? "border-primary bg-primary" : "border-border")} />
+                    <span
+                      className={cn(
+                        "mt-0.5 h-4 w-4 shrink-0 rounded border",
+                        on ? "border-emerald-400 bg-emerald-400" : "border-[var(--cj-border-soft)]",
+                      )}
+                    />
                     <span>
                       <span className="font-semibold">{t.name}</span>
-                      <span className="text-muted">｜{t.shot}</span>
+                      <span className="cj-modal-muted">｜{t.shot}</span>
                     </span>
                   </button>
                 );
               })}
             </div>
-            <p className="mt-1 text-[11px] text-muted">已選 {techniqueIds.length} / 3</p>
+            <p className="mt-1 text-[11px] cj-modal-muted">已選 {techniqueIds.length} / 3</p>
           </Field>
 
           <Field label="自我評分（選填）">
@@ -179,22 +181,24 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
                   onClick={() => setRating(n)}
                   className={cn(
                     "btn-touch flex-1 rounded-lg border py-2 text-sm font-semibold",
-                    rating === n ? "border-amber-500 bg-amber-500/15 text-amber-800" : "border-border",
+                    rating === n
+                      ? "border-amber-400 bg-amber-400/15 cj-gold"
+                      : "border-[var(--cj-border-soft)] cj-modal-muted",
                   )}
                 >
                   {n}
                 </button>
               ))}
             </div>
-            <p className="mt-1 text-[11px] text-muted">4 分以上每功法額外 +2</p>
+            <p className="mt-1 text-[11px] cj-modal-muted">4 分以上每功法額外 +2</p>
           </Field>
 
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-2 text-sm cj-modal-body">
             <input
               type="checkbox"
               checked={hasImprovement}
               onChange={(e) => setHasImprovement(e.target.checked)}
-              className="h-4 w-4 rounded border-border"
+              className="h-4 w-4 rounded border-[var(--cj-border-soft)]"
             />
             本次有明顯進步（每功法 +3）
           </label>
@@ -208,7 +212,9 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
                   onClick={() => setMood(mood === m ? undefined : m)}
                   className={cn(
                     "rounded-full border px-3 py-1 text-xs font-medium",
-                    mood === m ? "border-primary bg-primary/10 text-primary" : "border-border",
+                    mood === m
+                      ? "border-emerald-400 bg-emerald-400/15 cj-emerald"
+                      : "border-[var(--cj-border-soft)] cj-modal-muted",
                   )}
                 >
                   {m}
@@ -218,11 +224,11 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
           </Field>
 
           <Field label="心得備註（選填，有填每功法 +2）">
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="今日閉關感悟…" className="h-11" />
+            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="今日閉關感悟…" className="cj-input h-11" />
           </Field>
         </div>
 
-        <div className="shrink-0 flex gap-2 border-t border-divider p-4">
+        <div className="cj-modal-header shrink-0 flex gap-2 border-t p-4">
           <Button variant="secondary" onClick={onClose} className="flex-1">取消</Button>
           <Button onClick={() => void handleSubmit()} loading={loading} className="flex-1">完成閉關</Button>
         </div>
@@ -234,7 +240,7 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-1.5 text-sm font-medium text-muted">{label}</p>
+      <p className="cj-field-label">{label}</p>
       {children}
     </div>
   );

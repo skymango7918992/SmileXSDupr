@@ -115,10 +115,10 @@ export function CultivationJourneyHub({
     <div className="cultivation-journey space-y-4 pb-20 lg:pb-6">
       <header>
         <div className="mb-1 flex items-center gap-2">
-          <Scroll className="h-5 w-5 text-amber-600" />
-          <h1 className="text-xl font-semibold">修行軌跡</h1>
+          <Scroll className="h-5 w-5 text-amber-400" />
+          <h1 className="text-xl font-semibold text-[var(--cj-text)]">修行軌跡</h1>
         </div>
-        <p className="text-sm text-muted">
+        <p className="text-sm cj-muted">
           平常練球即閉關修煉 · 16 項功法熟練度 0～100 · 不進 DUPR 上傳
         </p>
       </header>
@@ -136,9 +136,7 @@ export function CultivationJourneyHub({
               onClick={() => setTab(t.id)}
               className={cn(
                 "btn-touch flex min-w-[4rem] shrink-0 flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-center",
-                tab === t.id
-                  ? "glass-nav-active"
-                  : "border border-border bg-surface",
+                tab === t.id ? "cj-tab-active" : "cj-tab",
               )}
             >
               <span>{t.icon}</span>
@@ -160,9 +158,7 @@ export function CultivationJourneyHub({
                   onClick={() => setTab(t.id)}
                   className={cn(
                     "btn-touch flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold",
-                    tab === t.id
-                      ? "glass-nav-active"
-                      : "text-muted hover:bg-surface-muted",
+                    tab === t.id ? "cj-tab-active" : "cj-tab",
                   )}
                 >
                   <span>{t.icon}</span>
@@ -182,7 +178,7 @@ export function CultivationJourneyHub({
                 <StatPill label="試煉" value={stats.trial} />
               </div>
               <section>
-                <h3 className="mb-2 text-sm font-semibold">近期修行紀錄</h3>
+                <h3 className="cj-section-title mb-2">近期修行紀錄</h3>
                 <CultivationRecordTimeline
                   records={records.slice(0, 8)}
                   onDelete={handleDelete}
@@ -211,7 +207,7 @@ export function CultivationJourneyHub({
                 <Plus className="h-4 w-4" />
                 新增閉關修煉
               </Button>
-              <p className="text-xs text-muted">
+              <p className="text-xs cj-muted">
                 閉關紀錄不可刪除（MVP），以免熟練度計算錯亂。
               </p>
               <CultivationRecordTimeline
@@ -266,7 +262,7 @@ export function CultivationJourneyHub({
         </div>
       </div>
 
-      <div className="fixed bottom-3 left-3 right-3 z-20 flex gap-2 rounded-xl border border-border bg-surface/95 p-1.5 shadow-lg backdrop-blur-sm lg:hidden">
+      <div className="cj-dock fixed bottom-3 left-3 right-3 z-20 flex gap-2 rounded-xl border p-1.5 shadow-lg backdrop-blur-sm lg:hidden">
         <Button size="sm" className="flex-1" onClick={() => setShowRetreat(true)}>
           閉關
         </Button>
@@ -329,9 +325,9 @@ export function CultivationJourneyHub({
 
 function StatPill({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-border bg-surface-muted/50 px-3 py-2 text-center">
-      <p className="text-lg font-bold text-foreground">{value}</p>
-      <p className="text-[10px] text-muted">{label}</p>
+    <div className="cj-stat-pill">
+      <strong>{value}</strong>
+      <span>{label}</span>
     </div>
   );
 }

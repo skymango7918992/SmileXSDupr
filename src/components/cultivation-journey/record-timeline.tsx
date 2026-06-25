@@ -32,7 +32,7 @@ export function CultivationRecordTimeline({
 
   if (list.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted">
+      <p className="cj-empty">
         尚無修行紀錄，點下方按鈕開始第一筆閉關或切磋。
       </p>
     );
@@ -41,27 +41,22 @@ export function CultivationRecordTimeline({
   return (
     <ul className="space-y-2">
       {list.map((record) => (
-        <li
-          key={record.id}
-          className="cultivation-record-item rounded-xl border border-border bg-surface p-3"
-        >
+        <li key={record.id} className="cj-record-item">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-base" aria-hidden>
                   {RECORD_TYPE_ICON[record.record_type]}
                 </span>
-                <span className="text-sm font-semibold text-foreground">
+                <span className="record-title">
                   {RECORD_TYPE_LABEL[record.record_type]}
                 </span>
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
-                  +{record.xp_earned} 修為
-                </span>
+                <span className="xp-badge">+{record.xp_earned} 修為</span>
                 {record.source !== "manual" && (
-                  <span className="text-[10px] text-muted">DUPR 匯入</span>
+                  <span className="text-[10px] cj-faint">DUPR 匯入</span>
                 )}
               </div>
-              <p className="mt-1 text-xs text-muted">
+              <p className="mt-1 text-xs cj-muted">
                 {record.occurred_on}
                 {record.venue_name ? ` · ${record.venue_name}` : ""}
               </p>
@@ -71,7 +66,7 @@ export function CultivationRecordTimeline({
                 size="sm"
                 variant="ghost"
                 disabled={disabled}
-                className="h-8 w-8 shrink-0 p-0 text-muted hover:text-danger"
+                className="h-8 w-8 shrink-0 p-0 cj-muted hover:text-danger"
                 onClick={async () => {
                   const ok = await confirm({
                     title: "刪除此筆修行紀錄？",
@@ -101,7 +96,7 @@ function RecordBody({ record }: { record: CultivationRecord }) {
       .map((id) => getTechniqueById(id)?.name ?? id)
       .join("、");
     return (
-      <div className="mt-2 space-y-1 text-xs text-secondary-foreground">
+      <div className="mt-2 space-y-1 text-xs cj-muted">
         {record.duration_minutes != null && (
           <p>閉關 {record.duration_minutes} 分鐘</p>
         )}
@@ -109,39 +104,39 @@ function RecordBody({ record }: { record: CultivationRecord }) {
         {record.self_rating != null && (
           <p>自評：{"★".repeat(record.self_rating)}</p>
         )}
-        {record.notes && <p className="text-muted">{record.notes}</p>}
+        {record.notes && <p className="cj-faint">{record.notes}</p>}
       </div>
     );
   }
 
   if (record.record_type === "sparring") {
     return (
-      <div className="mt-2 text-xs text-secondary-foreground">
+      <div className="mt-2 text-xs cj-muted">
         <p>
           比分 {record.team1_score} : {record.team2_score}
           {record.result && (
             <span
               className={cn(
                 "ml-2 font-semibold",
-                record.result === "win" && "text-primary",
-                record.result === "loss" && "text-amber-700",
+                record.result === "win" && "cj-emerald",
+                record.result === "loss" && "text-amber-300",
               )}
             >
               {RESULT_LABEL[record.result]}
             </span>
           )}
         </p>
-        {record.notes && <p className="mt-1 text-muted">{record.notes}</p>}
+        {record.notes && <p className="mt-1 cj-faint">{record.notes}</p>}
       </div>
     );
   }
 
   return (
-    <div className="mt-2 text-xs text-secondary-foreground">
+    <div className="mt-2 text-xs cj-muted">
       <p>
         試煉戰績 {record.trial_wins ?? 0} 勝 {record.trial_losses ?? 0} 敗
       </p>
-      {record.notes && <p className="mt-1 text-muted">{record.notes}</p>}
+      {record.notes && <p className="mt-1 cj-faint">{record.notes}</p>}
     </div>
   );
 }

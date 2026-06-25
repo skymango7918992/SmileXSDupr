@@ -20,18 +20,18 @@ export function ProficiencyRoadmap({ score, compact = false }: Props) {
 
   if (compact) {
     return (
-      <div className="rounded-lg border border-emerald-500/20 bg-slate-900/40 px-3 py-2">
+      <div className="cj-guide">
         {target.nextLevel != null ? (
-          <p className="text-[11px] text-emerald-100">
+          <p className="cj-guide-row">
             下一目標：
-            <span className="font-semibold text-amber-200">
-              {getProficiencyLevelMeta(target.nextLevel).name}
-            </span>
+            <strong>{getProficiencyLevelMeta(target.nextLevel).name}</strong>
             （{target.nextThreshold} 分）· 還差{" "}
-            <span className="font-bold tabular-nums">{target.pointsToNext}</span> 點
+            <strong>{target.pointsToNext}</strong> 點
           </p>
         ) : (
-          <p className="text-[11px] font-semibold text-amber-200">已達圓滿，此功法修至極境</p>
+          <p className="cj-guide-row">
+            <strong>已達圓滿</strong>，此功法修至極境
+          </p>
         )}
       </div>
     );
@@ -42,21 +42,20 @@ export function ProficiencyRoadmap({ score, compact = false }: Props) {
   return (
     <div className="space-y-3">
       {target.nextLevel != null && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
-          <p className="text-xs font-bold text-amber-900">修行目標</p>
-          <p className="mt-0.5 text-sm text-amber-950">
-            熟練度達 <span className="font-bold tabular-nums">{target.nextThreshold}</span> 分
-            ，突破至「{getProficiencyLevelMeta(target.nextLevel).name}」
+        <div className="cj-roadmap-target">
+          <p className="text-xs font-bold cj-gold">修行目標</p>
+          <p className="mt-0.5 text-sm">
+            熟練度達 <b>{target.nextThreshold}</b> 分，突破至「
+            {getProficiencyLevelMeta(target.nextLevel).name}」
           </p>
-          <p className="mt-1 text-xs text-amber-800">
-            目前 {score} 分，還需{" "}
-            <span className="font-bold tabular-nums">{target.pointsToNext}</span> 點
+          <p className="mt-1 text-xs cj-muted">
+            目前 {score} 分，還需 <b>{target.pointsToNext}</b> 點
           </p>
         </div>
       )}
 
       <div>
-        <p className="mb-2 text-xs font-semibold text-muted">功法階級路線</p>
+        <p className="cj-section-title mb-2">功法階級路線</p>
         <ol className="space-y-1.5">
           {PROFICIENCY_LEVELS.map((level, idx) => {
             const state: "done" | "current" | "upcoming" =
@@ -66,38 +65,29 @@ export function ProficiencyRoadmap({ score, compact = false }: Props) {
               <li
                 key={level.key}
                 className={cn(
-                  "rounded-lg border px-3 py-2 text-xs",
-                  state === "done" && "border-emerald-500/20 bg-emerald-500/5",
-                  state === "current" &&
-                    "border-amber-500/40 bg-amber-500/10 ring-1 ring-amber-500/20",
-                  state === "upcoming" && "border-border bg-surface-muted/30 opacity-70",
+                  "cj-roadmap-item",
+                  state === "done" && "is-done",
+                  state === "current" && "is-current",
+                  state === "upcoming" && "is-upcoming",
                 )}
               >
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                  <span
-                    className={cn(
-                      "font-bold",
-                      state === "current" && "text-amber-900",
-                      state === "done" && "text-emerald-800",
-                    )}
-                  >
-                    {level.name}
-                  </span>
-                  <span className="tabular-nums text-muted">
+                  <span className="level-name">{level.name}</span>
+                  <span className="tabular-nums cj-muted">
                     {level.min}～{level.max} 分
                   </span>
                   {state === "current" && (
-                    <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900">
+                    <span className="rounded bg-amber-500/25 px-1.5 py-0.5 text-[10px] font-semibold cj-gold">
                       目前
                     </span>
                   )}
                   {state === "done" && (
-                    <span className="text-[10px] text-emerald-700">已達成</span>
+                    <span className="text-[10px] cj-emerald">已達成</span>
                   )}
                 </div>
-                <p className="mt-0.5 text-muted">{level.description}</p>
+                <p className="mt-0.5 cj-muted">{level.description}</p>
                 {state === "upcoming" && idx === currentIdx + 1 && (
-                  <p className="mt-1 text-[10px] font-medium text-primary">
+                  <p className="mt-1 text-[10px] font-medium cj-emerald">
                     突破條件：熟練度 ≥ {level.min} 分
                   </p>
                 )}
@@ -112,16 +102,16 @@ export function ProficiencyRoadmap({ score, compact = false }: Props) {
 
 export function ProficiencyLevelGuide() {
   return (
-    <div className="rounded-xl border border-emerald-500/20 bg-slate-900/50 p-3">
-      <p className="mb-2 text-xs font-semibold text-emerald-100">功法階級與突破條件</p>
+    <div className="cj-guide">
+      <p className="cj-guide-title">功法階級與突破條件</p>
       <div className="grid gap-1 sm:grid-cols-2">
         {PROFICIENCY_LEVELS.map((level) => (
-          <div key={level.key} className="text-[10px] leading-snug text-slate-300">
-            <span className="font-bold text-amber-200">{level.name}</span>
-            <span className="ml-1 tabular-nums text-slate-400">
+          <div key={level.key} className="cj-guide-row">
+            <strong>{level.name}</strong>
+            <em className="ml-1 tabular-nums">
               {level.min}～{level.max} 分
-            </span>
-            <span className="text-slate-500"> · {level.description}</span>
+            </em>
+            <em> · {level.description}</em>
           </div>
         ))}
       </div>

@@ -10,7 +10,6 @@ import {
 } from "@/types/cultivation-journey";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
 
 type Props = {
   profile: CultivationProfile;
@@ -61,14 +60,14 @@ export function DemonsPanel({ profile }: Props) {
     JSON.stringify(conqueredDemons) !== JSON.stringify(profile.conquered_demons);
 
   return (
-    <Card>
+    <div className="cj-panel-card">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <CardTitle className="text-base">心魔清單</CardTitle>
+        <h3 className="cj-section-title text-base">心魔清單</h3>
         <Button size="sm" loading={isPending} disabled={!dirty} onClick={save}>
           儲存
         </Button>
       </div>
-      <p className="mb-3 text-xs text-muted">
+      <p className="mb-3 text-xs cj-muted">
         標記正在對抗的心魔，破魔後可勾選「已降伏」。（後續擴充項目）
       </p>
       <ul className="space-y-2">
@@ -81,19 +80,17 @@ export function DemonsPanel({ profile }: Props) {
               className={cn(
                 "rounded-xl border px-3 py-2.5",
                 conquered
-                  ? "border-emerald-500/30 bg-emerald-500/5 opacity-80"
+                  ? "border-emerald-400/30 bg-emerald-400/10"
                   : active
-                    ? "border-amber-500/40 bg-amber-500/5"
-                    : "border-border",
+                    ? "border-amber-400/35 bg-amber-400/10"
+                    : "border-[var(--cj-border-soft)] bg-[var(--cj-bg-deep)]",
               )}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold">{demon.label}</p>
-                  <p className="text-xs text-muted">{demon.description}</p>
-                  <p className="mt-1 text-[11px] text-primary/80">
-                    破魔：{demon.counter}
-                  </p>
+                  <p className="text-xs cj-muted">{demon.description}</p>
+                  <p className="mt-1 text-[11px] cj-emerald">破魔：{demon.counter}</p>
                 </div>
                 <div className="flex shrink-0 flex-col gap-1">
                   <button
@@ -103,8 +100,8 @@ export function DemonsPanel({ profile }: Props) {
                     className={cn(
                       "rounded-lg px-2 py-1 text-[10px] font-semibold",
                       active
-                        ? "bg-amber-500/20 text-amber-900"
-                        : "bg-surface-muted text-muted",
+                        ? "bg-amber-400/20 cj-gold"
+                        : "bg-[var(--cj-bg-card)] cj-muted",
                     )}
                   >
                     {active ? "對抗中" : "標記"}
@@ -115,8 +112,8 @@ export function DemonsPanel({ profile }: Props) {
                     className={cn(
                       "rounded-lg px-2 py-1 text-[10px] font-semibold",
                       conquered
-                        ? "bg-emerald-500/20 text-emerald-800"
-                        : "bg-surface-muted text-muted",
+                        ? "bg-emerald-400/20 cj-emerald"
+                        : "bg-[var(--cj-bg-card)] cj-muted",
                     )}
                   >
                     {conquered ? "已降伏" : "破魔"}
@@ -127,6 +124,6 @@ export function DemonsPanel({ profile }: Props) {
           );
         })}
       </ul>
-    </Card>
+    </div>
   );
 }

@@ -1982,3 +1982,434 @@ body {
   );
   border-radius: inherit;
 }
+
+/* ── 修行軌跡：宗門深色主題（scoped，高對比可讀）── */
+.cultivation-journey {
+  --cj-bg-deep: #0a1210;
+  --cj-bg-panel: #111f1b;
+  --cj-bg-card: #172b25;
+  --cj-bg-elevated: #1d352d;
+  --cj-border: rgba(52, 211, 153, 0.32);
+  --cj-border-soft: rgba(52, 211, 153, 0.18);
+  --cj-border-amber: rgba(252, 211, 77, 0.42);
+  --cj-text: #ecfdf5;
+  --cj-text-body: #d1fae5;
+  --cj-text-muted: #9cb8ad;
+  --cj-text-faint: #7a9a8e;
+  --cj-gold: #fcd34d;
+  --cj-gold-soft: #fde68a;
+  --cj-emerald: #6ee7b7;
+  --cj-track: #243b34;
+  --cj-overlay: rgba(2, 8, 6, 0.72);
+
+  border-radius: 1rem;
+  border: 1px solid var(--cj-border-soft);
+  background: linear-gradient(
+    168deg,
+    var(--cj-bg-deep) 0%,
+    #0d1a16 42%,
+    #0a1412 100%
+  );
+  padding: 1rem;
+  color: var(--cj-text);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 8px 28px rgba(2, 8, 6, 0.35);
+}
+
+@media (min-width: 640px) {
+  .cultivation-journey {
+    padding: 1.25rem;
+  }
+}
+
+.cultivation-journey .cj-muted {
+  color: var(--cj-text-muted);
+}
+
+.cultivation-journey .cj-faint {
+  color: var(--cj-text-faint);
+}
+
+.cultivation-journey .cj-gold {
+  color: var(--cj-gold-soft);
+}
+
+.cultivation-journey .cj-emerald {
+  color: var(--cj-emerald);
+}
+
+.cultivation-journey .cj-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cj-text);
+}
+
+.cultivation-journey .cj-tab {
+  border-radius: 0.75rem;
+  border: 1px solid var(--cj-border-soft);
+  background: var(--cj-bg-card);
+  color: var(--cj-text-muted);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.cultivation-journey .cj-tab:hover {
+  color: var(--cj-text-body);
+  border-color: var(--cj-border);
+}
+
+.cultivation-journey .cj-tab-active {
+  border-color: var(--cj-border-amber);
+  background: linear-gradient(145deg, #2a3d22 0%, #1a2f29 100%);
+  color: var(--cj-gold-soft);
+  box-shadow: 0 0 0 1px rgba(252, 211, 77, 0.12);
+}
+
+.cultivation-journey .cj-stat-pill {
+  border-radius: 0.75rem;
+  border: 1px solid var(--cj-border-soft);
+  background: var(--cj-bg-card);
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+}
+
+.cultivation-journey .cj-stat-pill strong {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--cj-gold-soft);
+}
+
+.cultivation-journey .cj-stat-pill span {
+  font-size: 0.625rem;
+  color: var(--cj-text-muted);
+}
+
+.cultivation-journey .cj-dock {
+  border-color: var(--cj-border-soft);
+  background: color-mix(in srgb, var(--cj-bg-panel) 94%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.cultivation-journey .cj-guide {
+  border-radius: 0.75rem;
+  border: 1px solid var(--cj-border);
+  background: var(--cj-bg-card);
+  padding: 0.75rem;
+}
+
+.cultivation-journey .cj-guide-title {
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cj-emerald);
+}
+
+.cultivation-journey .cj-guide-row {
+  font-size: 0.625rem;
+  line-height: 1.45;
+  color: var(--cj-text-body);
+}
+
+.cultivation-journey .cj-guide-row strong {
+  color: var(--cj-gold-soft);
+}
+
+.cultivation-journey .cj-guide-row em {
+  font-style: normal;
+  color: var(--cj-text-muted);
+}
+
+.cultivation-journey .cj-jade-card {
+  border-radius: 0.75rem;
+  border: 1px solid var(--cj-border-soft);
+  background: linear-gradient(
+    145deg,
+    #1a322b 0%,
+    #152820 52%,
+    #101f1a 100%
+  );
+  padding: 0.75rem;
+  text-align: left;
+  color: var(--cj-text);
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.cultivation-journey .cj-jade-card:hover {
+  border-color: var(--cj-border-amber);
+  box-shadow: 0 0 0 1px rgba(252, 211, 77, 0.15);
+}
+
+.cultivation-journey .cj-realm-card {
+  border-radius: 1rem;
+  border: 1px solid var(--cj-border-amber);
+  background: linear-gradient(
+    145deg,
+    #1a322b 0%,
+    #152820 55%,
+    #0f1c18 100%
+  );
+  padding: 1rem;
+  color: var(--cj-text);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28);
+}
+
+.cultivation-journey .cj-roadmap-target {
+  border-radius: 0.75rem;
+  border: 1px solid var(--cj-border-amber);
+  background: rgba(252, 211, 77, 0.1);
+  padding: 0.625rem 0.75rem;
+}
+
+.cultivation-journey .cj-roadmap-target strong,
+.cultivation-journey .cj-roadmap-target b {
+  color: var(--cj-gold-soft);
+}
+
+.cultivation-journey .cj-roadmap-target p {
+  color: var(--cj-text-body);
+}
+
+.cultivation-journey .cj-roadmap-item {
+  border-radius: 0.5rem;
+  border: 1px solid var(--cj-border-soft);
+  background: var(--cj-bg-card);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--cj-text-body);
+}
+
+.cultivation-journey .cj-roadmap-item.is-done {
+  border-color: rgba(52, 211, 153, 0.28);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.cultivation-journey .cj-roadmap-item.is-current {
+  border-color: var(--cj-border-amber);
+  background: rgba(252, 211, 77, 0.1);
+  box-shadow: 0 0 0 1px rgba(252, 211, 77, 0.1);
+}
+
+.cultivation-journey .cj-roadmap-item.is-upcoming {
+  opacity: 0.72;
+}
+
+.cultivation-journey .cj-roadmap-item .level-name {
+  font-weight: 700;
+  color: var(--cj-text);
+}
+
+.cultivation-journey .cj-roadmap-item.is-done .level-name {
+  color: var(--cj-emerald);
+}
+
+.cultivation-journey .cj-roadmap-item.is-current .level-name {
+  color: var(--cj-gold-soft);
+}
+
+.cultivation-journey .cj-record-item {
+  border-radius: 0.75rem;
+  border: 1px solid var(--cj-border-soft);
+  background: var(--cj-bg-card);
+  padding: 0.75rem;
+  color: var(--cj-text-body);
+}
+
+.cultivation-journey .cj-record-item .record-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cj-text);
+}
+
+.cultivation-journey .cj-record-item .xp-badge {
+  border-radius: 9999px;
+  background: rgba(52, 211, 153, 0.14);
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--cj-emerald);
+}
+
+.cultivation-journey .cj-empty {
+  border-radius: 0.75rem;
+  border: 1px dashed var(--cj-border-soft);
+  padding: 2.5rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--cj-text-muted);
+}
+
+.cultivation-journey .cj-panel-card {
+  border-radius: 0.75rem;
+  border: 1px solid var(--cj-border-soft);
+  background: var(--cj-bg-card);
+  padding: 1rem;
+  color: var(--cj-text-body);
+}
+
+.cultivation-journey .cj-category-label {
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cj-emerald);
+}
+
+.cj-modal {
+  border: 1px solid var(--cj-border) !important;
+  background: var(--cj-bg-panel) !important;
+  color: var(--cj-text) !important;
+}
+
+.cj-modal .cj-modal-header {
+  border-bottom: 1px solid var(--cj-border-soft);
+  background: linear-gradient(90deg, #132820 0%, #101f1a 100%);
+}
+
+.cj-modal .cj-modal-hero {
+  border-radius: 0.75rem;
+  border: 1px solid var(--cj-border-amber);
+  background: linear-gradient(145deg, #1a322b 0%, #101f1a 100%);
+  padding: 0.75rem;
+  color: var(--cj-text);
+}
+
+.cj-modal .cj-modal-muted {
+  color: var(--cj-text-muted);
+}
+
+.cj-modal .cj-modal-body {
+  color: var(--cj-text-body);
+}
+
+.cj-modal .cj-modal-stat {
+  border-radius: 0.5rem;
+  border: 1px solid var(--cj-border-soft);
+  background: var(--cj-bg-card);
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.cj-modal .cj-modal-stat strong {
+  color: var(--cj-gold-soft);
+}
+
+.cj-modal .cj-modal-log {
+  border-radius: 0.5rem;
+  border: 1px solid var(--cj-border-soft);
+  background: var(--cj-bg-card);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--cj-text-body);
+}
+
+.cj-modal .cj-breakthrough {
+  border-radius: 0.75rem;
+  border: 1px solid var(--cj-border-amber);
+  background: rgba(252, 211, 77, 0.12);
+  padding: 0.75rem;
+  color: var(--cj-text-body);
+}
+
+.cj-modal .cj-breakthrough strong {
+  color: var(--cj-gold-soft);
+}
+
+.cj-modal .cj-input,
+.cj-modal select.cj-input,
+.cj-modal textarea.cj-input {
+  height: 2.75rem;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--cj-border-soft);
+  background: var(--cj-bg-card);
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--cj-text);
+}
+
+.cj-modal textarea.cj-input {
+  height: auto;
+  min-height: 4.5rem;
+  padding: 0.625rem 0.75rem;
+}
+
+.cj-modal .cj-input::placeholder {
+  color: var(--cj-text-faint);
+}
+
+.cj-modal .cj-input:focus {
+  outline: none;
+  border-color: var(--cj-border);
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
+}
+
+.cj-modal .cj-technique-option {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  text-align: left;
+  color: var(--cj-text-body);
+  transition: background 0.12s ease;
+}
+
+.cj-modal .cj-technique-option:hover {
+  background: var(--cj-bg-elevated);
+}
+
+.cj-modal .cj-technique-option.is-selected {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--cj-emerald);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.25);
+}
+
+.cj-modal .cj-technique-list {
+  max-height: 12rem;
+  overflow-y: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--cj-border-soft);
+  background: var(--cj-bg-deep);
+  padding: 0.5rem;
+}
+
+.cj-modal .cj-field-label {
+  margin-bottom: 0.375rem;
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cj-text-muted);
+}
+
+.cultivation-journey .cj-field-label {
+  margin-bottom: 0.375rem;
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cj-text-muted);
+}
+
+.cj-modal .cj-close-btn {
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  color: var(--cj-text-muted);
+}
+
+.cj-modal .cj-close-btn:hover {
+  background: var(--cj-bg-card);
+  color: var(--cj-text);
+}
+
+.cj-modal-overlay {
+  background: var(--cj-overlay) !important;
+}
+
