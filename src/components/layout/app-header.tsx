@@ -59,10 +59,10 @@ export function AppHeader({ role = null }: Props) {
             已登入
           </span>
           {!isStaff && (
-            <Link href={khpaHomePath()} className="hidden sm:inline">
-              <Button variant="ghost" size="sm">
-                <span aria-hidden className="mr-1">🏓</span>
-                協會
+            <Link href={khpaHomePath()}>
+              <Button variant="ghost" size="sm" aria-label="協會平台">
+                <span aria-hidden>🏓</span>
+                <span className="hidden sm:inline">協會</span>
               </Button>
             </Link>
           )}

@@ -46,11 +46,16 @@ export function KhpaHeader({ venues, isAdmin }: Props) {
 
         <div className="flex shrink-0 items-center gap-1">
           {isAdmin && (
-            <Link
-              href="/"
-              className="hidden text-[11px] text-muted hover:text-foreground sm:inline"
-            >
-              星鑽 XS
+            <Link href="/">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-label="星鑽 XS 對戰中心"
+              >
+                <span className="text-xs font-semibold sm:hidden">XS</span>
+                <span className="hidden sm:inline">星鑽 XS</span>
+              </Button>
             </Link>
           )}
           <Button
