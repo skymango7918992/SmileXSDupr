@@ -8,6 +8,7 @@ import {
 } from "@/lib/trusted-device-server";
 
 const XS_ONLY_PREFIXES = [
+  "/cultivation",
   "/play-map",
   "/checkin",
   "/leaderboard",

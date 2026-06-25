@@ -29,6 +29,7 @@ export function canManagePlayers(email: string | undefined | null): boolean {
 
 /** 星鑽 XS 一般使用者不可進入的路由前綴 */
 export const STAFF_BLOCKED_PREFIXES = [
+  "/cultivation",
   "/play-map",
   "/checkin",
   "/settings",
