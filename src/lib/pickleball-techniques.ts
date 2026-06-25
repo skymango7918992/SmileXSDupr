@@ -1,4 +1,6 @@
 export type ProficiencyLevelKey =
+  | "foundation"
+  | "initiation"
   | "minor_success"
   | "subtle"
   | "major_success"
@@ -18,23 +20,37 @@ export type PickleballTechnique = {
 
 export const PROFICIENCY_LEVELS = [
   {
-    key: "minor_success" as const,
-    name: "小成",
+    key: "foundation" as const,
+    name: "基礎",
     min: 0,
+    max: 9,
+    description: "尚未有感，僅知有此一招。",
+  },
+  {
+    key: "initiation" as const,
+    name: "入門",
+    min: 10,
     max: 24,
     description: "初窺此道，球還不太聽話。",
   },
   {
+    key: "minor_success" as const,
+    name: "小成",
+    min: 25,
+    max: 44,
+    description: "知道怎麼打，偶爾成功。",
+  },
+  {
     key: "subtle" as const,
     name: "入微",
-    min: 25,
-    max: 59,
+    min: 45,
+    max: 64,
     description: "拍感漸明，已能窺見落點玄機。",
   },
   {
     key: "major_success" as const,
     name: "大成",
-    min: 60,
+    min: 65,
     max: 84,
     description: "此功已成，勝負之間皆可施展。",
   },
@@ -56,7 +72,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "進球率、深度、落點、旋轉、穩定開局",
     quote: "一拍開山，球未落地，氣勢已先壓三分。",
     levelTitles: {
-      minor_success: "發球入門",
+      foundation: "初聞此訣",
+      initiation: "發球入門",
+      minor_success: "偶有進球",
       subtle: "落點初定",
       major_success: "一拍開山",
       perfection: "開局鎮場",
@@ -70,6 +88,8 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "接發深度、穩定回球、讓自己有時間上前",
     quote: "接發如定海，一球壓住對手前進之路。",
     levelTitles: {
+      foundation: "初識接發",
+      initiation: "接發初學",
       minor_success: "接發不慌",
       subtle: "深球定海",
       major_success: "回元壓境",
@@ -84,7 +104,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "正手拍面控制、力量、深度、穿越速度",
     quote: "正手一起，風聲先至；敵未反應，球已破陣。",
     levelTitles: {
-      minor_success: "正手初鳴",
+      foundation: "正手初識",
+      initiation: "正手初鳴",
+      minor_success: "破風初線",
       subtle: "破風成線",
       major_success: "一拍逼退",
       perfection: "正手破陣",
@@ -98,7 +120,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "反手穩定度、回球深度、反手防守與反擊",
     quote: "反手不再是破綻，而是藏於身側的第二道鋒芒。",
     levelTitles: {
-      minor_success: "反手不逃",
+      foundation: "反手初識",
+      initiation: "反手不逃",
+      minor_success: "回元初穩",
       subtle: "回元穩拍",
       major_success: "反手破局",
       perfection: "左右無缺",
@@ -112,7 +136,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "放小球、越網高度、落入廚房區、上前銜接",
     quote: "球如落雲，輕墜廚房；一步上前，局勢由此翻轉。",
     levelTitles: {
-      minor_success: "落雲初試",
+      foundation: "初聞落雲",
+      initiation: "落雲初試",
+      minor_success: "輕墜初成",
       subtle: "輕墜廚房",
       major_success: "一落開門",
       perfection: "雲落無聲",
@@ -126,7 +152,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "第三拍強攻、壓迫對手、製造下一拍機會",
     quote: "一拍破風，不求一擊必殺，只求逼出對手破綻。",
     levelTitles: {
-      minor_success: "破風初擊",
+      foundation: "初聞破風",
+      initiation: "破風初擊",
+      minor_success: "快拍初壓",
       subtle: "快拍壓身",
       major_success: "破風逼退",
       perfection: "一擊開道",
@@ -140,7 +168,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "小球穩定、過網高度、落點、斜線 Dink、耐心控制",
     quote: "廚房線前不貪殺，凝氣於拍心，勝機藏於一寸落點。",
     levelTitles: {
-      minor_success: "廚房不爆衝",
+      foundation: "初識廚房",
+      initiation: "廚房不爆衝",
+      minor_success: "小球初穩",
       subtle: "小球入境",
       major_success: "凝氣成線",
       perfection: "廚房主宰",
@@ -154,7 +184,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "斜線小球、角度、穩定來回、消耗對手",
     quote: "一球斜斜落下，看似溫柔，實則慢慢磨穿對手道心。",
     levelTitles: {
-      minor_success: "斜線初磨",
+      foundation: "初識斜線",
+      initiation: "斜線初磨",
+      minor_success: "角度初成",
       subtle: "角度入魂",
       major_success: "磨到腳亂",
       perfection: "一線封魂",
@@ -168,7 +200,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "從 Dink 或中性球突然加速、攻擊時機、攻擊位置",
     quote: "看似溫柔小球，實則暗藏殺機；一念加速，戰局驟變。",
     levelTitles: {
-      minor_success: "偶爾偷襲",
+      foundation: "初識加速",
+      initiation: "偶爾偷襲",
+      minor_success: "看準初擊",
       subtle: "看準出手",
       major_success: "一拍變速",
       perfection: "殺機無聲",
@@ -182,7 +216,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "網前截擊、拍面穩定、封角度、控制回球方向",
     quote: "球未過身，已被斬落；網前一步，便是你的領域。",
     levelTitles: {
-      minor_success: "截擊入門",
+      foundation: "初識截擊",
+      initiation: "截擊入門",
+      minor_success: "拍面初穩",
       subtle: "拍面穩定",
       major_success: "斬空封路",
       perfection: "網前無門",
@@ -196,7 +232,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "手速、反應、近身快球、連續截擊",
     quote: "雷聲未至，拍影已動；快手之境，敵只見殘光。",
     levelTitles: {
-      minor_success: "手忙但有救",
+      foundation: "初識快手",
+      initiation: "手忙但有救",
+      minor_success: "快拍初跟",
       subtle: "快拍跟上",
       major_success: "雷音連斬",
       perfection: "拍影無形",
@@ -210,7 +248,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "面對對手加速時反擊、借力打力、快球反抽",
     quote: "你敢加速，我便借勢破甲；來球越快，反擊越狠。",
     levelTitles: {
-      minor_success: "擋得回去",
+      foundation: "初識反擊",
+      initiation: "擋得回去",
+      minor_success: "借力初還",
       subtle: "借力反抽",
       major_success: "破甲還擊",
       perfection: "以殺止殺",
@@ -224,7 +264,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "把快球、重球化成軟球，讓局面回到中性",
     quote: "敵勢如雷，我自化勁；殺招入拍，轉眼成一顆溫柔小球。",
     levelTitles: {
-      minor_success: "勉強擋住",
+      foundation: "初識化勁",
+      initiation: "勉強擋住",
+      minor_success: "化快初成",
       subtle: "化快為慢",
       major_success: "重置局勢",
       perfection: "萬力歸柔",
@@ -238,7 +280,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "擋快球、吸收力量、讓球落短、避免被連續攻擊",
     quote: "敵球如煞，我拍如壁；不求反殺，先讓殺意落空。",
     levelTitles: {
-      minor_success: "擋煞入門",
+      foundation: "初識擋煞",
+      initiation: "擋煞入門",
+      minor_success: "拍面初定",
       subtle: "拍面不亂",
       major_success: "擋中帶控",
       perfection: "鐵壁化煞",
@@ -252,7 +296,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "高吊深度、高度、越過對手、攻防轉換",
     quote: "一球飛雲起，逼敵回首退；高吊不是逃，是換一片戰場。",
     levelTitles: {
-      minor_success: "勉強過頭",
+      foundation: "初識高吊",
+      initiation: "勉強過頭",
+      minor_success: "飛雲初形",
       subtle: "飛雲有形",
       major_success: "一吊退敵",
       perfection: "雲上藏鋒",
@@ -266,7 +312,9 @@ export const PICKLEBALL_TECHNIQUES: PickleballTechnique[] = [
     focus: "高球處理、扣殺角度、力量、落點、穩定收分",
     quote: "高球既現，天雷即落；一拍定劫，不留餘地。",
     levelTitles: {
-      minor_success: "有扣有希望",
+      foundation: "初識扣殺",
+      initiation: "有扣有希望",
+      minor_success: "殺球初界",
       subtle: "殺球入界",
       major_success: "天雷落地",
       perfection: "一扣定劫",
@@ -285,9 +333,11 @@ export function getTechniqueById(id: string): PickleballTechnique | undefined {
 
 export function getProficiencyLevel(score: number): ProficiencyLevelKey {
   if (score >= 85) return "perfection";
-  if (score >= 60) return "major_success";
-  if (score >= 25) return "subtle";
-  return "minor_success";
+  if (score >= 65) return "major_success";
+  if (score >= 45) return "subtle";
+  if (score >= 25) return "minor_success";
+  if (score >= 10) return "initiation";
+  return "foundation";
 }
 
 export function getProficiencyLevelMeta(level: ProficiencyLevelKey) {
@@ -306,10 +356,34 @@ export function getTechniqueLevelTitle(
 }
 
 export function pointsToNextProficiencyLevel(score: number): number | null {
-  if (score >= 85) return null;
-  if (score >= 60) return 85 - score;
-  if (score >= 25) return 60 - score;
-  return 25 - score;
+  const target = getNextProficiencyTarget(score);
+  return target.pointsToNext;
+}
+
+export function getNextProficiencyTarget(score: number): {
+  currentLevel: ProficiencyLevelKey;
+  nextLevel: ProficiencyLevelKey | null;
+  pointsToNext: number | null;
+  nextThreshold: number | null;
+} {
+  const currentLevel = getProficiencyLevel(score);
+  const currentIdx = PROFICIENCY_LEVELS.findIndex((l) => l.key === currentLevel);
+  if (currentIdx >= PROFICIENCY_LEVELS.length - 1) {
+    return {
+      currentLevel,
+      nextLevel: null,
+      pointsToNext: null,
+      nextThreshold: null,
+    };
+  }
+
+  const next = PROFICIENCY_LEVELS[currentIdx + 1]!;
+  return {
+    currentLevel,
+    nextLevel: next.key,
+    pointsToNext: next.min - score,
+    nextThreshold: next.min,
+  };
 }
 
 export function calculateTechniqueExp(input: {

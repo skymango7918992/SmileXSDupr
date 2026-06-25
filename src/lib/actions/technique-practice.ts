@@ -74,7 +74,7 @@ export async function getTechniqueProgressList(): Promise<TechniqueProgress[]> {
       user_id: user.id,
       technique_id: techniqueId,
       proficiency_score: 0,
-      proficiency_level: "minor_success",
+      proficiency_level: "foundation",
       total_practice_count: 0,
       total_practice_minutes: 0,
       last_practiced_at: null,

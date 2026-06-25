@@ -1,11 +1,11 @@
 "use client";
 
+import { ProficiencyLevelGuide } from "@/components/cultivation-journey/proficiency-roadmap";
 import {
+  getNextProficiencyTarget,
   getProficiencyLevelMeta,
-  getProficiencyLevelName,
   getTechniqueById,
   getTechniqueLevelTitle,
-  pointsToNextProficiencyLevel,
   type PickleballTechnique,
 } from "@/lib/pickleball-techniques";
 import type { TechniqueProgress } from "@/types/technique-practice";
@@ -37,9 +37,11 @@ export function TechniquesOverview({ progressList, onSelect }: Props) {
       <div>
         <h3 className="text-base font-semibold text-foreground">我的閉關功法</h3>
         <p className="text-xs text-muted">
-          16 項匹克球擊球功法 · 熟練度 0～100 · 小成／入微／大成／圓滿
+          16 項匹克球擊球功法 · 熟練度 0～100 · 基礎／入門／小成／入微／大成／圓滿
         </p>
       </div>
+
+      <ProficiencyLevelGuide />
 
       {categories.map((category) => (
         <section key={category}>
@@ -79,7 +81,7 @@ function TechniqueCard({
   const levelMeta = getProficiencyLevelMeta(level);
   const levelTitle = getTechniqueLevelTitle(technique, level);
   const score = progress.proficiency_score;
-  const toNext = pointsToNextProficiencyLevel(score);
+  const target = getNextProficiencyTarget(score);
 
   return (
     <button
@@ -113,8 +115,13 @@ function TechniqueCard({
       </div>
       <div className="flex items-baseline justify-between text-[10px] text-slate-400">
         <span>{score} / 100</span>
-        {toNext != null && <span>再 {toNext} 點升階</span>}
-        {toNext == null && <span className="text-amber-300">圓滿</span>}
+        {target.nextLevel != null && target.pointsToNext != null && (
+          <span>
+            再 {target.pointsToNext} 點達
+            {getProficiencyLevelMeta(target.nextLevel).name}
+          </span>
+        )}
+        {target.nextLevel == null && <span className="text-amber-300">圓滿</span>}
       </div>
 
       {progress.last_practiced_at && (
@@ -130,6 +137,3 @@ function TechniqueCard({
   );
 }
 
-export function proficiencyLevelLabel(level: string): string {
-  return getProficiencyLevelName(level as import("@/lib/pickleball-techniques").ProficiencyLevelKey);
-}

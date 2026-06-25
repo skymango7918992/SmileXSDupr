@@ -4,14 +4,16 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { getTechniqueLogs } from "@/lib/actions/technique-practice";
 import {
+  proficiencyLevelLabel,
+  ProficiencyRoadmap,
+} from "@/components/cultivation-journey/proficiency-roadmap";
+import {
+  getNextProficiencyTarget,
   getProficiencyLevelMeta,
   getTechniqueById,
   getTechniqueLevelTitle,
-  pointsToNextProficiencyLevel,
 } from "@/lib/pickleball-techniques";
-import { proficiencyLevelLabel } from "@/components/cultivation-journey/techniques-overview";
 import type { TechniqueLogWithSession, TechniqueProgress } from "@/types/technique-practice";
-import { cn } from "@/lib/utils";
 
 type Props = {
   techniqueId: string;
@@ -48,7 +50,7 @@ export function TechniqueDetailPanel({ techniqueId, progress, onClose }: Props) 
 
   const levelMeta = getProficiencyLevelMeta(progress.proficiency_level);
   const levelTitle = getTechniqueLevelTitle(technique, progress.proficiency_level);
-  const toNext = pointsToNextProficiencyLevel(progress.proficiency_score);
+  const target = getNextProficiencyTarget(progress.proficiency_score);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center">
@@ -79,10 +81,17 @@ export function TechniqueDetailPanel({ techniqueId, progress, onClose }: Props) 
                 style={{ width: `${progress.proficiency_score}%` }}
               />
             </div>
-            {toNext != null && (
-              <p className="mt-1 text-[11px] text-slate-400">再 {toNext} 點可升階</p>
+            {target.nextLevel != null && target.pointsToNext != null && (
+              <p className="mt-1 text-[11px] text-slate-400">
+                再 {target.pointsToNext} 點可達「
+                {getProficiencyLevelMeta(target.nextLevel).name}」（{target.nextThreshold} 分）
+              </p>
             )}
             <p className="mt-2 text-xs italic text-slate-300">{technique.quote}</p>
+          </div>
+
+          <div className="mb-4">
+            <ProficiencyRoadmap score={progress.proficiency_score} />
           </div>
 
           <p className="mb-1 text-xs font-semibold text-muted">練習重點</p>

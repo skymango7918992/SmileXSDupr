@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import {
+  getNextProficiencyTarget,
   getTechniqueById,
   getProficiencyLevelMeta,
-  pointsToNextProficiencyLevel,
 } from "@/lib/pickleball-techniques";
 import type { CreatePracticeSessionResult } from "@/types/technique-practice";
 import { Button } from "@/components/ui/button";
@@ -74,15 +74,17 @@ export function PracticeResultDialog({ result, onClose }: Props) {
                     (l) => l.technique_id === item.techniqueId,
                   );
                   const after = log?.after_score ?? 0;
-                  const level = log?.after_level ?? "minor_success";
+                  const level = log?.after_level ?? "foundation";
                   const meta = getProficiencyLevelMeta(level);
-                  const toNext = pointsToNextProficiencyLevel(after);
+                  const target = getNextProficiencyTarget(after);
                   return (
                     <p key={item.techniqueId} className="mt-1 text-secondary-foreground">
                       {item.techniqueName}｜{meta.name} {after} / 100
-                      {toNext != null && (
+                      {target.nextLevel != null && target.pointsToNext != null && (
                         <span className="block text-xs text-muted">
-                          再 {toNext} 點熟練度可達下一階段
+                          再 {target.pointsToNext} 點可達「
+                          {getProficiencyLevelMeta(target.nextLevel).name}」（
+                          {target.nextThreshold} 分）
                         </span>
                       )}
                     </p>
