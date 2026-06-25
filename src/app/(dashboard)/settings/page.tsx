@@ -1,8 +1,14 @@
+import { Suspense } from "react";
 import { SettingsForm } from "@/components/settings/settings-form";
 import { KhpaSettingsCard } from "@/components/settings/khpa-settings-card";
 import { KhpaVenuesSettings } from "@/components/settings/khpa-venues-settings";
 import { XsVenuesSettings } from "@/components/settings/xs-venues-settings";
 import { XsStaffSettingsCard } from "@/components/settings/xs-staff-settings-card";
+import {
+  SettingsHub,
+  type SettingsSection,
+} from "@/components/settings/settings-hub";
+import { SettingsPanel } from "@/components/settings/settings-panel";
 import { SetupGuide } from "@/components/setup/setup-guide";
 import { hasSupabaseEnv, getServiceRoleKey } from "@/lib/env";
 import { getSettings } from "@/lib/actions/settings";
@@ -13,12 +19,17 @@ import { getXsAllVenuesAdmin } from "@/lib/actions/xs/venues";
 import { isAdminRole } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function SettingsPage() {
+type Props = {
+  searchParams: Promise<{ tab?: string }>;
+};
+
+export default async function SettingsPage({ searchParams }: Props) {
   if (!hasSupabaseEnv()) {
     return <SetupGuide />;
   }
 
   try {
+    const params = await searchParams;
     const supabase = await createClient();
     const {
       data: { user },
@@ -60,21 +71,72 @@ export default async function SettingsPage() {
       }
     }
 
+    const showAccounts = Boolean(xsStaffAccount || khpaAccount);
+    const showVenues = isAdmin && hasServiceKey;
+
+    const availableSections: SettingsSection[] = ["general"];
+    if (showAccounts) availableSections.push("accounts");
+    if (showVenues) availableSections.push("venues");
+
+    const cardClass = "max-w-none";
+
+    const defaultSection: SettingsSection | undefined =
+      params.tab === "accounts" ||
+      params.tab === "venues" ||
+      params.tab === "general"
+        ? params.tab
+        : undefined;
+
     return (
-      <div className="space-y-6">
-        <SettingsForm initialSettings={settings} />
-        {accountSetupHint && (
-          <div className="max-w-lg rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-950">
-            {accountSetupHint}
-          </div>
-        )}
-        {xsStaffAccount && <XsStaffSettingsCard account={xsStaffAccount} />}
-        {isAdmin && hasServiceKey && (
-          <XsVenuesSettings initialVenues={xsVenues} />
-        )}
-        {khpaAccount && <KhpaSettingsCard account={khpaAccount} />}
-        {khpaAccount && <KhpaVenuesSettings initialVenues={khpaVenues} />}
-      </div>
+      <Suspense fallback={<div className="text-sm text-muted">載入設定…</div>}>
+        <SettingsHub
+          availableSections={availableSections}
+          defaultSection={defaultSection}
+          accountSetupHint={accountSetupHint}
+          general={
+            <SettingsForm
+              initialSettings={settings}
+              className={cardClass}
+            />
+          }
+          accounts={
+            showAccounts ? (
+              <SettingsPanel columns={xsStaffAccount && khpaAccount ? 2 : 1}>
+                {xsStaffAccount && (
+                  <XsStaffSettingsCard
+                    account={xsStaffAccount}
+                    className={cardClass}
+                  />
+                )}
+                {khpaAccount && (
+                  <KhpaSettingsCard
+                    account={khpaAccount}
+                    className={cardClass}
+                  />
+                )}
+              </SettingsPanel>
+            ) : undefined
+          }
+          venues={
+            isAdmin && hasServiceKey ? (
+              <SettingsPanel
+                columns={
+                  xsVenues.length > 0 && khpaVenues.length > 0 ? 2 : 1
+                }
+              >
+                <XsVenuesSettings
+                  initialVenues={xsVenues}
+                  className={cardClass}
+                />
+                <KhpaVenuesSettings
+                  initialVenues={khpaVenues}
+                  className={cardClass}
+                />
+              </SettingsPanel>
+            ) : undefined
+          }
+        />
+      </Suspense>
     );
   } catch (error) {
     return (

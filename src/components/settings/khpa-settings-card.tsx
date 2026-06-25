@@ -9,12 +9,14 @@ import type { KhpaAccountStatus } from "@/lib/actions/khpa-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type Props = {
   account: KhpaAccountStatus;
+  className?: string;
 };
 
-export function KhpaSettingsCard({ account }: Props) {
+export function KhpaSettingsCard({ account, className }: Props) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -46,7 +48,7 @@ export function KhpaSettingsCard({ account }: Props) {
   };
 
   return (
-    <Card className="max-w-lg">
+    <Card className={cn("w-full max-w-lg", className)}>
       <CardTitle className="mb-2 flex items-center gap-2">
         <KeyRound className="h-5 w-5 text-teal-600" />
         高雄匹克球協會帳號

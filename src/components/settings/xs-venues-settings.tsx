@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   initialVenues: XsVenue[];
+  className?: string;
 };
 
 type EditDraft = {
@@ -24,7 +25,7 @@ type EditDraft = {
   courtCount: string;
 };
 
-export function XsVenuesSettings({ initialVenues }: Props) {
+export function XsVenuesSettings({ initialVenues, className }: Props) {
   const [venues, setVenues] = useState(initialVenues);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -145,7 +146,7 @@ export function XsVenuesSettings({ initialVenues }: Props) {
   };
 
   return (
-    <Card className="max-w-lg">
+    <Card className={cn("w-full max-w-lg", className)}>
       <CardTitle className="mb-2 flex items-center gap-2">
         <MapPin className="h-5 w-5 text-primary" />
         星鑽活動場地

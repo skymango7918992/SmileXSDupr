@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   initialVenues: KhpaVenue[];
+  className?: string;
 };
 
 type EditDraft = {
@@ -24,7 +25,7 @@ type EditDraft = {
   courtCount: string;
 };
 
-export function KhpaVenuesSettings({ initialVenues }: Props) {
+export function KhpaVenuesSettings({ initialVenues, className }: Props) {
   const [venues, setVenues] = useState(initialVenues);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -146,7 +147,7 @@ export function KhpaVenuesSettings({ initialVenues }: Props) {
   };
 
   return (
-    <Card className="max-w-lg">
+    <Card className={cn("w-full max-w-lg", className)}>
       <CardTitle className="mb-2 flex items-center gap-2">
         <MapPin className="h-5 w-5 text-teal-600" />
         協會活動場地

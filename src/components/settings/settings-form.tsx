@@ -8,12 +8,14 @@ import type { AppSettings } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type Props = {
   initialSettings: AppSettings | null;
+  className?: string;
 };
 
-export function SettingsForm({ initialSettings }: Props) {
+export function SettingsForm({ initialSettings, className }: Props) {
   const [teamName, setTeamName] = useState(
     initialSettings?.team_name ?? "星鑽 XS 匹克球",
   );
@@ -57,7 +59,7 @@ export function SettingsForm({ initialSettings }: Props) {
   };
 
   return (
-    <Card className="max-w-lg">
+    <Card className={cn("w-full max-w-lg", className)}>
       <CardTitle className="mb-4">應用設定</CardTitle>
 
       <div className="space-y-4">

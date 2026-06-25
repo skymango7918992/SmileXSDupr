@@ -9,12 +9,14 @@ import type { XsStaffAccountStatus } from "@/lib/actions/xs-staff-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type Props = {
   account: XsStaffAccountStatus;
+  className?: string;
 };
 
-export function XsStaffSettingsCard({ account }: Props) {
+export function XsStaffSettingsCard({ account, className }: Props) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -46,7 +48,7 @@ export function XsStaffSettingsCard({ account }: Props) {
   };
 
   return (
-    <Card className="max-w-lg">
+    <Card className={cn("w-full max-w-lg", className)}>
       <CardTitle className="mb-2 flex items-center gap-2">
         <KeyRound className="h-5 w-5 text-primary" />
         星鑽 XS 一般使用者帳號
