@@ -1984,7 +1984,8 @@ body {
 }
 
 /* ── 修行軌跡：淺色主題（與全站 glass 風格一致，青綠琥珀點綴）── */
-.cultivation-journey {
+.cultivation-journey,
+.cj-modal-root {
   --cj-bg-panel: #ffffff;
   --cj-bg-card: #ffffff;
   --cj-bg-muted: #f8fafc;
@@ -2006,6 +2007,36 @@ body {
   --cj-overlay: rgba(15, 23, 42, 0.45);
 
   color: var(--cj-text);
+}
+
+.cultivation-journey {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cj-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+@media (min-width: 640px) {
+  .cj-modal-root {
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+}
+
+.cj-modal-root--result {
+  z-index: 60;
 }
 
 .cultivation-journey .cj-muted {
@@ -2075,6 +2106,9 @@ body {
 }
 
 .cultivation-journey .cj-dock {
+  left: max(0.75rem, env(safe-area-inset-left));
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
   border-color: var(--cj-border-soft);
   background: color-mix(in srgb, var(--color-surface) 95%, transparent);
   backdrop-filter: blur(10px);
@@ -2397,5 +2431,95 @@ body {
 .cj-modal-overlay {
   background: var(--cj-overlay) !important;
 }
+
+.cj-scroll-tabs {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.cj-scroll-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.cultivation-journey .cj-guide summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cultivation-journey .cj-guide summary::-webkit-details-marker {
+  display: none;
+}
+
+.cultivation-journey .cj-guide-chevron {
+  font-size: 0.625rem;
+  color: var(--cj-text-muted);
+  transition: transform 0.15s ease;
+}
+
+.cultivation-journey .cj-guide[open] .cj-guide-chevron {
+  transform: rotate(180deg);
+}
+
+.cj-modal-root .cj-modal {
+  width: 100%;
+  max-width: 32rem;
+}
+
+@media (max-width: 639px) {
+  .cultivation-journey .cj-guide-row {
+    font-size: 0.6875rem;
+    padding: 0.375rem 0;
+    border-bottom: 1px solid var(--color-divider);
+  }
+
+  .cultivation-journey .cj-guide-row:last-child {
+    border-bottom: none;
+  }
+
+  .cultivation-journey .cj-jade-card {
+    padding: 0.875rem;
+  }
+
+  .cultivation-journey .cj-realm-card {
+    padding: 0.875rem;
+  }
+
+  .cj-modal-root {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .cj-modal-root .cj-modal {
+    max-height: min(94dvh, 100%) !important;
+    border-radius: 1rem 1rem 0 0 !important;
+  }
+
+  .cj-modal .cj-technique-list {
+    max-height: 14rem;
+  }
+
+  .cj-modal .cj-modal-footer {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 1024px) {
+  .cultivation-journey .cj-guide--desktop-open {
+    padding-bottom: 0.75rem;
+  }
+
+  .cultivation-journey .cj-guide--desktop-open summary {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .cultivation-journey .cj-guide--desktop-open .cj-guide-chevron {
+    display: none;
+  }
+}
+
 
 

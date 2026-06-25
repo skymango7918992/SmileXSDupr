@@ -35,8 +35,9 @@ export function TechniquesOverview({ progressList, onSelect }: Props) {
     <div className="space-y-5">
       <div>
         <h3 className="cj-section-title text-base">我的閉關功法</h3>
-        <p className="text-xs cj-muted">
-          16 項匹克球擊球功法 · 熟練度 0～100 · 基礎／入門／小成／入微／大成／圓滿
+        <p className="text-xs cj-muted text-pretty sm:text-xs">
+          16 項功法 · 0～100 熟練度
+          <span className="hidden md:inline"> · 基礎／入門／小成／入微／大成／圓滿</span>
         </p>
       </div>
 
@@ -84,7 +85,7 @@ function TechniqueCard({
     <button
       type="button"
       onClick={onClick}
-      className="cj-jade-card btn-touch w-full"
+      className="cj-jade-card btn-touch w-full min-w-0 overflow-hidden"
     >
       <div className="mb-1 flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -96,7 +97,7 @@ function TechniqueCard({
         </span>
       </div>
 
-      <p className="mb-2 text-[11px] cj-emerald">稱號：{levelTitle}</p>
+      <p className="mb-2 text-[11px] cj-emerald text-pretty">稱號：{levelTitle}</p>
 
       <div
         className="mb-1 h-1.5 overflow-hidden rounded-full"
@@ -107,10 +108,10 @@ function TechniqueCard({
           style={{ width: `${score}%` }}
         />
       </div>
-      <div className="flex items-baseline justify-between text-[10px] cj-muted">
-        <span>{score} / 100</span>
+      <div className="flex flex-col gap-0.5 text-[10px] cj-muted sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
+        <span className="shrink-0">{score} / 100</span>
         {target.nextLevel != null && target.pointsToNext != null && (
-          <span>
+          <span className="text-pretty sm:text-right">
             再 {target.pointsToNext} 點達
             {getProficiencyLevelMeta(target.nextLevel).name}
           </span>

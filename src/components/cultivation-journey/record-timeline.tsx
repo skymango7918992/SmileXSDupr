@@ -44,7 +44,7 @@ export function CultivationRecordTimeline({
         <li key={record.id} className="cj-record-item">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="text-base" aria-hidden>
                   {RECORD_TYPE_ICON[record.record_type]}
                 </span>

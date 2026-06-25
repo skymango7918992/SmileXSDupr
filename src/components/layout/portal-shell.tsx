@@ -28,7 +28,7 @@ export function PortalShell({ role, children }: Props) {
     <div className="page-canvas flex min-h-screen flex-col">
       <SportPageDecor />
       <AppHeader role={role} />
-      <main className="relative z-[1] mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6">
+      <main className="relative z-[1] mx-auto w-full min-w-0 max-w-7xl flex-1 overflow-x-clip px-4 py-6 sm:px-6">
         {children}
       </main>
     </div>

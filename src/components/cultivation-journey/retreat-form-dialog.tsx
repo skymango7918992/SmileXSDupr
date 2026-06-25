@@ -104,7 +104,7 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
   };
 
   return (
-    <div className="cultivation-journey fixed inset-0 z-50 flex flex-col justify-end border-0 bg-transparent p-0 shadow-none sm:items-center sm:justify-center">
+    <div className="cj-modal-root">
       <div className="cj-modal-overlay absolute inset-0" aria-hidden onClick={onClose} />
       <Card className="cj-modal glass-modal relative flex max-h-[min(96dvh,100%)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl sm:max-h-[min(90dvh,720px)] sm:rounded-2xl">
         <div className="cj-modal-header shrink-0 px-4 py-3">
@@ -161,9 +161,12 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
                         on ? "border-emerald-500 bg-emerald-500" : "border-border",
                       )}
                     />
-                    <span>
-                      <span className="font-semibold">{t.name}</span>
-                      <span className="cj-modal-muted">｜{t.shot}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold">{t.name}</span>
+                      <span className="block text-[10px] cj-modal-muted sm:inline">
+                        <span className="hidden sm:inline">｜</span>
+                        {t.shot}
+                      </span>
                     </span>
                   </button>
                 );
@@ -228,7 +231,7 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
           </Field>
         </div>
 
-        <div className="cj-modal-header shrink-0 flex gap-2 border-t p-4">
+        <div className="cj-modal-footer cj-modal-header shrink-0 flex gap-2 border-t p-4">
           <Button variant="secondary" onClick={onClose} className="flex-1">取消</Button>
           <Button onClick={() => void handleSubmit()} loading={loading} className="flex-1">完成閉關</Button>
         </div>

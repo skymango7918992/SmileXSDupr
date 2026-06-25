@@ -86,19 +86,19 @@ export function DemonsPanel({ profile }: Props) {
                     : "border-[var(--cj-border-soft)] bg-[var(--cj-bg-muted)]",
               )}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">{demon.label}</p>
-                  <p className="text-xs cj-muted">{demon.description}</p>
-                  <p className="mt-1 text-[11px] cj-emerald">破魔：{demon.counter}</p>
+                  <p className="text-xs cj-muted text-pretty">{demon.description}</p>
+                  <p className="mt-1 text-[11px] cj-emerald text-pretty">破魔：{demon.counter}</p>
                 </div>
-                <div className="flex shrink-0 flex-col gap-1">
+                <div className="flex shrink-0 flex-row gap-2 sm:flex-col">
                   <button
                     type="button"
                     disabled={conquered}
                     onClick={() => toggleActive(demon.id)}
                     className={cn(
-                      "rounded-lg px-2 py-1 text-[10px] font-semibold",
+                      "min-w-[4.5rem] rounded-lg px-3 py-1.5 text-xs font-semibold sm:min-w-0 sm:px-2 sm:py-1 sm:text-[10px]",
                       active
                         ? "bg-amber-100 text-amber-800"
                         : "bg-[var(--cj-bg-elevated)] cj-muted",
@@ -110,7 +110,7 @@ export function DemonsPanel({ profile }: Props) {
                     type="button"
                     onClick={() => toggleConquered(demon.id)}
                     className={cn(
-                      "rounded-lg px-2 py-1 text-[10px] font-semibold",
+                      "min-w-[4.5rem] rounded-lg px-3 py-1.5 text-xs font-semibold sm:min-w-0 sm:px-2 sm:py-1 sm:text-[10px]",
                       conquered
                         ? "bg-emerald-100 text-emerald-800"
                         : "bg-[var(--cj-bg-elevated)] cj-muted",

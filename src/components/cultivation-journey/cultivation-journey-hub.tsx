@@ -112,21 +112,26 @@ export function CultivationJourneyHub({
   };
 
   return (
-    <div className="cultivation-journey space-y-4 pb-20 lg:pb-6">
-      <header>
+    <div className="cultivation-journey w-full min-w-0 max-w-full space-y-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-6">
+      <header className="min-w-0">
         <div className="mb-1 flex items-center gap-2">
-          <Scroll className="h-5 w-5 text-amber-600" />
+          <Scroll className="h-5 w-5 shrink-0 text-amber-600" />
           <h1 className="text-xl font-semibold text-foreground">修行軌跡</h1>
         </div>
-        <p className="text-sm text-muted">
-          平常練球即閉關修煉 · 16 項功法熟練度 0～100 · 不進 DUPR 上傳
+        <p className="text-sm text-muted text-pretty">
+          平常練球即閉關修煉 · 16 項功法熟練度 0～100
+          <span className="hidden sm:inline"> · 不進 DUPR 上傳</span>
         </p>
       </header>
 
       <RealmProgressCard totalXp={totalXp} recordCount={records.length} />
 
-      <nav className="overflow-x-auto lg:hidden" role="tablist" aria-label="修行分類">
-        <div className="flex min-w-min gap-1.5">
+      <nav
+        className="cj-scroll-tabs -mx-1 overflow-x-auto px-1 pb-1 lg:hidden"
+        role="tablist"
+        aria-label="修行分類"
+      >
+        <div className="flex w-max min-w-full gap-2">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -135,7 +140,7 @@ export function CultivationJourneyHub({
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "btn-touch flex min-w-[4rem] shrink-0 flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-center",
+                "btn-touch flex min-w-[4.25rem] shrink-0 flex-col items-center gap-0.5 rounded-xl px-2.5 py-2 text-center",
                 tab === t.id ? "glass-nav-active" : "cj-tab",
               )}
             >
@@ -146,8 +151,8 @@ export function CultivationJourneyHub({
         </div>
       </nav>
 
-      <div className="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-5">
-        <nav className="hidden lg:block" role="tablist">
+      <div className="min-w-0 lg:grid lg:grid-cols-[minmax(11rem,13rem)_minmax(0,1fr)] lg:items-start lg:gap-6">
+        <nav className="hidden lg:sticky lg:top-20 lg:block" role="tablist">
           <ul className="space-y-1">
             {TABS.map((t) => (
               <li key={t.id}>
@@ -220,8 +225,8 @@ export function CultivationJourneyHub({
 
           {tab === "sparring" && (
             <>
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={() => setShowSparring(true)}>
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <Button onClick={() => setShowSparring(true)} className="w-full sm:w-auto">
                   <Plus className="h-4 w-4" />
                   友誼賽紀錄
                 </Button>
@@ -229,9 +234,10 @@ export function CultivationJourneyHub({
                   variant="secondary"
                   loading={isPending}
                   onClick={handleSyncDupr}
+                  className="w-full sm:w-auto"
                 >
                   <Download className="h-4 w-4" />
-                  匯入 DUPR（{ADMIN_MANAGER_DUPR_ID}）
+                  <span className="truncate">匯入 DUPR（{ADMIN_MANAGER_DUPR_ID}）</span>
                 </Button>
               </div>
               <CultivationRecordTimeline
@@ -262,7 +268,7 @@ export function CultivationJourneyHub({
         </div>
       </div>
 
-      <div className="cj-dock fixed bottom-3 left-3 right-3 z-20 flex gap-2 rounded-xl border border-border p-1.5 shadow-lg backdrop-blur-sm lg:hidden">
+      <div className="cj-dock fixed z-20 flex gap-2 rounded-xl border border-border p-1.5 shadow-lg backdrop-blur-sm lg:hidden">
         <Button size="sm" className="flex-1" onClick={() => setShowRetreat(true)}>
           閉關
         </Button>
