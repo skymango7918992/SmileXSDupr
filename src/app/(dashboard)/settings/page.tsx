@@ -1,6 +1,7 @@
 import { SettingsForm } from "@/components/settings/settings-form";
 import { KhpaSettingsCard } from "@/components/settings/khpa-settings-card";
 import { KhpaVenuesSettings } from "@/components/settings/khpa-venues-settings";
+import { XsVenuesSettings } from "@/components/settings/xs-venues-settings";
 import { XsStaffSettingsCard } from "@/components/settings/xs-staff-settings-card";
 import { SetupGuide } from "@/components/setup/setup-guide";
 import { hasSupabaseEnv, getServiceRoleKey } from "@/lib/env";
@@ -8,6 +9,7 @@ import { getSettings } from "@/lib/actions/settings";
 import { getKhpaAccountStatus } from "@/lib/actions/khpa-auth";
 import { getXsStaffAccountStatus } from "@/lib/actions/xs-staff-auth";
 import { getKhpaAllVenuesAdmin } from "@/lib/actions/khpa/venues";
+import { getXsAllVenuesAdmin } from "@/lib/actions/xs/venues";
 import { isAdminRole } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,10 +26,13 @@ export default async function SettingsPage() {
     const isAdmin = isAdminRole(user?.email);
     const hasServiceKey = Boolean(getServiceRoleKey());
 
-    const [settings, khpaVenues] = await Promise.all([
+    const [settings, khpaVenues, xsVenues] = await Promise.all([
       getSettings(),
       isAdmin && hasServiceKey
         ? getKhpaAllVenuesAdmin().catch(() => [])
+        : Promise.resolve([]),
+      isAdmin && hasServiceKey
+        ? getXsAllVenuesAdmin().catch(() => [])
         : Promise.resolve([]),
     ]);
 
@@ -64,6 +69,9 @@ export default async function SettingsPage() {
           </div>
         )}
         {xsStaffAccount && <XsStaffSettingsCard account={xsStaffAccount} />}
+        {isAdmin && hasServiceKey && (
+          <XsVenuesSettings initialVenues={xsVenues} />
+        )}
         {khpaAccount && <KhpaSettingsCard account={khpaAccount} />}
         {khpaAccount && <KhpaVenuesSettings initialVenues={khpaVenues} />}
       </div>

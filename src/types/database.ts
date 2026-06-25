@@ -21,6 +21,7 @@ export type Player = {
 
 export type MatchDay = {
   id: string;
+  venue_id: string;
   match_date: string;
   selected_player_ids: string[];
   created_at: string;
@@ -30,6 +31,7 @@ export type MatchDay = {
 export type ScheduleSession = {
   id: string;
   match_day_id: string;
+  venue_id?: string | null;
   name: string;
   sort_order: number;
   status: "draft" | "active" | "closed";
@@ -61,6 +63,7 @@ export type Match = {
   team1_score: number | null;
   team2_score: number | null;
   status: "scheduled" | "completed";
+  score_type?: ScoreType | null;
   created_at: string;
   updated_at: string;
 };

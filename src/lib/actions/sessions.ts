@@ -10,6 +10,7 @@ import {
   type SessionRosterEntry,
 } from "@/lib/scheduler";
 import { buildTeammateHistory, matchupKey } from "@/lib/pair-history";
+import { getDefaultXsVenueId } from "@/lib/actions/xs/venues";
 import type {
   MatchDay,
   MatchWithPlayers,
@@ -23,12 +24,16 @@ function normalizeScoreType(value: unknown): ScoreType {
   return value === "rally" ? "rally" : "sideout";
 }
 
-async function getInheritedRosterIds(matchDate: string): Promise<string[]> {
+async function getInheritedRosterIds(
+  venueId: string,
+  matchDate: string,
+): Promise<string[]> {
   const supabase = await createClient();
 
   const { data: recentDays, error: dayError } = await supabase
     .from("match_days")
     .select("id, match_date, selected_player_ids")
+    .eq("venue_id", venueId)
     .lt("match_date", matchDate)
     .order("match_date", { ascending: false })
     .limit(10);
@@ -115,20 +120,26 @@ async function seedSessionPlayers(
 }
 
 async function getOrCreateMatchDay(matchDate: string): Promise<MatchDay> {
+  const venueId = await getDefaultXsVenueId();
   const supabase = await createClient();
   const { data: existing } = await supabase
     .from("match_days")
     .select("*")
+    .eq("venue_id", venueId)
     .eq("match_date", matchDate)
     .maybeSingle();
 
   if (existing) return existing;
 
-  const inheritedIds = await getInheritedRosterIds(matchDate);
+  const inheritedIds = await getInheritedRosterIds(venueId, matchDate);
 
   const { data, error } = await supabase
     .from("match_days")
-    .insert({ match_date: matchDate, selected_player_ids: inheritedIds })
+    .insert({
+      venue_id: venueId,
+      match_date: matchDate,
+      selected_player_ids: inheritedIds,
+    })
     .select()
     .single();
 
@@ -253,7 +264,7 @@ async function syncDayRosterToSession(
   const rosterIds =
     matchDay.selected_player_ids.length > 0
       ? matchDay.selected_player_ids
-      : await getInheritedRosterIds(matchDay.match_date);
+      : await getInheritedRosterIds(matchDay.venue_id, matchDay.match_date);
 
   if (rosterIds.length === 0) return;
 
@@ -430,7 +441,7 @@ export async function createSession(
   const rosterIds =
     matchDay.selected_player_ids.length > 0
       ? matchDay.selected_player_ids
-      : await getInheritedRosterIds(matchDate);
+      : await getInheritedRosterIds(matchDay.venue_id, matchDate);
   if (rosterIds.length > 0) {
     await seedSessionPlayers(data.id as string, rosterIds);
   }
