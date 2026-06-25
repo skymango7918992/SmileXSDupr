@@ -69,6 +69,7 @@ export type CultivationDemonId =
   | "run_around"
   | "glass_heart";
 
+/** @deprecated 改用 pickleball-techniques PICKLEBALL_TECHNIQUES */
 export const CULTIVATION_SKILLS: {
   id: CultivationSkillId;
   label: string;

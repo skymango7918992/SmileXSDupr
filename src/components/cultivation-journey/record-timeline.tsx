@@ -3,11 +3,11 @@
 import { Trash2 } from "lucide-react";
 import { useAppUi } from "@/components/providers/app-ui-provider";
 import {
-  CULTIVATION_SKILLS,
   RECORD_TYPE_ICON,
   RECORD_TYPE_LABEL,
   type CultivationRecord,
 } from "@/types/cultivation-journey";
+import { getTechniqueById } from "@/lib/pickleball-techniques";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -66,7 +66,7 @@ export function CultivationRecordTimeline({
                 {record.venue_name ? ` · ${record.venue_name}` : ""}
               </p>
             </div>
-            {onDelete && record.source === "manual" && (
+            {onDelete && record.source === "manual" && record.record_type !== "retreat" && (
               <Button
                 size="sm"
                 variant="ghost"
@@ -98,7 +98,7 @@ export function CultivationRecordTimeline({
 function RecordBody({ record }: { record: CultivationRecord }) {
   if (record.record_type === "retreat") {
     const skills = record.practice_skills
-      .map((id) => CULTIVATION_SKILLS.find((s) => s.id === id)?.label ?? id)
+      .map((id) => getTechniqueById(id)?.name ?? id)
       .join("、");
     return (
       <div className="mt-2 space-y-1 text-xs text-secondary-foreground">

@@ -4,42 +4,65 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Plus, Scroll } from "lucide-react";
 import { useAppUi } from "@/components/providers/app-ui-provider";
+import { DemonsPanel } from "@/components/cultivation-journey/demons-panel";
 import { CultivationRecordTimeline } from "@/components/cultivation-journey/record-timeline";
+import { PracticeResultDialog } from "@/components/cultivation-journey/practice-result-dialog";
 import { RealmProgressCard } from "@/components/cultivation-journey/realm-progress-card";
 import { RetreatFormDialog } from "@/components/cultivation-journey/retreat-form-dialog";
-import { SkillsDemonsPanel } from "@/components/cultivation-journey/skills-demons-panel";
 import { SparringFormDialog } from "@/components/cultivation-journey/sparring-form-dialog";
+import { TechniqueDetailPanel } from "@/components/cultivation-journey/technique-detail-panel";
+import { TechniquesOverview } from "@/components/cultivation-journey/techniques-overview";
 import { TrialFormDialog } from "@/components/cultivation-journey/trial-form-dialog";
 import {
-  createRetreatRecord,
   createSparringRecord,
   createTrialRecord,
   deleteCultivationRecord,
   syncDuprSparringRecords,
 } from "@/lib/actions/cultivation-journey";
+import { createPracticeSession } from "@/lib/actions/technique-practice";
 import { ADMIN_MANAGER_DUPR_ID } from "@/types/cultivation-journey";
 import type { CultivationJourneyBundle } from "@/types/cultivation-journey";
+import type {
+  CreatePracticeSessionResult,
+  PracticeLocationOption,
+  TechniqueProgress,
+} from "@/types/technique-practice";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-type Tab = "overview" | "retreat" | "sparring" | "trial" | "skills";
+type Tab = "overview" | "retreat" | "sparring" | "trial" | "techniques" | "demons";
 
 const TABS: { id: Tab; label: string; short: string; icon: string }[] = [
   { id: "overview", label: "修行總覽", short: "總覽", icon: "📜" },
-  { id: "retreat", label: "閉關練球", short: "閉關", icon: "🧘" },
+  { id: "techniques", label: "閉關功法", short: "功法", icon: "✨" },
+  { id: "retreat", label: "閉關紀錄", short: "閉關", icon: "🧘" },
   { id: "sparring", label: "同門切磋", short: "切磋", icon: "⚔️" },
   { id: "trial", label: "天榜試煉", short: "試煉", icon: "⚡" },
-  { id: "skills", label: "功法心魔", short: "功法", icon: "✨" },
+  { id: "demons", label: "心魔清單", short: "心魔", icon: "👹" },
 ];
 
-type Props = CultivationJourneyBundle;
+type Props = CultivationJourneyBundle & {
+  techniqueProgress: TechniqueProgress[];
+  practiceLocations: PracticeLocationOption[];
+};
 
-export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
+export function CultivationJourneyHub({
+  profile,
+  records,
+  totalXp,
+  techniqueProgress,
+  practiceLocations,
+}: Props) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>("techniques");
   const [showRetreat, setShowRetreat] = useState(false);
   const [showSparring, setShowSparring] = useState(false);
   const [showTrial, setShowTrial] = useState(false);
+  const [practiceResult, setPracticeResult] =
+    useState<CreatePracticeSessionResult | null>(null);
+  const [detailTechniqueId, setDetailTechniqueId] = useState<string | null>(
+    null,
+  );
   const [isPending, startTransition] = useTransition();
   const { success, error: toastError } = useAppUi();
 
@@ -49,6 +72,11 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
     const trial = records.filter((r) => r.record_type === "trial").length;
     return { retreat, sparring, trial };
   }, [records]);
+
+  const progressMap = useMemo(
+    () => new Map(techniqueProgress.map((p) => [p.technique_id, p])),
+    [techniqueProgress],
+  );
 
   const refresh = useCallback(() => router.refresh(), [router]);
 
@@ -69,6 +97,20 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
     });
   };
 
+  const handlePracticeSubmit = async (
+    input: Parameters<typeof createPracticeSession>[0],
+  ) => {
+    try {
+      const result = await createPracticeSession(input);
+      setShowRetreat(false);
+      setPracticeResult(result);
+      await refresh();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "閉關紀錄失敗");
+      throw e;
+    }
+  };
+
   return (
     <div className="cultivation-journey space-y-4 pb-20 lg:pb-6">
       <header>
@@ -77,13 +119,12 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
           <h1 className="text-xl font-semibold">修行軌跡</h1>
         </div>
         <p className="text-sm text-muted">
-          從凡人走向球道大帝 · 閉關、切磋、試煉，皆入修行冊
+          平常練球即閉關修煉 · 16 項功法熟練度 0～100 · 不進 DUPR 上傳
         </p>
       </header>
 
       <RealmProgressCard totalXp={totalXp} recordCount={records.length} />
 
-      {/* 手機：底部式橫向分頁 */}
       <nav className="overflow-x-auto lg:hidden" role="tablist" aria-label="修行分類">
         <div className="flex min-w-min gap-1.5">
           {TABS.map((t) => (
@@ -94,7 +135,7 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "btn-touch flex min-w-[4.5rem] shrink-0 flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-center",
+                "btn-touch flex min-w-[4rem] shrink-0 flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-center",
                 tab === t.id
                   ? "glass-nav-active"
                   : "border border-border bg-surface",
@@ -108,7 +149,6 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
       </nav>
 
       <div className="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-5">
-        {/* 桌面：左側導覽 */}
         <nav className="hidden lg:block" role="tablist">
           <ul className="space-y-1">
             {TABS.map((t) => (
@@ -152,16 +192,31 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
             </>
           )}
 
+          {tab === "techniques" && (
+            <>
+              <Button onClick={() => setShowRetreat(true)} className="w-full sm:w-auto">
+                <Plus className="h-4 w-4" />
+                新增閉關修煉
+              </Button>
+              <TechniquesOverview
+                progressList={techniqueProgress}
+                onSelect={setDetailTechniqueId}
+              />
+            </>
+          )}
+
           {tab === "retreat" && (
             <>
               <Button onClick={() => setShowRetreat(true)} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
-                新增閉關紀錄
+                新增閉關修煉
               </Button>
+              <p className="text-xs text-muted">
+                閉關紀錄不可刪除（MVP），以免熟練度計算錯亂。
+              </p>
               <CultivationRecordTimeline
                 records={records}
                 filter="retreat"
-                onDelete={handleDelete}
                 disabled={isPending}
               />
             </>
@@ -183,9 +238,6 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
                   匯入 DUPR（{ADMIN_MANAGER_DUPR_ID}）
                 </Button>
               </div>
-              <p className="text-xs text-muted">
-                自動匯入星鑽 XS 與協會中，DUPR ID 為 {ADMIN_MANAGER_DUPR_ID} 的已完成對戰。
-              </p>
               <CultivationRecordTimeline
                 records={records}
                 filter="sparring"
@@ -210,29 +262,31 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
             </>
           )}
 
-          {tab === "skills" && <SkillsDemonsPanel profile={profile} />}
+          {tab === "demons" && <DemonsPanel profile={profile} />}
         </div>
       </div>
 
-      {/* 手機：快捷新增 */}
       <div className="fixed bottom-3 left-3 right-3 z-20 flex gap-2 rounded-xl border border-border bg-surface/95 p-1.5 shadow-lg backdrop-blur-sm lg:hidden">
         <Button size="sm" className="flex-1" onClick={() => setShowRetreat(true)}>
           閉關
         </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          className="flex-1"
+          onClick={() => setTab("techniques")}
+        >
+          功法
+        </Button>
         <Button size="sm" variant="secondary" className="flex-1" onClick={() => setShowSparring(true)}>
           切磋
-        </Button>
-        <Button size="sm" variant="secondary" className="flex-1" onClick={() => setShowTrial(true)}>
-          試煉
         </Button>
       </div>
 
       {showRetreat && (
         <RetreatFormDialog
-          onSubmit={async (input) => {
-            await createRetreatRecord(input);
-            await refresh();
-          }}
+          locations={practiceLocations}
+          onSubmit={handlePracticeSubmit}
           onClose={() => setShowRetreat(false)}
         />
       )}
@@ -241,6 +295,7 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
           onSubmit={async (input) => {
             await createSparringRecord(input);
             await refresh();
+            setShowSparring(false);
           }}
           onClose={() => setShowSparring(false)}
         />
@@ -250,8 +305,22 @@ export function CultivationJourneyHub({ profile, records, totalXp }: Props) {
           onSubmit={async (input) => {
             await createTrialRecord(input);
             await refresh();
+            setShowTrial(false);
           }}
           onClose={() => setShowTrial(false)}
+        />
+      )}
+      {practiceResult && (
+        <PracticeResultDialog
+          result={practiceResult}
+          onClose={() => setPracticeResult(null)}
+        />
+      )}
+      {detailTechniqueId && progressMap.get(detailTechniqueId) && (
+        <TechniqueDetailPanel
+          techniqueId={detailTechniqueId}
+          progress={progressMap.get(detailTechniqueId)!}
+          onClose={() => setDetailTechniqueId(null)}
         />
       )}
     </div>

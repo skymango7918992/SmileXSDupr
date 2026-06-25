@@ -74,18 +74,3 @@ export function computeRecordXp(
   }
   return computeTrialXp(input.trialWins ?? 0, input.trialLosses ?? 0);
 }
-
-/** 閉關時每項功法 +5 熟練度 */
-export const SKILL_XP_PER_PRACTICE = 5;
-
-export function skillLevelFromXp(xp: number): number {
-  if (xp <= 0) return 0;
-  return Math.min(10, Math.floor(xp / 25) + 1);
-}
-
-export function skillProgressPercent(xp: number): number {
-  const level = skillLevelFromXp(xp);
-  if (level >= 10) return 100;
-  const into = xp % 25;
-  return Math.round((into / 25) * 100);
-}

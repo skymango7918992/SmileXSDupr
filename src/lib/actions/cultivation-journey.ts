@@ -2,10 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { isAdminRole } from "@/lib/auth/roles";
-import {
-  computeRecordXp,
-  SKILL_XP_PER_PRACTICE,
-} from "@/lib/cultivation-journey-xp";
+import { computeRecordXp } from "@/lib/cultivation-journey-xp";
 import { ADMIN_MANAGER_DUPR_ID } from "@/types/cultivation-journey";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -14,7 +11,6 @@ import type {
   CultivationMatchResult,
   CultivationProfile,
   CultivationRecord,
-  CultivationSkillId,
 } from "@/types/cultivation-journey";
 
 const PATH = "/cultivation";
@@ -57,24 +53,6 @@ async function ensureProfile(
   return data as CultivationProfile;
 }
 
-async function applySkillXp(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  skills: string[],
-): Promise<void> {
-  if (skills.length === 0) return;
-  const profile = await ensureProfile(supabase, userId);
-  const skillXp = { ...(profile.skill_xp ?? {}) };
-  for (const skill of skills) {
-    skillXp[skill] = (skillXp[skill] ?? 0) + SKILL_XP_PER_PRACTICE;
-  }
-  const { error } = await supabase
-    .from("cultivation_profiles")
-    .update({ skill_xp: skillXp })
-    .eq("user_id", userId);
-  if (error) throw new Error(error.message);
-}
-
 function deriveResult(
   myTeam: 1 | 2,
   team1Score: number,
@@ -103,37 +81,6 @@ export async function getCultivationJourney(): Promise<CultivationJourneyBundle>
   const totalXp = records.reduce((sum, r) => sum + (r.xp_earned ?? 0), 0);
 
   return { profile, records, totalXp };
-}
-
-export async function createRetreatRecord(input: {
-  occurred_on: string;
-  venue_name: string;
-  duration_minutes: number;
-  practice_skills: CultivationSkillId[];
-  self_rating: number;
-  notes?: string;
-}): Promise<void> {
-  const { supabase, user } = await requireAdminUser();
-  const { total, breakdown } = computeRecordXp("retreat", {
-    durationMinutes: input.duration_minutes,
-  });
-
-  const { error } = await supabase.from("cultivation_records").insert({
-    user_id: user.id,
-    record_type: "retreat",
-    occurred_on: input.occurred_on,
-    venue_name: input.venue_name.trim(),
-    duration_minutes: input.duration_minutes,
-    practice_skills: input.practice_skills,
-    self_rating: input.self_rating,
-    notes: input.notes?.trim() ?? "",
-    xp_earned: total,
-    xp_breakdown: breakdown,
-  });
-
-  if (error) throw new Error(error.message);
-  await applySkillXp(supabase, user.id, input.practice_skills);
-  revalidate();
 }
 
 export async function createSparringRecord(input: {
