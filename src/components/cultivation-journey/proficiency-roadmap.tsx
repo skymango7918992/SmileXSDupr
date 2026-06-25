@@ -77,7 +77,7 @@ export function ProficiencyRoadmap({ score, compact = false }: Props) {
                     {level.min}～{level.max} 分
                   </span>
                   {state === "current" && (
-                    <span className="rounded bg-amber-500/25 px-1.5 py-0.5 text-[10px] font-semibold cj-gold">
+                    <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
                       目前
                     </span>
                   )}

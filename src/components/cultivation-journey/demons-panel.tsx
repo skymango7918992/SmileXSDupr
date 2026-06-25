@@ -80,10 +80,10 @@ export function DemonsPanel({ profile }: Props) {
               className={cn(
                 "rounded-xl border px-3 py-2.5",
                 conquered
-                  ? "border-emerald-400/30 bg-emerald-400/10"
+                  ? "border-emerald-200 bg-emerald-50"
                   : active
-                    ? "border-amber-400/35 bg-amber-400/10"
-                    : "border-[var(--cj-border-soft)] bg-[var(--cj-bg-deep)]",
+                    ? "border-amber-200 bg-amber-50"
+                    : "border-[var(--cj-border-soft)] bg-[var(--cj-bg-muted)]",
               )}
             >
               <div className="flex items-start justify-between gap-2">
@@ -100,8 +100,8 @@ export function DemonsPanel({ profile }: Props) {
                     className={cn(
                       "rounded-lg px-2 py-1 text-[10px] font-semibold",
                       active
-                        ? "bg-amber-400/20 cj-gold"
-                        : "bg-[var(--cj-bg-card)] cj-muted",
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-[var(--cj-bg-elevated)] cj-muted",
                     )}
                   >
                     {active ? "對抗中" : "標記"}
@@ -112,8 +112,8 @@ export function DemonsPanel({ profile }: Props) {
                     className={cn(
                       "rounded-lg px-2 py-1 text-[10px] font-semibold",
                       conquered
-                        ? "bg-emerald-400/20 cj-emerald"
-                        : "bg-[var(--cj-bg-card)] cj-muted",
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-[var(--cj-bg-elevated)] cj-muted",
                     )}
                   >
                     {conquered ? "已降伏" : "破魔"}

@@ -30,9 +30,9 @@ export function PracticeResultDialog({ result, onClose }: Props) {
   return (
     <div className="cultivation-journey fixed inset-0 z-[60] flex flex-col justify-end border-0 bg-transparent p-0 shadow-none sm:items-center sm:justify-center">
       <div className="cj-modal-overlay absolute inset-0" aria-hidden onClick={onClose} />
-      <Card className="cj-modal relative w-full max-w-md overflow-hidden rounded-t-2xl sm:rounded-2xl">
+      <Card className="cj-modal glass-modal relative w-full max-w-md overflow-hidden rounded-t-2xl sm:rounded-2xl">
         <div className="cj-modal-header border-b px-4 py-4">
-          <CardTitle className="text-lg cj-gold">閉關完成！</CardTitle>
+          <CardTitle className="text-lg text-emerald-800">閉關完成！</CardTitle>
           <p className="text-xs cj-modal-muted">
             修為 +{result.realmXpEarned} · 功法熟練度已更新
           </p>

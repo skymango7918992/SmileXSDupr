@@ -88,10 +88,10 @@ function TechniqueCard({
     >
       <div className="mb-1 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold cj-gold">{technique.name}</p>
+          <p className="truncate text-sm font-semibold text-foreground">{technique.name}</p>
           <p className="truncate text-[10px] cj-muted">{technique.shot}</p>
         </div>
-        <span className="shrink-0 rounded-full border border-amber-400/30 bg-amber-400/15 px-2 py-0.5 text-[10px] font-semibold cj-gold">
+        <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
           {levelMeta.name}
         </span>
       </div>
@@ -115,7 +115,7 @@ function TechniqueCard({
             {getProficiencyLevelMeta(target.nextLevel).name}
           </span>
         )}
-        {target.nextLevel == null && <span className="cj-gold">圓滿</span>}
+        {target.nextLevel == null && <span className="text-amber-600">圓滿</span>}
       </div>
 
       {progress.last_practiced_at && (

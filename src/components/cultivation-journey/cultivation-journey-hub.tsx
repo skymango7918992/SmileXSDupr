@@ -115,10 +115,10 @@ export function CultivationJourneyHub({
     <div className="cultivation-journey space-y-4 pb-20 lg:pb-6">
       <header>
         <div className="mb-1 flex items-center gap-2">
-          <Scroll className="h-5 w-5 text-amber-400" />
-          <h1 className="text-xl font-semibold text-[var(--cj-text)]">修行軌跡</h1>
+          <Scroll className="h-5 w-5 text-amber-600" />
+          <h1 className="text-xl font-semibold text-foreground">修行軌跡</h1>
         </div>
-        <p className="text-sm cj-muted">
+        <p className="text-sm text-muted">
           平常練球即閉關修煉 · 16 項功法熟練度 0～100 · 不進 DUPR 上傳
         </p>
       </header>
@@ -136,7 +136,7 @@ export function CultivationJourneyHub({
               onClick={() => setTab(t.id)}
               className={cn(
                 "btn-touch flex min-w-[4rem] shrink-0 flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-center",
-                tab === t.id ? "cj-tab-active" : "cj-tab",
+                tab === t.id ? "glass-nav-active" : "cj-tab",
               )}
             >
               <span>{t.icon}</span>
@@ -158,7 +158,7 @@ export function CultivationJourneyHub({
                   onClick={() => setTab(t.id)}
                   className={cn(
                     "btn-touch flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold",
-                    tab === t.id ? "cj-tab-active" : "cj-tab",
+                    tab === t.id ? "glass-nav-active" : "cj-tab",
                   )}
                 >
                   <span>{t.icon}</span>
@@ -262,7 +262,7 @@ export function CultivationJourneyHub({
         </div>
       </div>
 
-      <div className="cj-dock fixed bottom-3 left-3 right-3 z-20 flex gap-2 rounded-xl border p-1.5 shadow-lg backdrop-blur-sm lg:hidden">
+      <div className="cj-dock fixed bottom-3 left-3 right-3 z-20 flex gap-2 rounded-xl border border-border p-1.5 shadow-lg backdrop-blur-sm lg:hidden">
         <Button size="sm" className="flex-1" onClick={() => setShowRetreat(true)}>
           閉關
         </Button>

@@ -119,7 +119,7 @@ function RecordBody({ record }: { record: CultivationRecord }) {
               className={cn(
                 "ml-2 font-semibold",
                 record.result === "win" && "cj-emerald",
-                record.result === "loss" && "text-amber-300",
+                record.result === "loss" && "text-amber-700",
               )}
             >
               {RESULT_LABEL[record.result]}

@@ -55,7 +55,7 @@ export function TechniqueDetailPanel({ techniqueId, progress, onClose }: Props) 
   return (
     <div className="cultivation-journey fixed inset-0 z-50 flex flex-col justify-end border-0 bg-transparent p-0 shadow-none sm:items-center sm:justify-center">
       <div className="cj-modal-overlay absolute inset-0" aria-hidden onClick={onClose} />
-      <div className="cj-modal relative flex max-h-[min(96dvh,100%)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl sm:max-h-[min(90dvh,720px)] sm:rounded-2xl">
+      <div className="cj-modal glass-modal relative flex max-h-[min(96dvh,100%)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl sm:max-h-[min(90dvh,720px)] sm:rounded-2xl">
         <div className="cj-modal-header flex shrink-0 items-start justify-between px-4 py-3">
           <div>
             <h3 className="text-base font-bold">{technique.name}</h3>
@@ -131,7 +131,7 @@ export function TechniqueDetailPanel({ techniqueId, progress, onClose }: Props) 
                     <span className="cj-modal-muted">{log.location_name}</span>
                     <span className="cj-emerald">+{log.gained_exp}</span>
                     {log.is_level_up && (
-                      <span className="rounded bg-amber-400/20 px-1.5 py-0.5 font-semibold cj-gold">
+                      <span className="rounded bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-800">
                         突破 {proficiencyLevelLabel(log.before_level)} →{" "}
                         {proficiencyLevelLabel(log.after_level)}
                       </span>

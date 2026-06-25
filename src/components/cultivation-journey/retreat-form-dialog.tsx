@@ -106,7 +106,7 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
   return (
     <div className="cultivation-journey fixed inset-0 z-50 flex flex-col justify-end border-0 bg-transparent p-0 shadow-none sm:items-center sm:justify-center">
       <div className="cj-modal-overlay absolute inset-0" aria-hidden onClick={onClose} />
-      <Card className="cj-modal relative flex max-h-[min(96dvh,100%)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl sm:max-h-[min(90dvh,720px)] sm:rounded-2xl">
+      <Card className="cj-modal glass-modal relative flex max-h-[min(96dvh,100%)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl sm:max-h-[min(90dvh,720px)] sm:rounded-2xl">
         <div className="cj-modal-header shrink-0 px-4 py-3">
           <CardTitle className="text-base">新增閉關修煉紀錄</CardTitle>
           <p className="text-xs cj-modal-muted">選 1～3 項功法 · 不進 DUPR 上傳</p>
@@ -158,7 +158,7 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
                     <span
                       className={cn(
                         "mt-0.5 h-4 w-4 shrink-0 rounded border",
-                        on ? "border-emerald-400 bg-emerald-400" : "border-[var(--cj-border-soft)]",
+                        on ? "border-emerald-500 bg-emerald-500" : "border-border",
                       )}
                     />
                     <span>
@@ -182,8 +182,8 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
                   className={cn(
                     "btn-touch flex-1 rounded-lg border py-2 text-sm font-semibold",
                     rating === n
-                      ? "border-amber-400 bg-amber-400/15 cj-gold"
-                      : "border-[var(--cj-border-soft)] cj-modal-muted",
+                      ? "border-amber-400 bg-amber-50 text-amber-800"
+                      : "border-border cj-modal-muted",
                   )}
                 >
                   {n}
@@ -213,8 +213,8 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
                   className={cn(
                     "rounded-full border px-3 py-1 text-xs font-medium",
                     mood === m
-                      ? "border-emerald-400 bg-emerald-400/15 cj-emerald"
-                      : "border-[var(--cj-border-soft)] cj-modal-muted",
+                      ? "border-emerald-400 bg-emerald-50 text-emerald-800"
+                      : "border-border cj-modal-muted",
                   )}
                 >
                   {m}

@@ -17,7 +17,7 @@ export function RealmProgressCard({ totalXp, recordCount }: Props) {
     <section className="cj-realm-card overflow-hidden sm:p-5">
       <div className="flex gap-4">
         <div className="shrink-0">
-          <div className="relative h-20 w-20 overflow-hidden rounded-2xl ring-2 ring-amber-400/50 sm:h-24 sm:w-24">
+          <div className="relative h-20 w-20 overflow-hidden rounded-2xl ring-2 ring-emerald-200 sm:h-24 sm:w-24">
             <img
               src={imageSrc}
               alt={current.name}
