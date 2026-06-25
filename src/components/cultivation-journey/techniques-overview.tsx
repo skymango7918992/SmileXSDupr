@@ -87,11 +87,14 @@ function TechniqueCard({
       onClick={onClick}
       className="cj-jade-card btn-touch w-full min-w-0 overflow-hidden"
     >
-      <div className="mb-1 flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground">{technique.name}</p>
-          <p className="truncate text-[10px] cj-muted">{technique.shot}</p>
-        </div>
+      <div className="mb-1.5 flex items-start justify-between gap-2">
+        <p className="min-w-0 flex-1 text-sm leading-snug text-pretty">
+          <span className="font-semibold text-foreground">{technique.name}</span>
+          <span className="mx-1 text-[10px] cj-muted" aria-hidden>
+            ·
+          </span>
+          <span className="text-[10px] cj-muted">{technique.shot}</span>
+        </p>
         <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
           {levelMeta.name}
         </span>
