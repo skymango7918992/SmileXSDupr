@@ -233,22 +233,38 @@ export function formatWinsRequirement(tier: CultivationTier): string {
   return `${tier.minWins} 勝以上`;
 }
 
+export function resolveCultivationPortraitGender(
+  gender: PlayerAvatarGender | null | undefined,
+): PlayerAvatarGender {
+  return gender ?? "male";
+}
+
 /** 境界圖（頭像與勳章共用） */
 export function getCultivationImageSrc(
   level: number,
   gender?: PlayerAvatarGender | null,
+  options?: { fallbackGender?: PlayerAvatarGender },
 ): string {
-  if (level === 0 || !gender) {
+  const effectiveGender = gender ?? options?.fallbackGender ?? null;
+  if (level === 0 || !effectiveGender) {
     return CULTIVATION_MORTAL_IMAGE_SRC;
   }
   const tier = getCultivationTierByLevel(level);
   if (!tier?.imageFile) {
     return CULTIVATION_MORTAL_IMAGE_SRC;
   }
-  if (gender === "female") {
+  if (effectiveGender === "female") {
     return `/cultivation/female/${tier.imageFile}`;
   }
   return `/cultivation/${tier.imageFile}`;
+}
+
+/** 修行軌跡：各境界一律顯示對應圖（未設定性別時預設男生圖） */
+export function getJourneyRealmImageSrc(
+  level: number,
+  gender?: PlayerAvatarGender | null,
+): string {
+  return getCultivationImageSrc(level, gender, { fallbackGender: "male" });
 }
 
 /** @deprecated 請改用 getCultivationImageSrc */

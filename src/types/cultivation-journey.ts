@@ -53,6 +53,7 @@ export type CultivationJourneyBundle = {
   records: CultivationRecord[];
   totalXp: number;
   avatarGender: PlayerAvatarGender | null;
+  duprRating: number | null;
 };
 
 export type CultivationSkillId =

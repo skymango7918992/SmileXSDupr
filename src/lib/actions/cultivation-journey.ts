@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { isAdminRole } from "@/lib/auth/roles";
-import { computeRecordXp } from "@/lib/cultivation-journey-xp";
+import { computeRecordXp, computeRecordXpFromRow } from "@/lib/cultivation-journey-xp";
 import { normalizePlayerAvatarGender } from "@/lib/cultivation-tiers";
 import { ADMIN_MANAGER_DUPR_ID } from "@/types/cultivation-journey";
 import { createClient } from "@/lib/supabase/server";
@@ -65,6 +65,37 @@ function deriveResult(
   return myScore > oppScore ? "win" : "loss";
 }
 
+async function refreshCultivationRecordXp(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  records: CultivationRecord[],
+): Promise<{ records: CultivationRecord[]; totalXp: number }> {
+  let totalXp = 0;
+  const refreshed: CultivationRecord[] = [];
+
+  for (const record of records) {
+    const { total, breakdown } = computeRecordXpFromRow(record);
+    totalXp += total;
+
+    const breakdownJson = breakdown as CultivationRecord["xp_breakdown"];
+    const needsUpdate =
+      total !== record.xp_earned ||
+      JSON.stringify(record.xp_breakdown) !== JSON.stringify(breakdownJson);
+
+    if (needsUpdate) {
+      const { error } = await supabase
+        .from("cultivation_records")
+        .update({ xp_earned: total, xp_breakdown: breakdownJson })
+        .eq("id", record.id);
+      if (error) throw new Error(error.message);
+      refreshed.push({ ...record, xp_earned: total, xp_breakdown: breakdownJson });
+    } else {
+      refreshed.push(record);
+    }
+  }
+
+  return { records: refreshed, totalXp };
+}
+
 export async function getCultivationJourney(): Promise<CultivationJourneyBundle> {
   const { supabase, user } = await requireAdminUser();
   const profile = await ensureProfile(supabase, user.id);
@@ -78,18 +109,20 @@ export async function getCultivationJourney(): Promise<CultivationJourneyBundle>
     .limit(300);
 
   if (error) throw new Error(error.message);
-  const records = (data ?? []) as CultivationRecord[];
-  const totalXp = records.reduce((sum, r) => sum + (r.xp_earned ?? 0), 0);
+  const rawRecords = (data ?? []) as CultivationRecord[];
+  const { records, totalXp } = await refreshCultivationRecordXp(supabase, rawRecords);
 
   const { data: playerRow } = await supabase
     .from("xs_players")
-    .select("avatar_gender")
+    .select("avatar_gender, dupr_rating")
     .eq("dupr_id", ADMIN_MANAGER_DUPR_ID)
     .maybeSingle();
 
   const avatarGender = normalizePlayerAvatarGender(playerRow?.avatar_gender);
+  const duprRating =
+    playerRow?.dupr_rating != null ? Number(playerRow.dupr_rating) : null;
 
-  return { profile, records, totalXp, avatarGender };
+  return { profile, records, totalXp, avatarGender, duprRating };
 }
 
 export async function createSparringRecord(input: {
@@ -106,7 +139,10 @@ export async function createSparringRecord(input: {
     input.team1_score,
     input.team2_score,
   );
-  const { total, breakdown } = computeRecordXp("sparring", { result });
+  const { total, breakdown } = computeRecordXp("sparring", {
+    result,
+    source: "manual",
+  });
 
   const { error } = await supabase.from("cultivation_records").insert({
     user_id: user.id,
@@ -244,7 +280,10 @@ export async function syncDuprSparringRecords(): Promise<{
 
     const myTeam = myRow.team as 1 | 2;
     const result = deriveResult(myTeam, team1, team2);
-    const { total, breakdown } = computeRecordXp("sparring", { result });
+    const { total, breakdown } = computeRecordXp("sparring", {
+      result,
+      source: "xs_dupr",
+    });
     const matchDay = unwrapRelation(
       match.match_day as { match_date: string } | { match_date: string }[] | null,
     );
@@ -315,7 +354,10 @@ export async function syncDuprSparringRecords(): Promise<{
 
     const myTeam = myRow.team as 1 | 2;
     const result = deriveResult(myTeam, team1, team2);
-    const { total, breakdown } = computeRecordXp("sparring", { result });
+    const { total, breakdown } = computeRecordXp("sparring", {
+      result,
+      source: "khpa_dupr",
+    });
 
     const session = unwrapRelation(
       match.session as

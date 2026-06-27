@@ -49,6 +49,7 @@ export function CultivationJourneyHub({
   records,
   totalXp,
   avatarGender,
+  duprRating,
   techniqueProgress,
   practiceLocations,
 }: Props) {
@@ -127,9 +128,14 @@ export function CultivationJourneyHub({
         totalXp={totalXp}
         recordCount={records.length}
         avatarGender={avatarGender}
+        duprRating={duprRating}
       />
 
-      <RealmLevelsGuide totalXp={totalXp} avatarGender={avatarGender} />
+      <RealmLevelsGuide
+        totalXp={totalXp}
+        avatarGender={avatarGender}
+        duprRating={duprRating}
+      />
 
       <nav
         className="cj-scroll-tabs -mx-1 overflow-x-auto px-1 pb-1 lg:hidden"

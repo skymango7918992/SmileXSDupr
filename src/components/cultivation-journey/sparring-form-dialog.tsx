@@ -88,7 +88,9 @@ export function SparringFormDialog({ locations, onSubmit, onClose }: Props) {
       <Card className="cj-modal glass-modal relative w-full max-w-lg rounded-t-2xl sm:rounded-2xl">
         <div className="cj-modal-header border-b px-4 py-3">
           <CardTitle className="text-base">同門切磋</CardTitle>
-          <p className="text-xs cj-modal-muted">友誼賽不上傳 DUPR · 勝 +3 修為、敗 +5 修心</p>
+          <p className="text-xs cj-modal-muted">
+            友誼賽不上傳 DUPR · 勝 +10、敗 +11 修為（DUPR 匯入勝場 +55 為關鍵分）
+          </p>
         </div>
         <div className="space-y-3 px-4 py-3">
           <Field label="切磋日期">
