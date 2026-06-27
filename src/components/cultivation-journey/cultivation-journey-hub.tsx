@@ -4,9 +4,9 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Plus, Scroll } from "lucide-react";
 import { useAppUi } from "@/components/providers/app-ui-provider";
-import { DemonsPanel } from "@/components/cultivation-journey/demons-panel";
 import { CultivationRecordTimeline } from "@/components/cultivation-journey/record-timeline";
 import { PracticeResultDialog } from "@/components/cultivation-journey/practice-result-dialog";
+import { RealmLevelsGuide } from "@/components/cultivation-journey/realm-levels-guide";
 import { RealmProgressCard } from "@/components/cultivation-journey/realm-progress-card";
 import { RetreatFormDialog } from "@/components/cultivation-journey/retreat-form-dialog";
 import { SparringFormDialog } from "@/components/cultivation-journey/sparring-form-dialog";
@@ -30,7 +30,7 @@ import type {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-type Tab = "overview" | "retreat" | "sparring" | "trial" | "techniques" | "demons";
+type Tab = "overview" | "retreat" | "sparring" | "trial" | "techniques";
 
 const TABS: { id: Tab; label: string; short: string; icon: string }[] = [
   { id: "overview", label: "修行總覽", short: "總覽", icon: "📜" },
@@ -38,7 +38,6 @@ const TABS: { id: Tab; label: string; short: string; icon: string }[] = [
   { id: "retreat", label: "閉關紀錄", short: "閉關", icon: "🧘" },
   { id: "sparring", label: "同門切磋", short: "切磋", icon: "⚔️" },
   { id: "trial", label: "天榜試煉", short: "試煉", icon: "⚡" },
-  { id: "demons", label: "心魔清單", short: "心魔", icon: "👹" },
 ];
 
 type Props = CultivationJourneyBundle & {
@@ -47,7 +46,6 @@ type Props = CultivationJourneyBundle & {
 };
 
 export function CultivationJourneyHub({
-  profile,
   records,
   totalXp,
   techniqueProgress,
@@ -125,6 +123,8 @@ export function CultivationJourneyHub({
       </header>
 
       <RealmProgressCard totalXp={totalXp} recordCount={records.length} />
+
+      <RealmLevelsGuide totalXp={totalXp} />
 
       <nav
         className="cj-scroll-tabs -mx-1 overflow-x-auto px-1 pb-1 lg:hidden"
@@ -264,7 +264,6 @@ export function CultivationJourneyHub({
             </>
           )}
 
-          {tab === "demons" && <DemonsPanel profile={profile} />}
         </div>
       </div>
 
