@@ -7,6 +7,11 @@ import {
   PRACTICE_MOODS,
 } from "@/lib/pickleball-techniques";
 import type { PracticeLocationOption } from "@/types/technique-practice";
+import {
+  getDefaultLocationId,
+  resolveLocationName,
+  VenueLocationField,
+} from "@/components/cultivation-journey/venue-location-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,8 +37,8 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
   const [practiceDate, setPracticeDate] = useState(
     new Date().toISOString().slice(0, 10),
   );
-  const [locationId, setLocationId] = useState(
-    locations[0]?.id ?? "custom",
+  const [locationId, setLocationId] = useState(() =>
+    getDefaultLocationId(locations),
   );
   const [customLocation, setCustomLocation] = useState("");
   const [duration, setDuration] = useState("60");
@@ -64,13 +69,11 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
     });
   };
 
-  const resolveLocationName = () => {
-    if (locationId === "custom") return customLocation.trim();
-    return locations.find((l) => l.id === locationId)?.name ?? customLocation.trim();
-  };
+  const resolveLocationNameForSubmit = () =>
+    resolveLocationName(locations, locationId, customLocation);
 
   const handleSubmit = async () => {
-    const locationName = resolveLocationName();
+    const locationName = resolveLocationNameForSubmit();
     if (!locationName) {
       toastError("請選擇或填寫練球地點");
       return;
@@ -117,27 +120,15 @@ export function RetreatFormDialog({ locations, onSubmit, onClose }: Props) {
             <Input type="date" value={practiceDate} onChange={(e) => setPracticeDate(e.target.value)} className="cj-input h-11" />
           </Field>
 
-          <Field label="練球地點">
-            <select
-              value={locationId}
-              onChange={(e) => setLocationId(e.target.value)}
-              className="cj-input"
-            >
-              {locations.map((loc) => (
-                <option key={loc.id} value={loc.id}>
-                  {loc.name}
-                </option>
-              ))}
-            </select>
-            {locationId === "custom" && (
-              <Input
-                value={customLocation}
-                onChange={(e) => setCustomLocation(e.target.value)}
-                placeholder="輸入地點名稱"
-                className="cj-input mt-2 h-11"
-              />
-            )}
-          </Field>
+          <VenueLocationField
+            label="練球地點"
+            variant="modal"
+            locations={locations}
+            locationId={locationId}
+            onLocationIdChange={setLocationId}
+            customLocation={customLocation}
+            onCustomLocationChange={setCustomLocation}
+          />
 
           <Field label="練習時間（分鐘）">
             <Input type="number" min={1} value={duration} onChange={(e) => setDuration(e.target.value)} className="cj-input h-11" />

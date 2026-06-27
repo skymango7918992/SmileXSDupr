@@ -294,6 +294,7 @@ export function CultivationJourneyHub({
       )}
       {showSparring && (
         <SparringFormDialog
+          locations={practiceLocations}
           onSubmit={async (input) => {
             await createSparringRecord(input);
             await refresh();
@@ -304,6 +305,7 @@ export function CultivationJourneyHub({
       )}
       {showTrial && (
         <TrialFormDialog
+          locations={practiceLocations}
           onSubmit={async (input) => {
             await createTrialRecord(input);
             await refresh();
