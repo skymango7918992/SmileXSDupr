@@ -48,6 +48,7 @@ type Props = CultivationJourneyBundle & {
 export function CultivationJourneyHub({
   records,
   totalXp,
+  avatarGender,
   techniqueProgress,
   practiceLocations,
 }: Props) {
@@ -122,9 +123,13 @@ export function CultivationJourneyHub({
         </p>
       </header>
 
-      <RealmProgressCard totalXp={totalXp} recordCount={records.length} />
+      <RealmProgressCard
+        totalXp={totalXp}
+        recordCount={records.length}
+        avatarGender={avatarGender}
+      />
 
-      <RealmLevelsGuide totalXp={totalXp} />
+      <RealmLevelsGuide totalXp={totalXp} avatarGender={avatarGender} />
 
       <nav
         className="cj-scroll-tabs -mx-1 overflow-x-auto px-1 pb-1 lg:hidden"

@@ -1,27 +1,34 @@
 "use client";
 
 import { getCultivationImageSrc } from "@/lib/cultivation-tiers";
+import type { PlayerAvatarGender } from "@/lib/cultivation-tiers";
 import { getJourneyRealmProgress } from "@/lib/cultivation-journey-tiers";
 
 type Props = {
   totalXp: number;
   recordCount: number;
+  avatarGender: PlayerAvatarGender | null;
 };
 
-export function RealmProgressCard({ totalXp, recordCount }: Props) {
+export function RealmProgressCard({
+  totalXp,
+  recordCount,
+  avatarGender,
+}: Props) {
   const { current, next, xpIntoTier, xpNeeded, percent } =
     getJourneyRealmProgress(totalXp);
-  const imageSrc = getCultivationImageSrc(current.level, "male");
+  const imageSrc = getCultivationImageSrc(current.level, avatarGender);
 
   return (
     <section className="cj-realm-card overflow-hidden">
       <div className="flex gap-3 sm:gap-4">
         <div className="shrink-0">
           <div className="relative h-16 w-16 overflow-hidden rounded-2xl ring-2 ring-emerald-200 sm:h-24 sm:w-24">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageSrc}
               alt={current.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           </div>
         </div>

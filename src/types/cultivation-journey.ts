@@ -1,3 +1,5 @@
+import type { PlayerAvatarGender } from "@/lib/cultivation-tiers";
+
 /** 管理員 DUPR ID，用於自動匯入同門切磋 */
 export const ADMIN_MANAGER_DUPR_ID = "MPNX6P";
 
@@ -50,6 +52,7 @@ export type CultivationJourneyBundle = {
   profile: CultivationProfile;
   records: CultivationRecord[];
   totalXp: number;
+  avatarGender: PlayerAvatarGender | null;
 };
 
 export type CultivationSkillId =

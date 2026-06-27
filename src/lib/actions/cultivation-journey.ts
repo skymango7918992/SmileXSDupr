@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { isAdminRole } from "@/lib/auth/roles";
 import { computeRecordXp } from "@/lib/cultivation-journey-xp";
+import { normalizePlayerAvatarGender } from "@/lib/cultivation-tiers";
 import { ADMIN_MANAGER_DUPR_ID } from "@/types/cultivation-journey";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -80,7 +81,15 @@ export async function getCultivationJourney(): Promise<CultivationJourneyBundle>
   const records = (data ?? []) as CultivationRecord[];
   const totalXp = records.reduce((sum, r) => sum + (r.xp_earned ?? 0), 0);
 
-  return { profile, records, totalXp };
+  const { data: playerRow } = await supabase
+    .from("xs_players")
+    .select("avatar_gender")
+    .eq("dupr_id", ADMIN_MANAGER_DUPR_ID)
+    .maybeSingle();
+
+  const avatarGender = normalizePlayerAvatarGender(playerRow?.avatar_gender);
+
+  return { profile, records, totalXp, avatarGender };
 }
 
 export async function createSparringRecord(input: {
